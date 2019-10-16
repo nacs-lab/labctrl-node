@@ -9,5 +9,6 @@
   "author": "Yichao Yu",
   "license": "LGPL-2.0+",
   "dependencies": {
+    "express": "^4.17.1"
   }
 }

@@ -18,4 +18,14 @@
 
 "use strict";
 
-const Server = require('./server/server');
+const express = require('express');
+const http = require('http');
+
+class Server {
+    constructor() {
+        this.express = express();
+        this.http = http.createServer(this.express);
+    }
+};
+
+module.exports = Server;
