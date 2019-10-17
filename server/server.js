@@ -18,6 +18,7 @@
 
 "use strict";
 
+const compression = require('compression');
 const express = require('express');
 const http = require('http');
 
@@ -25,6 +26,7 @@ class Server {
     constructor() {
         this.express = express();
         this.http = http.createServer(this.express);
+        this.express.use(compression());
     }
 };
 
