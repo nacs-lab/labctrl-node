@@ -18,27 +18,11 @@
 
 "use strict";
 
-const compression = require('compression');
-const express = require('express');
-const http = require('http');
-const path = require('path');
+// Override the environment variable
+// since other packages might get the debugging state from this.
+process.env.NODE_ENV = 'development';
 
-const data_dir = path.join(__dirname, '../public/');
+const Server = require('../server/server');
 
-class Server {
-    constructor() {
-        this.express = express();
-        this.http = http.createServer(this.express);
-        this.express.use(compression());
-        this.express.use('/favicon.ico',
-                         express.static(path.join(data_dir, 'img/favicon.ico')));
-        this.express.get('/', function (req, res) {
-            res.sendFile('/html/index.html', {root: data_dir});
-        });
-    }
-    listen() {
-        this.http.listen.apply(this.http, arguments);
-    }
-};
-
-module.exports = Server;
+const server = new Server();
+server.listen(8000);
