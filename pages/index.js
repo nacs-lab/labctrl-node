@@ -18,40 +18,10 @@
 
 "use strict";
 
-const compression = require('compression');
-const express = require('express');
-const http = require('http');
-const next = require('next');
-const path = require('path');
-
-const data_dir = path.join(__dirname, '../public/');
-
-class Server {
-    constructor() {
-        this.next = next({ dev: process.env.NODE_ENV == 'development' });
-        this.handle = this.next.getRequestHandler();
-        this.prepare = this.next.prepare().then(() => {
-            this.init();
-        });
-    }
-    init() {
-        this.express = express();
-        this.http = http.createServer(this.express);
-        this.express.use(compression());
-        this.express.use('/favicon.ico',
-                         express.static(path.join(data_dir, 'img/favicon.ico')));
-        this.express.get('/', function (req, res) {
-            res.sendFile('/html/index.html', {root: data_dir});
-        });
-        this.express.all('*', (req, res) => {
-            return this.handle(req, res);
-        });
-    }
-    listen() {
-        this.prepare = this.prepare.then(() => {
-            this.http.listen.apply(this.http, arguments);
-        });
-    }
-};
-
-module.exports = Server;
+export default function Default() {
+    return (
+        <div>
+          Home
+        </div>
+    );
+}
