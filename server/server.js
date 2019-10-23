@@ -40,9 +40,6 @@ class Server {
         this.express.use(compression());
         this.express.use('/favicon.ico',
                          express.static(path.join(data_dir, 'img/favicon.ico')));
-        this.express.get('/', function (req, res) {
-            res.sendFile('/html/index.html', {root: data_dir});
-        });
         this.express.all('*', (req, res) => {
             return this.handle(req, res);
         });

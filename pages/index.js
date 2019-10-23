@@ -18,10 +18,14 @@
 
 "use strict";
 
+import Wrapper from '../components/Wrapper';
+
 export default function Default() {
     return (
-        <div>
-          Home
-        </div>
+        <Wrapper>
+          <div>
+            Home
+          </div>
+        </Wrapper>
     );
 }
