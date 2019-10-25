@@ -18,6 +18,8 @@
 
 "use strict";
 
+import { NotifyMenu, NotifyProvider } from './NotifyMenu';
+
 import Head from 'next/head';
 import Link from 'next/link';
 import React from 'react';
@@ -25,7 +27,7 @@ import React from 'react';
 // This relies on the css and js files loaded by the `_document.js`
 export default class Wrapper extends React.Component {
     render() {
-        return <div className="wrapper">
+        let dom = <div className="wrapper">
           <Head>
             <title>Lab Control</title>
           </Head>
@@ -40,6 +42,7 @@ export default class Wrapper extends React.Component {
 
             {/* Right navbar links */}
             <ul className="navbar-nav ml-auto">
+              <NotifyMenu/>
             </ul>
           </nav>
           {/* /.navbar */}
@@ -97,5 +100,6 @@ export default class Wrapper extends React.Component {
               <a href="https://adminlte.io/" target="_blank">AdminLTE</a>.</strong>
           </footer>
         </div>;
+        return <NotifyProvider>{dom}</NotifyProvider>;
     }
 };
