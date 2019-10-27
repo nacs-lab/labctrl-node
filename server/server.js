@@ -18,6 +18,9 @@
 
 "use strict";
 
+const api = require('./api');
+
+const body_parser = require('body-parser');
 const compression = require('compression');
 const express = require('express');
 const http = require('http');
@@ -40,6 +43,20 @@ class Server {
         this.express.use(compression());
         this.express.use('/favicon.ico',
                          express.static(path.join(data_dir, 'img/favicon.ico')));
+        this.express.use(body_parser.json());
+        this.express.post('/api', async (req, res, next) => {
+            // This handles the client version of the API.
+
+            // Handle exception as per:
+            // http://www.acuriousanimal.com/2018/02/15/express-async-middleware.html
+            try {
+                // Relies on the body parser above to parse the request data.
+                res.type("json").send(JSON.stringify(await api(req.body, { req, res })));
+            }
+            catch (err) {
+                next(err);
+            }
+        });
         this.express.all('*', (req, res) => {
             return this.handle(req, res);
         });
