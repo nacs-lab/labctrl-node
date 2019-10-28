@@ -18,14 +18,12 @@
 
 "use strict";
 
-const path = require('path');
+const config = require('config');
+const fs = require('fs');
 
-// Override the environment variable
-// since other packages might get the debugging state from this.
-process.env.NODE_ENV = 'development';
-process.env.NODE_CONFIG_DIR = path.resolve(__dirname, 'conf');
-
-const Server = require('../server/server');
-
-const server = new Server();
-server.listen(8000);
+const db = {
+    dir: config.get('db.dir')
+};
+fs.mkdirSync(db.dir, {recursive: true,
+                      mode: 0o755});
+exports.db = db;
