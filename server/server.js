@@ -19,9 +19,12 @@
 "use strict";
 
 const api = require('./api');
+const User = require('./user');
+const user_session = require('./user_session');
 
 const body_parser = require('body-parser');
 const compression = require('compression');
+const cookie_parser = require('cookie-parser');
 const express = require('express');
 const http = require('http');
 const next = require('next');
@@ -33,9 +36,10 @@ class Server {
     constructor() {
         this.next = next({ dev: process.env.NODE_ENV == 'development' });
         this.handle = this.next.getRequestHandler();
-        this.prepare = this.next.prepare().then(() => {
-            this.init();
-        });
+        this.prepare = Promise.all([this.next.prepare(),
+                                    User.init()]).then(() => {
+                                        this.init();
+                                    });
     }
     init() {
         this.express = express();
@@ -44,6 +48,8 @@ class Server {
         this.express.use('/favicon.ico',
                          express.static(path.join(data_dir, 'img/favicon.ico')));
         this.express.use(body_parser.json());
+        this.express.use(cookie_parser());
+        this.express.use(user_session);
         this.express.post('/api', async (req, res, next) => {
             // This handles the client version of the API.
 
