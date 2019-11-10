@@ -18,6 +18,9 @@
 
 "use strict";
 
+const dev = process.env.NODE_ENV == 'development';
+exports.dev = dev;
+
 const config = require('config');
 const fs = require('fs');
 
@@ -27,3 +30,13 @@ const db = {
 fs.mkdirSync(db.dir, {recursive: true,
                       mode: 0o755});
 exports.db = db;
+
+if (dev && !config.has('email.account')) {
+    exports.email = { test: true };
+}
+else {
+    exports.email = {
+        test: false,
+        account: config.get('email.account')
+    };
+}
