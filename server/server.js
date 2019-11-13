@@ -63,6 +63,9 @@ class Server {
                 next(err);
             }
         });
+        this.express.use('/verify', (req, res, next) => {
+            return this.next.render(req, res, '/verify', { token: req.path });
+        });
         this.express.all('*', (req, res) => {
             return this.handle(req, res);
         });
