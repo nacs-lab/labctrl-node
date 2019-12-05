@@ -18,7 +18,10 @@
 
 "use strict";
 
+import api from '../lib/api';
+import GlobalContext from './Global';
 import { NotifyMenu, NotifyProvider } from './NotifyMenu';
+import { hash_md5 } from '../lib/crypto';
 
 import Head from 'next/head';
 import Link from 'next/link';
@@ -26,7 +29,81 @@ import React from 'react';
 
 // This relies on the css and js files loaded by the `_document.js`
 export default class Wrapper extends React.Component {
+    static contextType = GlobalContext;
+    logout = async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        await api({ logout: 'logout' });
+        this.context.set_user(null);
+    }
     render() {
+        let user;
+        if (!this.context.user) {
+            user = {
+                name: 'Anonymous',
+                hash: '00000000000000000000000000000000',
+                anonymous: true,
+                admin: false
+            };
+        }
+        else {
+            user = {
+                name: this.context.user.email,
+                hash: hash_md5(this.context.user.email),
+                anonymous: false,
+                admin: this.context.user.admin
+            };
+        }
+        let user_dropdown;
+        if (user.anonymous) {
+            // Use a different fallback for anonymous so that people
+            // that doesn't have an gravatar account can still
+            // use the icon to tell if they are logged in or not.
+            user.avatar = 'https://www.gravatar.com/avatar/' + user.hash + '?d=mp';
+            user_dropdown = <div className="dropdown-menu dropdown-menu-right">
+              <Link href="/login">
+                <a className="dropdown-item">
+                  <i className="fas fa-sign-in-alt mr-2"></i> Login
+                </a>
+              </Link>
+              <div className="dropdown-divider"></div>
+              <Link href="/register">
+                <a className="dropdown-item">
+                  <i className="fas fa-user-plus mr-2"></i> Register
+                </a>
+              </Link>
+            </div>;
+        }
+        else {
+            user.avatar = 'https://www.gravatar.com/avatar/' + user.hash;
+            user_dropdown = <div className="dropdown-menu dropdown-menu-right">
+              <span className="dropdown-header">
+                <a href={'https://www.gravatar.com/' + user.hash} target="_blank">
+                  <img src={user.avatar} className="img-circle"/>
+                </a>
+                <br/>
+                {user.name}
+              </span>
+              <div className="dropdown-divider"></div>
+              <a href="#" className="dropdown-item">
+                {/* TODO profile page */}
+                <i className="fas fa-id-card mr-2"></i> Profile
+              </a>
+              {
+                  user.admin ? <React.Fragment>
+                    <div className="dropdown-divider"></div>
+                    <a href="#" className="dropdown-item">
+                      {/* TODO admin page */}
+                      <i className="fas fa-users-cog mr-2"></i> Admin
+                    </a>
+                  </React.Fragment> : <React.Fragment/>
+              }
+              <div className="dropdown-divider"></div>
+              <a href="#" className="dropdown-item" onClick={this.logout}>
+                <i className="fas fa-sign-out-alt mr-2"></i> Log out
+              </a>
+            </div>;
+        }
         let dom = <div className="wrapper">
           <Head>
             <title>Lab Control</title>
@@ -43,6 +120,13 @@ export default class Wrapper extends React.Component {
             {/* Right navbar links */}
             <ul className="navbar-nav ml-auto">
               <NotifyMenu/>
+              <li className="nav-item dropdown">
+                <a className="nav-link" data-toggle="dropdown" href="#">
+                  <img src={user.avatar} className="img-circle"
+                    style={{ height: "2em", marginTop: "-5px" }}/>
+                </a>
+                {user_dropdown}
+              </li>
             </ul>
           </nav>
           {/* /.navbar */}
