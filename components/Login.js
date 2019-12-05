@@ -86,6 +86,14 @@ export default class Login extends React.Component {
             return;
         e.preventDefault();
         e.stopPropagation();
+        // Forward the email address and password to registration page.
+        Router.push({
+            pathname: '/register',
+            query: {
+                email: this.email.current.value,
+                password: this.password.current.value
+            }
+        }, '/register');
     }
     componentDidMount() {
         // Set the initial value from the previous page.

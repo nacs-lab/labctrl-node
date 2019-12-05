@@ -18,32 +18,18 @@
 
 "use strict";
 
-module.exports.Token = {
-    Invitation: 1,
-    Verification: 2,
-    LoginSession: 3,
-    ResetPassword: 4,
-};
-
-const email_re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-function validate_email(email) {
-    return email_re.test(email);
+function absolute_url(req, url) {
+    let host;
+    if (req.app.get('trust proxy'))
+        host = req.get('X-Forwarded-Host');
+    if (!host)
+        host = req.get('Host');
+    if (!host)
+        host = req.hostname;
+    let baseurl = req.protocol + '://' + host;
+    if (url && url[0] == '/')
+        return baseurl + url;
+    return baseurl + '/' + url;
 }
-module.exports.validate_email = validate_email;
 
-const num_only = /^[0-9]*$/;
-const letter_only = /^[a-zA-Z]*$/;
-
-function validate_password(password) {
-    if (password.length >= 12)
-        return true;
-    if (num_only.test(password))
-        return 'Number only password must be at least 12 characters long.';
-    if (letter_only.test(password))
-        return 'Letter only password must be at least 12 characters long.';
-    if (password.length < 8)
-        return 'Password must be at least 8 characters long.';
-    return true;
-}
-module.exports.validate_password = validate_password;
+module.exports.absolute_url = absolute_url;
