@@ -68,6 +68,10 @@ export default class Page extends Document {
                 {/* AdminLTE App */}
                 <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.0.1/dist/js/adminlte.min.js"
                   crossOrigin="anonymous"></script>
+                {/* Used by lib/crypto_client.js */}
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.12.0/js/md5.min.js"
+                  integrity="sha256-1K9nK/DlS1HHfbB3SmJz2qRfsW5Tgg/yimRBOHLmwk0="
+                  crossOrigin="anonymous"></script>
               </body>
             </html>
         )
