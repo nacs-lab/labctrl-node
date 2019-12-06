@@ -85,10 +85,11 @@ export default class Wrapper extends React.Component {
                 {user.name}
               </span>
               <div className="dropdown-divider"></div>
-              <a href="#" className="dropdown-item">
-                {/* TODO profile page */}
-                <i className="fas fa-id-card mr-2"></i> Profile
-              </a>
+              <Link href="/profile">
+                <a className="dropdown-item">
+                  <i className="fas fa-id-card mr-2"></i> Profile
+                </a>
+              </Link>
               {
                   user.admin ? <React.Fragment>
                     <div className="dropdown-divider"></div>
