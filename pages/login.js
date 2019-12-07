@@ -19,14 +19,15 @@
 "use strict";
 
 import Wrapper from '../components/Wrapper';
-import CheckLogin from '../components/CheckLogin';
+import CheckAnonymous from '../components/CheckAnonymous';
+import Login from '../components/Login';
 
-export default function Default() {
-    return (
-        <Wrapper>
-          <CheckLogin>
-            Home
-          </CheckLogin>
-        </Wrapper>
-    );
+export default class LoginPage extends React.Component {
+    render() {
+        return <Wrapper>
+          <CheckAnonymous>
+            <Login/>
+          </CheckAnonymous>
+        </Wrapper>;
+    }
 }

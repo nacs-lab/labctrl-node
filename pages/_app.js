@@ -18,15 +18,32 @@
 
 "use strict";
 
-import Wrapper from '../components/Wrapper';
-import CheckLogin from '../components/CheckLogin';
+import api from '../lib/api';
+import GlobalContext from '../components/Global';
 
-export default function Default() {
-    return (
-        <Wrapper>
-          <CheckLogin>
-            Home
-          </CheckLogin>
-        </Wrapper>
-    );
+import React from 'react'
+import App from 'next/app'
+
+export default class NaCsApp extends App {
+    constructor(props) {
+        super(props);
+        this.state = {
+            user: props.user,
+            set_user: (user) => { this.setState({ user }); }
+        };
+    }
+    // This disables the static page rendering optimization and that's exactly what we want.
+    // we want the global context to be available for all pages.
+    static async getInitialProps(appContext) {
+        // calls page's `getInitialProps` and fills `appProps.pageProps`
+        const appProps = await App.getInitialProps(appContext);
+        let user = (await api({'user': 'user'}, appContext.ctx)).user;
+        return { user, ...appProps };
+    }
+    render() {
+        const { Component, pageProps } = this.props;
+        return <GlobalContext.Provider value={this.state}>
+          <Component {...pageProps}/>
+        </GlobalContext.Provider>;
+    }
 }

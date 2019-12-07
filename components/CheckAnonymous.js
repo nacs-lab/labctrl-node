@@ -18,15 +18,27 @@
 
 "use strict";
 
-import Wrapper from '../components/Wrapper';
-import CheckLogin from '../components/CheckLogin';
+import GlobalContext from './Global';
+import RedirectIn from './RedirectIn';
 
-export default function Default() {
-    return (
-        <Wrapper>
-          <CheckLogin>
-            Home
-          </CheckLogin>
-        </Wrapper>
-    );
+import Link from 'next/link';
+import Router from 'next/router';
+import React from 'react';
+
+// For pages that only makes sense for users that are not logged in
+// (e.g. register, login) Redirect to `/` if the user is already logged in.
+export default class CheckAnonymous extends React.Component {
+    static contextType = GlobalContext;
+    render() {
+        if (!this.context.user)
+            return <React.Fragment>
+              {this.props.children}
+            </React.Fragment>;
+        return <RedirectIn href="/" timeout={5}>
+          {(timeout, props) => (<div>
+            Already logged in as {this.context.user.email}.<br/>
+            Redirect to <Link {...props}><a>home page</a></Link> in {timeout} seconds.
+          </div>)}
+        </RedirectIn>;
+    }
 }

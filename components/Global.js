@@ -18,15 +18,8 @@
 
 "use strict";
 
-import Wrapper from '../components/Wrapper';
-import CheckLogin from '../components/CheckLogin';
+import React from 'react';
 
-export default function Default() {
-    return (
-        <Wrapper>
-          <CheckLogin>
-            Home
-          </CheckLogin>
-        </Wrapper>
-    );
-}
+const GlobalContext = React.createContext();
+export default GlobalContext;
+export const GlobalConsumer = GlobalContext.Consumer;
