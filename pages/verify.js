@@ -20,6 +20,8 @@
 
 import { Token } from '../lib/account';
 import api from '../lib/api';
+import GlobalContext from '../components/Global';
+import ChangePassword from '../components/ChangePassword';
 import CheckAnonymous from '../components/CheckAnonymous';
 import RedirectIn from '../components/RedirectIn';
 import Wrapper from '../components/Wrapper';
@@ -28,6 +30,7 @@ import Error from 'next/error';
 import Link from 'next/link';
 
 export default class Verify extends React.Component {
+    static contextType = GlobalContext;
     static async getInitialProps(ctx) {
         let token = ctx.query.token;
         if (!token || token.length < 2 || token[0] != '/')
@@ -36,6 +39,15 @@ export default class Verify extends React.Component {
         let res = await api({ check_token: { params: { token } } }, ctx);
         res.token = token;
         return res;
+    }
+    componentDidMount() {
+        let check_token = this.props.check_token;
+        if (check_token && check_token.user) {
+            if (check_token.type == Token.Invitation ||
+                check_token.type == Token.ResetPassword) {
+                this.context.set_user(check_token.user);
+            }
+        }
     }
     render() {
         if (!this.props.token)
@@ -62,9 +74,16 @@ export default class Verify extends React.Component {
               </RedirectIn>
             </CheckAnonymous>;
         }
-        /* if (type == Token.Invitation ||  ||
-         *     type == Token.ResetPassword) {
-         * } */
+        else if (type == Token.Invitation) {
+            return <ChangePassword token={this.props.token}
+                     title="Welcome, please set your password below."
+                     submit="Set password"/>;
+        }
+        else if (type == Token.ResetPassword) {
+            return <ChangePassword token={this.props.token}
+                     title="Password Reset."
+                     submit="Reset password"/>;
+        }
         return this.invalid_token();
     }
     invalid_token() {

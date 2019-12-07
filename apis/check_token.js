@@ -36,6 +36,13 @@ module.exports = async ({ req, res }, params) => {
              type == User.Token.ResetPassword) {
         // These allows the user to update password so we need to keep the token valid until
         // the user set the new password.
+        let maxage = User.min_login_time;
+        let expires = new Date(Date.now() + maxage);
+        let token = await user.new_token(User.Token.LoginSession, expires);
+        if (token) {
+            // TODO secure
+            res.cookie('nacs_user', token, { expires, httpOnly: true });
+        }
     }
     else {
         return null;
