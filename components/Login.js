@@ -80,6 +80,13 @@ export default class Login extends React.Component {
             return;
         e.preventDefault();
         e.stopPropagation();
+        // Forward the email address to lost password page.
+        Router.push({
+            pathname: '/lost-password',
+            query: {
+                email: this.email.current.value
+            }
+        }, '/lost-password');
     }
     register = (e) => {
         if (!simple_click(e))
