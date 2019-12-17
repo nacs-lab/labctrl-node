@@ -1,0 +1,42 @@
+#!/bin/bash
+
+BIN_DIR_REL="$1"
+export NEXT_DIST_DIR="${BIN_DIR_REL}/exec"
+
+git_is_dirty() {
+    # Based on https://stackoverflow.com/questions/2657935/checking-for-a-dirty-index-or-untracked-files-with-git
+    if ! git diff-index --cached HEAD --; then
+        # Changed files
+        return 0
+    elif u="$(git ls-files --others)" && [ -z "$u" ]; then
+        return 1
+    else
+        # New files
+        return 0
+    fi
+}
+
+is_dirty=0
+generate_build_id() {
+    if [[ -f VERSION ]]; then
+        cat VERSION
+    else
+        hash=$(git rev-parse HEAD)
+        if git_is_dirty; then
+            is_dirty=1
+            echo "${hash}-dirty"
+        else
+            echo "${hash}"
+        fi
+    fi
+}
+
+build_id=$(generate_build_id)
+export NEXT_BUILD_ID="${build_id}"
+if [ -f "${NEXT_DIST_DIR}/BUILD_ID" ] && ((!is_dirty)) &&
+       [ "$(cat "${NEXT_DIST_DIR}/BUILD_ID")" = "${build_id}" ]; then
+    exit 0
+fi
+
+rm -rf "${NEXT_DIST_DIR}"
+node_modules/next/dist/bin/next build

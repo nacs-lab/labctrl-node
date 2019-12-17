@@ -18,4 +18,13 @@
 
 "use strict";
 
+process.env.NODE_ENV = 'production';
+process.env.NEXT_DIST_DIR = 'exec';
+process.env.NODE_CONFIG_DIR = 'conf';
+
+process.chdir(__dirname);
+
 const Server = require('./server/server');
+
+const server = new Server();
+server.listen(8000);

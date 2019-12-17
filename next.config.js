@@ -31,6 +31,11 @@ const blacklist_prefix = [
 
 module.exports = {
     distDir: (process.env.NEXT_DIST_DIR ? process.env.NEXT_DIST_DIR : '.next'),
+    generateBuildId: async () => {
+        if (process.env.NEXT_BUILD_ID)
+            return process.env.NEXT_BUILD_ID
+        return null
+    },
     webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
         // Note: we provide webpack above so you should not `require` it
         // Perform customizations to webpack config
