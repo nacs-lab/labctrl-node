@@ -16,13 +16,29 @@
  *   see <http://www.gnu.org/licenses/>.                                 *
  *************************************************************************/
 
-"use strict";
+const path = require('path');
 
-// Override the environment variable
-// since other packages might get the debugging state from this.
 process.env.NODE_ENV = 'development';
+if (!process.env.NODE_CONFIG_DIR)
+    process.env.NODE_CONFIG_DIR = path.resolve(process.cwd(), 'tests', 'conf');
 
-const Server = require('../server/server');
+process.chdir(path.join(__dirname, '..'));
 
-const server = new Server();
-server.listen(8000);
+const all_tests = ['user'];
+tests = process.argv.slice(2);
+if (tests.length == 0)
+    tests = all_tests;
+
+const old_env = { ...process.env };
+
+async function run_tests(tests) {
+    for (let i in tests) {
+        await require('./' + tests[i])();
+        process.env = old_env;
+    }
+}
+
+run_tests(tests).catch((err) => {
+    console.log(err);
+    process.exit(1);
+});

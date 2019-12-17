@@ -8,3 +8,5 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}"
 find_package(Node 12.0 REQUIRED)
 
 node_targets()
+
+add_subdirectory(tests)

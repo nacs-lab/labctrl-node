@@ -22,11 +22,7 @@ const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-// Override the environment variable
-// since other packages might get the debugging state from this.
-process.env.NODE_ENV = 'development';
 process.env.NODE_CONFIG_ENV = 'test_user';
-process.env.NODE_CONFIG_DIR = path.resolve(__dirname, 'conf');
 
 const config = require('../server/config');
 
@@ -39,7 +35,7 @@ catch {
 const sleep = require('../lib/sleep');
 const User = require('../server/user');
 
-async function test() {
+module.exports = async function test() {
     await User.init();
     assert(await User.count() == 0);
 
@@ -154,8 +150,3 @@ async function test() {
     await retry_login;
     await retry_token;
 }
-
-test().catch((err) => {
-    console.log(err);
-    process.exit(1);
-});
