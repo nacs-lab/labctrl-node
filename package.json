@@ -22,6 +22,7 @@
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "sequelize": "^5.21.4",
-    "sqlite3": "^4.1.1"
+    "sqlite3": "^4.1.1",
+    "zeromq": "^6.0.0-beta.6"
   }
 }
