@@ -9,8 +9,28 @@ set(SERVER_DIR /srv/labctrl/)
 
 find_package(Node 12.0 REQUIRED)
 
+find_package(PkgConfig REQUIRED)
+set(DEP_PKGS nacs-utils>=10.0 nacs-seq libzmq>=4.0)
+pkg_check_modules(DEP REQUIRED ${DEP_PKGS})
+
+add_definitions(-Wall -Wextra -g -pthread -fvisibility=hidden
+  -Wno-psabi -Wno-unknown-warning-option -Wno-cast-function-type
+  -fno-math-errno -Wconversion -Wno-sign-conversion ${DEP_CFLAGS})
+include_directories(${DEP_INCLUDE_DIRS} ${NODE_INCLUDE_DIRS})
+
+set(LINKER_FLAGS "-Wl,--as-needed -Wl,--gc-sections")
+set(LINKER_FLAGS "${LINKER_FLAGS} -pthread -fno-math-errno -Wl,-Bsymbolic")
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINKER_FLAGS}")
+set(CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} ${LINKER_FLAGS}")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LINKER_FLAGS}")
+set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${LINKER_FLAGS}")
+
 node_targets()
 
+add_subdirectory(addon)
 add_subdirectory(tests)
 
 file(RELATIVE_PATH BIN_DIR_REL "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
