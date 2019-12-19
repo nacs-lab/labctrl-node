@@ -29,18 +29,14 @@ process.env.NODE_CONFIG_ENV = 'test_user';
 process.env.NODE_CONFIG_DIR = path.resolve(__dirname, 'conf');
 
 const config = require('../server/config');
+
 try {
     fs.unlinkSync(path.join(config.db.dir, 'user.db'));
 }
 catch {
 }
 
-function sleep(timeout) {
-    return new Promise((resolve) => {
-        setTimeout(resolve, timeout);
-    });
-}
-
+const sleep = require('../lib/sleep');
 const User = require('../server/user');
 
 async function test() {
