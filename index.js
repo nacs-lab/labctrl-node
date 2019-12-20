@@ -18,9 +18,12 @@
 
 "use strict";
 
+const path = require('path');
+
 process.env.NODE_ENV = 'production';
 process.env.NEXT_DIST_DIR = 'exec';
 process.env.NODE_CONFIG_DIR = 'conf';
+process.env.LABCTRL_LIB_DIR = path.resolve(__dirname, 'addon');
 
 process.chdir(__dirname);
 

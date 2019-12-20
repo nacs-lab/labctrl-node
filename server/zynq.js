@@ -18,6 +18,7 @@
 
 const { BufferReader, Dealer } = require('./zmq_utils');
 const sleep = require('../lib/sleep');
+const { parse_cmdlist } = require(process.env.LABCTRL_LIB_DIR + '/labctrl');
 
 class ParseError {
     constructor(msg, line, lineno, colnum, colstart, colend) {
@@ -262,6 +263,19 @@ function dds_chn_name(id) {
 
 class Zynq {
     static ParseError = ParseError
+    static parse_cmdlist(cmdlist) {
+        return new Promise((resolve, reject) => {
+            parse_cmdlist(cmdlist, ParseError, (err, res) => {
+                if (err !== null) {
+                    reject(err);
+                }
+                else {
+                    resolve(res);
+                }
+            });
+        });
+    }
+
     #sock
     #live = true
     #state_id = [0n, 0n]

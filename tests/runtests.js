@@ -21,6 +21,8 @@ const path = require('path');
 process.env.NODE_ENV = 'development';
 if (!process.env.NODE_CONFIG_DIR)
     process.env.NODE_CONFIG_DIR = path.resolve(process.cwd(), 'tests', 'conf');
+if (!process.env.LABCTRL_LIB_DIR)
+    process.env.LABCTRL_LIB_DIR = path.resolve(process.cwd(), 'addon');
 
 process.chdir(path.join(__dirname, '..'));
 
