@@ -707,5 +707,21 @@ class Zynq {
             }
         }
     }
+
+    async run_cmdlist(cmdlist) {
+        let bin = await Zynq.parse_cmdlist(cmdlist);
+        let res = await this.#sock.run_cmdlist(bin);
+        // If the sequence starts successfully, fake a state id to inform the user
+        // about the running sequence.
+        if (res && this.#state_id > 0)
+            this.#state_id |= 1 << 31;
+        return res;
+    }
+    wait_seq(id, type) {
+        return this.#sock.wait_seq(id, type);
+    }
+    cancel_seq(id) {
+        return this.#sock.cancel_seq(id);
+    }
 };
 module.exports = Zynq;
