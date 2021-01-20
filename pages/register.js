@@ -26,6 +26,7 @@ import RedirectIn from '../components/RedirectIn';
 import Wrapper from '../components/Wrapper';
 
 import Link from 'next/link';
+import React from 'react';
 import Router from 'next/router';
 
 export default class Register extends React.Component {

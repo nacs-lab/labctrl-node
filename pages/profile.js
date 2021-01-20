@@ -25,6 +25,7 @@ import { NotifyContext } from '../components/NotifyMenu';
 import Wrapper from '../components/Wrapper';
 
 import Link from 'next/link';
+import React from 'react';
 
 export default class Profile extends React.Component {
     static contextType = GlobalContext;

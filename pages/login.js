@@ -22,6 +22,8 @@ import Wrapper from '../components/Wrapper';
 import CheckAnonymous from '../components/CheckAnonymous';
 import Login from '../components/Login';
 
+import React from 'react';
+
 export default class LoginPage extends React.Component {
     render() {
         return <Wrapper>

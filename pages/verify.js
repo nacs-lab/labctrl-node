@@ -28,6 +28,7 @@ import Wrapper from '../components/Wrapper';
 
 import Error from 'next/error';
 import Link from 'next/link';
+import React from 'react';
 
 export default class Verify extends React.Component {
     static contextType = GlobalContext;

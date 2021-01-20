@@ -22,6 +22,8 @@ import Wrapper from '../components/Wrapper';
 import CheckLogin from '../components/CheckLogin';
 import ChangePassword from '../components/ChangePassword';
 
+import React from 'react';
+
 export default class ChangePasswordPage extends React.Component {
     render() {
         return <Wrapper>
