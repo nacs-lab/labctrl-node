@@ -137,7 +137,7 @@ private:
 
 }
 
-// Asynchronous access to the `Estimate()` function
+// Asynchronous access to the `Seq::CmdList::parse` function
 NAN_METHOD(ParseCmdList)
 {
     Nan::HandleScope scope;
