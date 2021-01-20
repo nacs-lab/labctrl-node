@@ -18,7 +18,7 @@
 
 "use strict";
 
-import Document, { Head, Main, NextScript } from 'next/document'
+import Document, { Html, Head, Main, NextScript } from 'next/document'
 
 // This is the template for all the pages.
 // We load all the scripts and style sheets here and we leave the actual page template
@@ -26,7 +26,7 @@ import Document, { Head, Main, NextScript } from 'next/document'
 export default class Page extends Document {
     render() {
         return (
-            <html>
+            <Html>
               <Head>
                 <meta httpEquiv="x-ua-compatible" content="ie=edge"/>
 
@@ -73,7 +73,7 @@ export default class Page extends Document {
                   integrity="sha256-1K9nK/DlS1HHfbB3SmJz2qRfsW5Tgg/yimRBOHLmwk0="
                   crossOrigin="anonymous"></script>
               </body>
-            </html>
+            </Html>
         )
     }
 }
