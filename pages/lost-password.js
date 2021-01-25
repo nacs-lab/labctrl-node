@@ -19,6 +19,7 @@
 "use strict";
 
 import api from '../lib/api';
+import { simple_click } from '../lib/event';
 import CheckAnonymous from '../components/CheckAnonymous';
 import RedirectIn from '../components/RedirectIn';
 import Wrapper from '../components/Wrapper';
