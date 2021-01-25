@@ -52,6 +52,20 @@ async function create_user() {
     await admin_user.verify();
     await admin_user.set_admin(true);
     console.log(await User.find_user('admin@nigrp.org'));
+
+    console.log("Creating normal user: user1@nigrp.org");
+    assert(!(await User.find_user('user1@nigrp.org')));
+    let normal_user = await User.signup('user1@nigrp.org', 'abcdef123456');
+    assert(normal_user.email == 'user1@nigrp.org');
+    assert(normal_user.verified === false);
+    assert(normal_user.approved === false);
+    assert(normal_user.admin === false);
+    assert(normal_user.requested === false);
+    assert(normal_user.password_hash);
+    assert(!normal_user.last_failed);
+    await normal_user.verify();
+    await normal_user.set_approved(true);
+    console.log(await User.find_user('user1@nigrp.org'));
 }
 
 create_user().catch((err) => {
