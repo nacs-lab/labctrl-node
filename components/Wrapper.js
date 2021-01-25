@@ -115,7 +115,8 @@ export default class Wrapper extends React.Component {
             {/* Left navbar links */}
             <ul className="navbar-nav">
               <li className="nav-item">
-                <a className="nav-link" data-widget="pushmenu" href="#"><i className="fas fa-bars"></i></a>
+                <a className="nav-link" id="sidebar-botton"
+                  data-widget="pushmenu" href="#"><i className="fas fa-bars"></i></a>
               </li>
             </ul>
 
@@ -185,6 +186,13 @@ export default class Wrapper extends React.Component {
             <strong>Powered by <a href="https://nodejs.org" target="_blank">Node.js</a> and
               <a href="https://adminlte.io/" target="_blank">AdminLTE</a>.</strong>
           </footer>
+          {/* Manually add the sidebar overlay to make React aware of this.
+            * This makes sure that the overlay can stay up when we switch page
+            * using the `<Link/>` element which may cause a re-rendering of the page.
+            * without reloading the scripts (from AdminLTE)
+            * that would have set up the overlay if this wasn't there. */}
+          <div id="sidebar-overlay"
+            onClick={()=>$('#sidebar-botton').PushMenu('collapse')}></div>
         </div>;
         return <NotifyProvider>{dom}</NotifyProvider>;
     }
