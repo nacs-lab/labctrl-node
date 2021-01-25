@@ -30,3 +30,11 @@ add_custom_target(node-repl
   "NEXT_DIST_DIR=${BIN_DIR_REL}/dev" "${NODE_EXECUTABLE}" --experimental-repl-await
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   DEPENDS npm-init)
+
+add_custom_target(recreate-testuser
+  COMMAND "NODE_CONFIG_DIR=${CONFIG_DIR}"
+  "NODE_ENV=development"
+  "LABCTRL_LIB_DIR=${PROJECT_BINARY_DIR}/addon"
+  "NEXT_DIST_DIR=${BIN_DIR_REL}/dev" "${NODE_EXECUTABLE}" tests/recreate_testuser.js
+  WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+  DEPENDS npm-init)
