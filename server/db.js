@@ -20,7 +20,7 @@
 
 const config = require('./config');
 
-const cls = require('continuation-local-storage');
+const cls = require('cls-hooked');
 const Sequelize = require('sequelize');
 const path = require('path');
 
@@ -57,12 +57,14 @@ class DB extends Sequelize {
         else {
             options = options || {};
         }
-        // Pass in the parent transaction as an option automatically
-        // if one is set in the CLS.
-        let t = DB.namespace.get('transaction');
-        if (t)
-            options.transaction = t;
-        return super.transaction(options, callback);
+        return DB.namespace.runAndReturn(() => {
+            // Pass in the parent transaction as an option automatically
+            // if one is set in the CLS.
+            let t = DB.namespace.get('transaction');
+            if (t)
+                options.transaction = t;
+            return super.transaction(options, callback);
+        });
     }
     err_handler(val) {
         if (val === null)
