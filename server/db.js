@@ -46,7 +46,7 @@ class DB extends Sequelize {
         super(null, null, null, {
             dialect: 'sqlite',
             storage: path.join(config.db.dir, name),
-            logging: !!process.env.NACS_DB_LOGGING
+            logging: process.env.NACS_DB_LOGGING ? console.log : false
         });
     }
     transaction(options, callback) {
