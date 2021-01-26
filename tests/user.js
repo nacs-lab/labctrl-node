@@ -1,5 +1,5 @@
 /*************************************************************************
- *   Copyright (c) 2019 - 2019 Yichao Yu <yyc1992@gmail.com>             *
+ *   Copyright (c) 2019 - 2021 Yichao Yu <yyc1992@gmail.com>             *
  *                                                                       *
  *   This library is free software; you can redistribute it and/or       *
  *   modify it under the terms of the GNU Lesser General Public          *
@@ -134,17 +134,26 @@ module.exports = async function test() {
         token.update_expire(new Date(Date.now() + 1100));
         console.log("Sleeping for 0.7 seconds.");
         await sleep(700);
+        assert(await token.isvalid());
         assert(await User.find_token(token_str));
         console.log("Sleeping for 0.6 seconds.");
         await sleep(600);
+        assert(!(await token.isvalid()));
         assert(!(await User.find_token(token_str)));
     })(token, token_str);
     token_str = await user1.new_token(User.Token.LoginSession, new Date(Date.now() + 1000));
     assert(token_str);
     token = await User.find_token(token_str);
     assert(token);
+    assert(await token.isvalid());
+    let token2 = await User.find_token(token_str);
+    assert(token2);
+    assert(await token2.isvalid());
     assert((await token.getUser()).email == user1.email);
-    await token.invalidate();
+    // Make sure invalidating one token cause the other one to return false.
+    assert(await token.invalidate());
+    assert(!(await token.isvalid()));
+    assert(!(await token2.isvalid()));
     assert(!(await User.find_token(token_str)));
 
     await retry_login;
