@@ -63,6 +63,8 @@ export default class Page extends Document {
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.18.0/js/md5.min.js"
                   integrity="sha512-Hmp6qDy9imQmd15Ds1WQJ3uoyGCUz5myyr5ijainC1z+tP7wuXcze5ZZR3dF7+rkRALfNy7jcfgS5hH8wJ/2dQ=="
                   crossOrigin="anonymous"></script>
+                {/* Preload socket.io since we also use it in the main code */}
+                <script src="/socket.io/socket.io.js"></script>
                 <NextScript/>
                 {/* Bootstrap JS */}
                 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"

@@ -30,8 +30,15 @@ const express = require('express');
 const http = require('http');
 const next = require('next');
 const path = require('path');
+const socketio = require('socket.io');
 
 const data_dir = path.join(__dirname, '../public/');
+
+function midware_express2io(mw) {
+    return function (socket, next) {
+        mw(socket.request, {}, next);
+    };
+}
 
 class Server {
     static namespace = cls.createNamespace('labctrl-server-ns');
@@ -55,12 +62,24 @@ class Server {
                 return next();
             });
         };
+        let cp = cookie_parser();
+
+        this.io = socketio(this.http);
+        this.io.use(midware_express2io(cp));
+        this.io.use(midware_express2io(user_session));
+        this.io.use(midware_express2io(setup_ns));
+        this.io.use(function (socket, next) {
+            let req = socket.request;
+            if (!req.nacs_user)
+                return next(new Error('Not authorized.'));
+            next();
+        });
 
         this.express.use(compression());
         this.express.use('/favicon.ico',
                          express.static(path.join(data_dir, 'img/favicon.ico')));
         this.express.use(body_parser.json());
-        this.express.use(cookie_parser());
+        this.express.use(cp);
         this.express.use(user_session);
         this.express.use(setup_ns);
         this.express.post('/api', async (req, res, next) => {

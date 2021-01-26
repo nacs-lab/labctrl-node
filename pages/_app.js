@@ -19,6 +19,7 @@
 "use strict";
 
 import api from '../lib/api';
+import socket from '../lib/socket';
 import GlobalContext from '../components/Global';
 
 import React from 'react'
@@ -38,11 +39,16 @@ export default class NaCsApp extends App {
             api({'heartbeat': ''});
         }, 600 * 1000); // 10 minutes
     }
+    componentDidUpdate() {
+        // This runs on the client side.
+        socket.check_reconnect();
+    }
     componentWillUnmount() {
         // This runs on the client side.
         if (this.timeout !== undefined) {
             clearInterval(this.timeout);
         }
+        socket.disconnect();
     }
     // This disables the static page rendering optimization and that's exactly what we want.
     // we want the global context to be available for all pages.
