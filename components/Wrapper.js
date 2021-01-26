@@ -60,6 +60,13 @@ export default class Wrapper extends React.Component {
             // that doesn't have an gravatar account can still
             // use the icon to tell if they are logged in or not.
             user.avatar = 'https://www.gravatar.com/avatar/' + user.hash + '?d=mp';
+            // Note that these links do not automatically forward
+            // the email/password info as the corresponding links
+            // on the login/password reset/register pages does.
+            // Fixing that is probably possible by putting some callback/info
+            // into some context but I don't think this drop down menu
+            // would be that useful when the link is directly available on the page
+            // so I don't think it'll be worth the effort....
             user_dropdown = <div className="dropdown-menu dropdown-menu-right">
               <Link href="/login">
                 <a className="dropdown-item">
