@@ -32,6 +32,18 @@ export default class NaCsApp extends App {
             set_user: (user) => { this.setState({ user }); }
         };
     }
+    componentDidMount() {
+        // This runs on the client side.
+        this.timeout = setInterval(() => {
+            api({'heartbeat': ''});
+        }, 600 * 1000); // 10 minutes
+    }
+    componentWillUnmount() {
+        // This runs on the client side.
+        if (this.timeout !== undefined) {
+            clearInterval(this.timeout);
+        }
+    }
     // This disables the static page rendering optimization and that's exactly what we want.
     // we want the global context to be available for all pages.
     static async getInitialProps(appContext) {
