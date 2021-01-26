@@ -257,6 +257,14 @@ class Token extends DB.Model {
             return true;
         }).catch(db.err_handler(false));
     }
+    async isvalid() {
+        return await db.transaction(async () => {
+            if ((await Token.count({ where: { id: this.id }})) == 0)
+                return false;
+            await this.reload();
+            return this.expires > Date.now();
+        }).catch(db.err_handler(false));
+    }
 }
 Token.init({
     // This is used for looking up the token so the computation must be unique.
