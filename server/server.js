@@ -50,10 +50,15 @@ class Server {
         this.next = next({ dev: process.env.NODE_ENV == 'development' });
         this.handle = this.next.getRequestHandler();
         this.sock_mgr = new SocketManager();
+        this.sock_mgr.set_auth_handler((sock) => this.request_loggedin(sock.request));
         this.prepare = Promise.all([this.next.prepare(),
                                     User.init()]).then(() => {
                                         this.init();
                                     });
+    }
+    async request_loggedin(req) {
+        return (req && req.nacs_user && req.nacs_user_token &&
+                await req.nacs_user_token.isvalid());
     }
     init() {
         this.express = express();
