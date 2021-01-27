@@ -18,31 +18,23 @@
 
 "use strict";
 
-const path = require('path');
+const assert = require('assert');
+const EventEmitter = require('events');
 
-process.env.NODE_ENV = 'development';
-if (!process.env.NODE_CONFIG_DIR)
-    process.env.NODE_CONFIG_DIR = path.resolve(process.cwd(), 'tests', 'conf');
-if (!process.env.LABCTRL_LIB_DIR)
-    process.env.LABCTRL_LIB_DIR = path.resolve(process.cwd(), 'addon');
+const sleep = require('../lib/sleep');
+const SocketManager = require('../server/socket_manager');
 
-process.chdir(path.join(__dirname, '..'));
-
-const all_tests = ['user', 'socket_manager'];
-let tests = process.argv.slice(2);
-if (tests.length == 0)
-    tests = all_tests;
-
-const old_env = { ...process.env };
-
-async function run_tests(tests) {
-    for (let i in tests) {
-        await require('./' + tests[i])();
-        process.env = old_env;
+class DummySocket extends EventEmitter {
+    disconnect() {
+        this.emit('disconnect');
     }
-}
+};
 
-run_tests(tests).catch((err) => {
-    console.log(err);
-    process.exit(1);
-});
+module.exports = async function test() {
+    let mgr = new SocketManager();
+    let sock = new DummySocket();
+
+    mgr.add_socket(sock);
+
+    sock.disconnect();
+}

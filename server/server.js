@@ -19,6 +19,7 @@
 "use strict";
 
 const api = require('./api');
+const SocketManager = require('./socket_manager');
 const User = require('./user');
 const user_session = require('./user_session');
 
@@ -48,6 +49,7 @@ class Server {
     constructor() {
         this.next = next({ dev: process.env.NODE_ENV == 'development' });
         this.handle = this.next.getRequestHandler();
+        this.sock_mgr = new SocketManager();
         this.prepare = Promise.all([this.next.prepare(),
                                     User.init()]).then(() => {
                                         this.init();
@@ -73,6 +75,9 @@ class Server {
             if (!req.nacs_user)
                 return next(new Error('Not authorized.'));
             next();
+        });
+        this.io.on('connection', (sock) => {
+            this.sock_mgr.add_socket(sock);
         });
 
         this.express.use(compression());

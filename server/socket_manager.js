@@ -1,5 +1,5 @@
 /*************************************************************************
- *   Copyright (c) 2019 - 2021 Yichao Yu <yyc1992@gmail.com>             *
+ *   Copyright (c) 2021 - 2021 Yichao Yu <yyc1992@gmail.com>             *
  *                                                                       *
  *   This library is free software; you can redistribute it and/or       *
  *   modify it under the terms of the GNU Lesser General Public          *
@@ -18,31 +18,12 @@
 
 "use strict";
 
-const path = require('path');
-
-process.env.NODE_ENV = 'development';
-if (!process.env.NODE_CONFIG_DIR)
-    process.env.NODE_CONFIG_DIR = path.resolve(process.cwd(), 'tests', 'conf');
-if (!process.env.LABCTRL_LIB_DIR)
-    process.env.LABCTRL_LIB_DIR = path.resolve(process.cwd(), 'addon');
-
-process.chdir(path.join(__dirname, '..'));
-
-const all_tests = ['user', 'socket_manager'];
-let tests = process.argv.slice(2);
-if (tests.length == 0)
-    tests = all_tests;
-
-const old_env = { ...process.env };
-
-async function run_tests(tests) {
-    for (let i in tests) {
-        await require('./' + tests[i])();
-        process.env = old_env;
+class SocketManager {
+    add_socket(sock) {
+        sock.on('disconnect', () => {
+            // TODO: disconnect from all sources
+        });
     }
-}
+};
 
-run_tests(tests).catch((err) => {
-    console.log(err);
-    process.exit(1);
-});
+module.exports = SocketManager;

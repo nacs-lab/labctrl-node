@@ -25,6 +25,7 @@ function(runtest_target name)
     DEPENDS compile-all)
 endfunction()
 runtest_target(user)
+runtest_target(socket_manager)
 
 add_custom_target(test-server
   COMMAND "NODE_CONFIG_DIR=${CONFIG_DIR}"
