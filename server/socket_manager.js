@@ -69,6 +69,31 @@ class Source {
     remove_socket(sock) {
         this.#sockets.delete(sock);
     }
+
+    // abstract: set_values(params)
+    // abstract: call_method(name, params)
+    get_values() {
+        // TODO
+        return Object.create(null);
+    }
+
+    listen_signal(name, sock) {
+        let data = this.#get_socket_data(sock);
+        // TODO
+    }
+    unlisten_signal(name, sock) {
+        let data = this.#get_socket_data(sock);
+        // TODO
+    }
+
+    watch_values(params, sock) {
+        let data = this.#get_socket_data(sock);
+        // TODO add watches and queue update
+    }
+    unwatch_values(params, sock) {
+        let data = this.#get_socket_data(sock);
+        // TODO remove watches
+    }
 };
 
 class SocketManager {
@@ -177,28 +202,70 @@ class SocketManager {
         sock.on('unwatch', unwatch_handler);
     }
 
+    #use_source(name, src_id, cb) {
+        let source = this.#sources.get(src_id);
+        if (!source) {
+            console.log(`Error when processing '${name}' request: ` +
+                        `Cannot find source '${src_id}'`);
+        }
+        else {
+            return cb(source);
+        }
+    }
+    #multi_source(name, params, use_res, cb) {
+        let all_res = use_res ? Object.create(null) : undefined;
+        let promises;
+        for (let src_id of Object.getOwnPropertyNames(params)) {
+            let source = this.#sources.get(src_id);
+            if (!source) {
+                console.log(`Error when processing '${name}' request: ` +
+                            `Cannot find source '${src_id}'`);
+                continue;
+            }
+            let res = cb(source, params[src_id]);
+            if (use_res) {
+                if (res instanceof Promise) {
+                    if (promises === undefined)
+                        promises = [];
+                    promises.push(res.then(v => { all_res[src_id] = v; }));
+                }
+                else {
+                    all_res[src_id] = res;
+                }
+            }
+        }
+        if (promises !== undefined)
+            return Promise.all(promises).then(() => all_res);
+        return all_res;
+    }
+
     call_method(src_id, name, params) {
-        // TODO
+        return this.#use_source('call', src_id,
+                                (source) => source.call_method(name, params));
     }
     get_values(params) {
-        // TODO
+        return this.#multi_source('get', params, true,
+                                  (source, params) => source.get_values(params));
     }
     set_values(params) {
-        // TODO
+        return this.#multi_source('set', params, true,
+                                  (source, params) => source.set_values(params));
     }
 
     #listen_signal(src_id, name, sock) {
-        // TODO
+        this.#use_source('listen', src_id, (source) => source.listen_signal(name, sock));
     }
     #unlisten_signal(src_id, name, sock) {
-        // TODO
+        this.#use_source('unlisten', src_id, (source) => source.unlisten_signal(name, sock));
     }
 
     #watch_values(params, sock) {
-        // TODO
+        this.#multi_source('watch', params, false,
+                           (source, params) => source.watch_values(params, sock));
     }
     #unwatch_values(params, sock) {
-        // TODO
+        this.#multi_source('unwatch', params, false,
+                           (source, params) => source.unwatch_values(params, sock));
     }
 
     add_source(source) {
