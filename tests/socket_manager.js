@@ -30,11 +30,19 @@ class DummySocket extends EventEmitter {
     }
 };
 
+class TestSource extends SocketManager.Source {
+};
+
 module.exports = async function test() {
     let mgr = new SocketManager();
     let sock = new DummySocket();
+    let src = new TestSource('source1');
+    mgr.add_source(src);
+    assert(src.age == 1);
+    assert(src.id == 'source1');
 
     mgr.add_socket(sock);
 
     sock.disconnect();
+    mgr.remove_source(src);
 }

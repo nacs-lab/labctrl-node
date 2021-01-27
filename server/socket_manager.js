@@ -18,7 +18,64 @@
 
 "use strict";
 
+// Event generation is likely per source
+// and each socket is more likely to subscribe to a single source
+// so we can store the subscription and data age info per source
+// in order to minimize the scanning required when emitting events/updates.
+class SocketData {
+};
+
+class Source {
+    // Use a single age per source instead of having more fine grain age, e.g. per channel/value.
+    // This does mean that `get_values` or the initial `watch_values` request
+    // may return some values that are not necessary.
+    // However, `get_values` should mainly be used for the initial population of the state
+    // whereas `watch_values` should come right after a `get_values`
+    // so I don't really either should have a very high chance of needing a partial update.
+    // (`get_values` would likely need all the values
+    //  whereas `watch_values` would likely already have the most up-to-date value
+    //  unless the source updated the value between the `get_values` and `watch_values`.)
+    // On the other hand, making the age per source means we don't need to store the age
+    // with the values and simplifies a lot of the processing.
+    #age = 1
+    get age() {
+        return this.#age;
+    }
+    #id
+    get id() {
+        return this.#id;
+    }
+    #mgr
+    set socket_manager(mgr) {
+        this.#mgr = mgr;
+    }
+    #sockets = new Map()
+
+    constructor(id) {
+        this.#id = id;
+    }
+
+    #get_socket_data(sock) {
+        let data = this.#sockets.get(sock);
+        if (data)
+            return data;
+        data = new SocketData();
+        this.#sockets.set(sock, data);
+        return data;
+    }
+    clear() {
+        this.#sockets.clear();
+    }
+    remove_socket(sock) {
+        this.#sockets.delete(sock);
+    }
+};
+
 class SocketManager {
+    static Source = Source;
+
+    #sources = new Map()
+
     async #handle(sock, name, req, callback) {
         // From the socketio source code, adding a `onAll` handling
         // or using a socket middleware (with `use`)
@@ -102,7 +159,9 @@ class SocketManager {
             sock.off('watch', watch_handler);
             sock.off('unwatch', unwatch_handler);
 
-            // TODO: disconnect from all sources
+            for (let [src_id, source] of this.#sources) {
+                source.remove_socket(sock);
+            }
         };
 
         sock.on('disconnect', sock.sm_disconnect_handlers);
@@ -140,6 +199,15 @@ class SocketManager {
     }
     #unwatch_values(params, sock) {
         // TODO
+    }
+
+    add_source(source) {
+        source.socket_manager = this;
+        this.#sources.set(source.id, source);
+    }
+    remove_source(source) {
+        source.clear();
+        this.#sources.delete(source.id);
     }
 };
 
