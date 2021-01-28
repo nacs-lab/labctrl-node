@@ -1,5 +1,5 @@
 /*************************************************************************
- *   Copyright (c) 2019 - 2019 Yichao Yu <yyc1992@gmail.com>             *
+ *   Copyright (c) 2019 - 2021 Yichao Yu <yyc1992@gmail.com>             *
  *                                                                       *
  *   This library is free software; you can redistribute it and/or       *
  *   modify it under the terms of the GNU Lesser General Public          *
@@ -16,6 +16,8 @@
  *   see <http://www.gnu.org/licenses/>.                                 *
  *************************************************************************/
 
+"use strict";
+
 const path = require('path');
 
 process.env.NODE_ENV = 'development';
@@ -27,7 +29,7 @@ if (!process.env.LABCTRL_LIB_DIR)
 process.chdir(path.join(__dirname, '..'));
 
 const all_tests = ['user'];
-tests = process.argv.slice(2);
+let tests = process.argv.slice(2);
 if (tests.length == 0)
     tests = all_tests;
 
