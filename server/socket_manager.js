@@ -26,6 +26,13 @@ const { is_object } = require('../lib/utils');
 // in order to minimize the scanning required when emitting events/updates.
 class SocketData {
     signals = new Set()
+    pending_update = null
+
+    pop_pending_update() {
+        let update = this.pending_update;
+        this.pending_update = null;
+        return update;
+    }
 };
 
 class Source {
@@ -72,6 +79,15 @@ class Source {
     }
     remove_socket(sock) {
         this.#sockets.delete(sock);
+    }
+
+    * get_pending_updates() {
+        for (let [sock, data] of this.#sockets) {
+            let update = data.pop_pending_update();
+            if (update === null)
+                continue;
+            yield [sock, update];
+        }
     }
 
     // To be called by the source implementation.
@@ -137,6 +153,33 @@ class SocketManager {
     static Source = Source;
 
     #sources = new Map()
+    #update_timer = 0
+
+    ensure_update_timer() {
+        if (this.#update_timer > 0)
+            return;
+        // Bunch up update events within 30 ms
+        this.#update_timer = setTimeout(() => {
+            this.#update_timer = 0;
+            this.#flush_update();
+        }, 30);
+    }
+    #flush_update() {
+        let updates = new Map();
+        for (let [src_id, source] of this.#sources) {
+            for (let [sock, update] of source.get_pending_updates()) {
+                let all_update = updates.get(sock);
+                if (!all_update) {
+                    all_update = Object.create(null);
+                    updates.set(sock, all_update);
+                }
+                all_update[src_id] = { age: source.age, values: update };
+            }
+        }
+        for (let [sock, update] of updates) {
+            this.auth_socket(sock).then((ok) => ok && sock.emit('update', update));
+        }
+    }
 
     async #handle(sock, name, req, callback) {
         // From the socketio source code, adding a `onAll` handling
