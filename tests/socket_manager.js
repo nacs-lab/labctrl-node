@@ -33,6 +33,16 @@ class DummySocket extends EventEmitter {
         // Make sure the async call finishes.
         await sleep(1);
     }
+    async set(...args) {
+        this.emit('set', ...args);
+        // Make sure the async call finishes.
+        await sleep(1);
+    }
+    async get(...args) {
+        this.emit('get', ...args);
+        // Make sure the async call finishes.
+        await sleep(1);
+    }
     async listen(...args) {
         this.emit('listen', ...args);
         // Make sure the async call finishes.
@@ -47,8 +57,19 @@ class DummySocket extends EventEmitter {
 
 class TestSource extends SocketManager.Source {
     test_field = 0
+    delay_set = false
 
-    // TODO: set_values(params)
+    set_values(params) {
+        if (this.delay_set) {
+            return sleep(10).then(() => {
+                this.update_values(params);
+                return true;
+            });
+        }
+        this.update_values(params);
+        return true;
+    }
+
     call_method(name, params) {
         if (name == 'method1') {
             let { a, b } = params;
@@ -77,6 +98,45 @@ class TestSource extends SocketManager.Source {
         await sleep(1);
     }
 };
+
+/**
+ * Comparing arbitrary values. Assuming the values are JSON-serializable.
+ * This should be equivalent to checking if the two values can be represented by
+ * the same JSON string.
+ */
+function val_eq(a, b) {
+    if (Object.is(a, b))
+        return true;
+
+    var atyp = typeof a;
+    var btyp = typeof b;
+
+    // `typeof null` is `"object"` but `!!null` is `false`
+    if (atyp != "object" || !a)
+        return false;
+    if (btyp != "object" || !b)
+        return false;
+
+    var aprops = Object.getOwnPropertyNames(a);
+    var bprops = Object.getOwnPropertyNames(b);
+
+    // If number of properties is different,
+    // objects are not equivalent
+    if (aprops.length != bprops.length)
+        return false;
+
+    for (var i = 0; i < aprops.length; i++) {
+        var pn = aprops[i];
+
+        // We do not support self referencing structure which should be fine
+        // since we only need to deal with JSON compabible objects
+        if (!val_eq(a[pn], b[pn])) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 async function test_call_and_signal() {
     let mgr = new SocketManager();
@@ -338,9 +398,160 @@ async function test_source_remove() {
     sock.disconnect();
 }
 
+async function test_set_get() {
+    let mgr = new SocketManager();
+    let sock = new DummySocket();
+    let src1 = new TestSource('source1');
+    let src2 = new TestSource('source2');
+    let counter = 0;
+    mgr.set_auth_handler((s) => {
+        assert(s === sock);
+        counter += 1;
+        return true;
+    });
+    mgr.add_socket(sock);
+    mgr.add_source(src1);
+    mgr.add_source(src2);
+
+    assert(val_eq(mgr.set_values({ source1: { chn1: 20, chn2: 30 },
+                                   source2: { chn1: -1, chn2: -2 }}),
+                  { source1: true, source2: true }));
+    let res = mgr.get_values({ source1: { path: { chn1: 0, chn2: 0 }},
+                               source2: { path: { chn1: 0, chn2: 0 }}});
+    assert(val_eq(res, { source1: { age: 2, values: { chn1: 20, chn2: 30 }},
+                         source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
+    res = mgr.get_values({ source1: { age: 2, path: { chn1: 0, chn2: 0 }},
+                           source2: { age: 2, path: { chn1: 0, chn2: 0 }}});
+    assert(val_eq(res, { source1: null, source2: null}));
+    res = mgr.get_values({ source1: { path: { chn1: 0 }},
+                           source2: { path: { chn2: 0 }}});
+    assert(val_eq(res, { source1: { age: 2, values: { chn1: 20 }},
+                         source2: { age: 2, values: { chn2: -2 }}}));
+    assert(val_eq(mgr.set_values({ source1: { chn1: null, chn3: 90 }}),
+                  { source1: true }));
+    assert(src1.age == 3);
+    assert(src2.age == 2);
+    res = mgr.get_values({ source1: { path: 0 },
+                           source2: { path: 0 }});
+    assert(val_eq(res, { source1: { age: 3, values: { chn3: 90, chn2: 30 }},
+                         source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
+    // Try to access deleted/non-existing channels
+    res = mgr.get_values({ source1: { path: { chn1: 0, chn10: { subchn: 0 } } }});
+    assert(val_eq(res, { source1: { age: 3, values: { chn1: null, chn10: null }}}));
+    assert(val_eq(mgr.set_values({ source2: { chn1: { sub1: 30, sub2: 40 }}}),
+                  { source2: true }));
+    res = mgr.get_values({ source2: { path: 0 }});
+    assert(val_eq(res, { source2: { age: 3, values: { chn1: { sub1: 30, sub2: 40 },
+                                                      chn2: -2 }}}));
+
+    assert(counter == 0);
+    await sock.set({ source1: { chn3: 10 }});
+    assert(counter == 1);
+    res = await new Promise((resolve, reject) => {
+        sock.get({ source1: { path: 0 }}, resolve);
+    });
+    assert(val_eq(res, { source1: { age: 4, values: { chn3: 10, chn2: 30 }}}));
+    assert(counter == 2);
+
+    res = await new Promise((resolve, reject) => {
+        sock.set({ source1: { chn2: 42 }, source2: { chn1: { sub4: 4 }}}, resolve);
+    });
+    assert(val_eq(res, { source1: true, source2: true }));
+    assert(counter == 3);
+    res = await new Promise((resolve, reject) => {
+        sock.get({ source1: { path: 0 }, source2: { path: 0 }}, resolve);
+    });
+    assert(val_eq(res, { source1: { age: 5, values: { chn3: 10, chn2: 42 }},
+                         source2: { age: 4, values: { chn1: { sub1: 30, sub2: 40, sub4: 4 },
+                                                      chn2: -2 }}}));
+    assert(counter == 4);
+
+    mgr.remove_source(src1);
+    mgr.remove_source(src2);
+    sock.disconnect();
+}
+
+async function test_set_get_async() {
+    let mgr = new SocketManager();
+    let sock = new DummySocket();
+    let src1 = new TestSource('source1');
+    let src2 = new TestSource('source2');
+    let counter = 0;
+    mgr.set_auth_handler((s) => {
+        assert(s === sock);
+        counter += 1;
+        return true;
+    });
+    mgr.add_socket(sock);
+    mgr.add_source(src1);
+    mgr.add_source(src2);
+    src1.delay_set = true;
+
+    let res = mgr.set_values({ source1: { chn1: 20, chn2: 30 },
+                               source2: { chn1: -1, chn2: -2 }});
+    assert(res instanceof Promise);
+    assert(val_eq(await res, { source1: true, source2: true }));
+    res = mgr.get_values({ source1: { path: { chn1: 0, chn2: 0 }},
+                           source2: { path: { chn1: 0, chn2: 0 }}});
+    assert(val_eq(res, { source1: { age: 2, values: { chn1: 20, chn2: 30 }},
+                         source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
+    res = mgr.get_values({ source1: { age: 2, path: { chn1: 0, chn2: 0 }},
+                           source2: { age: 2, path: { chn1: 0, chn2: 0 }}});
+    assert(val_eq(res, { source1: null, source2: null}));
+    res = mgr.get_values({ source1: { path: { chn1: 0 }},
+                           source2: { path: { chn2: 0 }}});
+    assert(val_eq(res, { source1: { age: 2, values: { chn1: 20 }},
+                         source2: { age: 2, values: { chn2: -2 }}}));
+    res = mgr.set_values({ source1: { chn1: null, chn3: 90 }});
+    assert(res instanceof Promise);
+    assert(val_eq(await res, { source1: true }));
+    assert(src1.age == 3);
+    assert(src2.age == 2);
+    res = mgr.get_values({ source1: { path: 0 },
+                           source2: { path: 0 }});
+    assert(val_eq(res, { source1: { age: 3, values: { chn3: 90, chn2: 30 }},
+                         source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
+    assert(val_eq(mgr.set_values({ source2: { chn1: { sub1: 30, sub2: 40 }}}),
+                  { source2: true }));
+    res = mgr.get_values({ source2: { path: 0 }});
+    assert(val_eq(res, { source2: { age: 3, values: { chn1: { sub1: 30, sub2: 40 },
+                                                      chn2: -2 }}}));
+
+    assert(counter == 0);
+    await sock.set({ source1: { chn3: 10 }});
+    assert(counter == 1);
+    res = mgr.get_values({ source1: { path: 0 }});
+    assert(val_eq(res, { source1: { age: 3, values: { chn3: 90, chn2: 30 }}}));
+    await sleep(30);
+    res = await new Promise((resolve, reject) => {
+        sock.get({ source1: { path: 0 }}, resolve);
+    });
+    assert(val_eq(res, { source1: { age: 4, values: { chn3: 10, chn2: 30 }}}));
+    assert(counter == 2);
+
+    res = await new Promise((resolve, reject) => {
+        sock.set({ source1: { chn2: 42 }, source2: { chn1: { sub4: 4 }}}, resolve);
+    });
+    assert(val_eq(res, { source1: true, source2: true }));
+    assert(counter == 3);
+    res = await new Promise((resolve, reject) => {
+        sock.get({ source1: { path: 0 }, source2: { path: 0 }}, resolve);
+    });
+    assert(val_eq(res, { source1: { age: 5, values: { chn3: 10, chn2: 42 }},
+                         source2: { age: 4, values: { chn1: { sub1: 30, sub2: 40, sub4: 4 },
+                                                      chn2: -2 }}}));
+    assert(counter == 4);
+
+    mgr.remove_source(src1);
+    mgr.remove_source(src2);
+    sock.disconnect();
+}
+
 module.exports = async function test() {
     await test_call_and_signal();
     await test_rejection();
     await test_socket_disconnect();
     await test_source_remove();
+    await test_set_get();
+    await test_set_get_async();
 }

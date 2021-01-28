@@ -18,7 +18,7 @@
 
 "use strict";
 
-const { is_object } = require('../lib/utils');
+const { is_object, object_empty, update_object } = require('../lib/utils');
 
 // Event generation is likely per source
 // and each socket is more likely to subscribe to a single source
@@ -32,6 +32,12 @@ class SocketData {
         let update = this.pending_update;
         this.pending_update = null;
         return update;
+    }
+
+    queue_update(change) {
+        // TODO check if there's any update we are interested in and queue them
+        // return if update is needed.
+        return false;
     }
 };
 
@@ -91,6 +97,20 @@ class Source {
     }
 
     // To be called by the source implementation.
+    update_values(values) {
+        let change = update_object(this.#values, values);
+        if (change)
+            this.#age += 1;
+        let needs_update = false;
+        for (let [sock, data] of this.#sockets) {
+            if (data.queue_update(change)) {
+                needs_update = true;
+            }
+        }
+        if (needs_update && this.#mgr) {
+            this.#mgr.ensure_update_timer();
+        }
+    }
     emit_signal(name, params) {
         for (let [sock, data] of this.#sockets) {
             if (data.signals.has(name)) {
