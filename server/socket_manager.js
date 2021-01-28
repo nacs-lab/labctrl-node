@@ -18,7 +18,12 @@
 
 "use strict";
 
-const { is_object, object_empty, update_object } = require('../lib/utils');
+const { is_object, object_empty, update_object, queue_update } = require('../lib/utils');
+
+class Watch {
+    all = false
+    subwatch = Object.create(null)
+};
 
 // Event generation is likely per source
 // and each socket is more likely to subscribe to a single source
@@ -27,6 +32,7 @@ const { is_object, object_empty, update_object } = require('../lib/utils');
 class SocketData {
     signals = new Set()
     pending_update = null
+    watching
 
     pop_pending_update() {
         let update = this.pending_update;
@@ -35,9 +41,8 @@ class SocketData {
     }
 
     queue_update(change) {
-        // TODO check if there's any update we are interested in and queue them
-        // return if update is needed.
-        return false;
+        this.pending_update = queue_update(this.watching, change, this.pending_update);
+        return this.pending_update !== undefined;
     }
 };
 
@@ -98,7 +103,7 @@ class Source {
 
     // To be called by the source implementation.
     update_values(values) {
-        let change = update_object(this.#values, values);
+        let change = update_object(this.#values, values, true);
         if (change)
             this.#age += 1;
         let needs_update = false;
