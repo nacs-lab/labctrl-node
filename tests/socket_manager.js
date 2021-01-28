@@ -53,6 +53,16 @@ class DummySocket extends EventEmitter {
         // Make sure the async call finishes.
         await sleep(1);
     }
+    async watch(...args) {
+        this.emit('watch', ...args);
+        // Make sure the async call finishes.
+        await sleep(1);
+    }
+    async unwatch(...args) {
+        this.emit('unwatch', ...args);
+        // Make sure the async call finishes.
+        await sleep(1);
+    }
 };
 
 class TestSource extends SocketManager.Source {
@@ -313,6 +323,34 @@ async function test_rejection() {
     assert(sigval == 10);
     assert(counter == 5);
 
+    let updates = [];
+    sock.on('update', function (param) {
+        updates.push(param);
+    });
+
+    mgr.add_socket(sock);
+    enable = false;
+    await sock.watch({ source1: { path: { chn1: 0 } } });
+    assert(counter == 6);
+    enable = true;
+    assert(val_eq(mgr.set_values({ source1: { chn1: 20 }}), { source1: true }));
+    assert(updates.length == 0);
+    assert(counter == 6);
+
+    mgr.add_socket(sock);
+    await sock.watch({ source1: { path: { chn1: 0 } } });
+    assert(counter == 7);
+    enable = false;
+    assert(val_eq(mgr.set_values({ source1: { chn1: 20 }}), { source1: true }));
+    assert(counter == 7);
+    await sleep(50);
+    assert(updates.length == 0);
+    assert(counter == 8);
+    assert(val_eq(mgr.set_values({ source1: { chn1: 40 }}), { source1: true }));
+    await sleep(50);
+    assert(updates.length == 0);
+    assert(counter == 8);
+
     mgr.remove_source(src);
 }
 
@@ -547,6 +585,260 @@ async function test_set_get_async() {
     sock.disconnect();
 }
 
+async function test_watch() {
+    let mgr = new SocketManager();
+    let sock = new DummySocket();
+    let src1 = new TestSource('source1');
+    let src2 = new TestSource('source2');
+    let counter = 0;
+    mgr.set_auth_handler((s) => {
+        assert(s === sock);
+        counter += 1;
+        return true;
+    });
+    mgr.add_socket(sock);
+    mgr.add_source(src1);
+    mgr.add_source(src2);
+
+    let updates = [];
+    sock.on('update', function (param) {
+        updates.push(param);
+    });
+
+    let res = mgr.set_values({ source1: { chn1: 20, chn2: 30 },
+                               source2: { chn1: -1, chn2: -2 }});
+    assert(val_eq(res, { source1: true, source2: true }));
+    res = mgr.get_values({ source1: { path: { chn1: 0, chn2: 0 }},
+                           source2: { path: { chn1: 0, chn2: 0 }}});
+    assert(val_eq(res, { source1: { age: 2, values: { chn1: 20, chn2: 30 }},
+                         source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
+
+    assert(counter == 0);
+    // Watching subpath
+    await sock.watch({ source1: { path: { chn1: 0 } } });
+    assert(counter == 1);
+    assert(updates.length == 0);
+    // Wait for the update timer to fire.
+    await sleep(50);
+    assert(updates.length == 1);
+    assert(val_eq(updates[0], { source1: { age: 2, values: { chn1: 20 }}}));
+    assert(counter == 2);
+    updates.length = 0; // clear
+
+    // Watching whole source
+    await sock.watch({ source2: { path: 0 } });
+    assert(updates.length == 0);
+    assert(counter == 3);
+    // Wait for the update timer to fire.
+    await sleep(50);
+    assert(updates.length == 1);
+    assert(val_eq(updates[0], { source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
+    assert(counter == 4);
+    updates.length = 0; // clear
+
+    // Watching sub source within whole source
+    await sock.watch({ source2: { path: { chn1: 0 } } });
+    assert(updates.length == 0);
+    assert(counter == 5);
+    // Wait for the update timer to fire.
+    await sleep(50);
+    assert(updates.length == 1);
+    assert(val_eq(updates[0], { source2: { age: 2, values: { chn1: -1 }}}));
+    assert(counter == 6);
+    updates.length = 0; // clear
+
+    // Nothing changed
+    res = mgr.set_values({ source1: { chn1: 20, chn2: 30 },
+                           source2: { chn1: -1, chn2: -2 }});
+    assert(val_eq(res, { source1: true, source2: true }));
+    await sleep(50);
+    assert(updates.length == 0);
+    assert(counter == 6);
+
+    res = mgr.set_values({ source1: { chn1: 20, chn2: 2 },
+                           source2: { chn1: 1, chn2: -2 }});
+    assert(val_eq(res, { source1: true, source2: true }));
+    assert(updates.length == 0);
+    assert(counter == 6);
+    await sleep(50);
+    assert(updates.length == 1);
+    assert(val_eq(updates[0], { source2: { age: 3, values: { chn1: 1 }}}));
+    assert(counter == 7);
+    updates.length = 0; // clear
+
+    res = mgr.set_values({ source1: { chn1: 1 },
+                           source2: { chn2: 2 }});
+    assert(val_eq(res, { source1: true, source2: true }));
+    assert(updates.length == 0);
+    assert(counter == 7);
+    await sleep(50);
+    assert(updates.length == 1);
+    assert(val_eq(updates[0], { source1: { age: 4, values: { chn1: 1 }},
+                                source2: { age: 4, values: { chn2: 2 }}}));
+    assert(counter == 8);
+    updates.length = 0; // clear
+
+    await sock.unwatch({ source2: { path: 0 } });
+    assert(counter == 9);
+
+    // Set a value of `0` to catch potentially faulty logic
+    res = mgr.set_values({ source2: { chn1: 0, chn2: 0 }});
+    assert(val_eq(res, { source2: true }));
+    assert(updates.length == 0);
+    assert(counter == 9);
+    await sleep(50);
+    assert(updates.length == 1);
+    assert(val_eq(updates[0], { source2: { age: 5, values: { chn1: 0 }}}));
+    assert(counter == 10);
+    updates.length = 0; // clear
+
+    // Also start a watch on a value of `0` to check if the add watch logic can handle this too.
+    await sock.watch({ source2: { path: { chn2: 0 } } });
+    assert(updates.length == 0);
+    assert(counter == 11);
+    await sleep(50);
+    assert(updates.length == 1);
+    assert(val_eq(updates[0], { source2: { age: 5, values: { chn2: 0 }}}));
+    assert(counter == 12);
+    updates.length = 0; // clear
+
+    // Check if the age parameter works
+    await sock.unwatch({ source2: { path: { chn2: 0 } } });
+    assert(counter == 13);
+    await sock.watch({ source2: { age: 5, path: { chn2: 0 } } });
+    assert(updates.length == 0);
+    assert(counter == 14);
+    await sleep(50);
+    assert(updates.length == 0);
+    assert(counter == 14);
+
+    await sock.unwatch({ source2: { path: { chn2: 0 } } });
+    assert(counter == 15);
+    await sock.watch({ source2: { age: 4, path: { chn2: 0 } } });
+    assert(counter == 16);
+    assert(updates.length == 0);
+    await sleep(50);
+    assert(updates.length == 1);
+    assert(val_eq(updates[0], { source2: { age: 5, values: { chn2: 0 }}}));
+    assert(counter == 17);
+    updates.length = 0; // clear
+
+    // Use the socket to set the value.
+    sock.set({ source1: { chn1: 0 }});
+    assert(updates.length == 0);
+    assert(counter == 18);
+    await sleep(50);
+    assert(updates.length == 1);
+    assert(val_eq(updates[0], { source1: { age: 5, values: { chn1: 0 }}}));
+    assert(counter == 19);
+    updates.length = 0; // clear
+
+    // Bunch up of firing
+    sock.set({ source1: { chn1: 1 }});
+    assert(counter == 20);
+    sock.set({ source2: { chn1: 2 }});
+    assert(counter == 21);
+    sock.set({ source2: { chn2: 3 }});
+    assert(counter == 22);
+    assert(updates.length == 0);
+    await sleep(50);
+    assert(updates.length == 1);
+    assert(val_eq(updates[0], { source1: { age: 6, values: { chn1: 1 }},
+                                source2: { age: 7, values: { chn1: 2, chn2: 3 }}}));
+    assert(counter == 23);
+    updates.length = 0; // clear
+
+    // Deletion
+    sock.set({ source1: { chn1: null }});
+    assert(updates.length == 0);
+    assert(counter == 24);
+    await sleep(50);
+    assert(updates.length == 1);
+    assert(val_eq(updates[0], { source1: { age: 7, values: { chn1: null }}}));
+    assert(counter == 25);
+    updates.length = 0; // clear
+
+    mgr.remove_source(src1);
+    mgr.remove_source(src2);
+    sock.disconnect();
+}
+
+async function test_watch_delete() {
+    let mgr = new SocketManager();
+    let sock = new DummySocket();
+    let src1 = new TestSource('source1');
+    mgr.add_socket(sock);
+    mgr.add_source(src1);
+
+    let updates = [];
+    sock.on('update', function (param) {
+        updates.push(param);
+    });
+
+    let res = mgr.set_values({ source1: { chn1: 1, chn2: { subchn1: 1, subchn2: 2 }}});
+    assert(val_eq(res, { source1: true }));
+    res = mgr.get_values({ source1: { path: 0 }});
+    assert(val_eq(res, { source1: { age: 2, values: { chn1: 1, chn2: { subchn1: 1,
+                                                                       subchn2: 2 }}}}));
+
+    await sock.watch({ source1: { path: 0 }});
+
+    res = mgr.set_values({ source1: { chn1: 3, chn2: { subchn1: 2, subchn2: 3 }}});
+    assert(val_eq(res, { source1: true }));
+    assert(updates.length == 0);
+    await sleep(50);
+    assert(updates.length == 1);
+    assert(val_eq(updates[0], { source1: { age: 3, values: { chn1: 3, chn2: { subchn1: 2,
+                                                                              subchn2: 3 }}}}));
+    updates.length = 0; // clear
+
+    res = mgr.set_values({ source1: { chn1: 0, chn2: { subchn1: 1, subchn2: 2 }}});
+    assert(val_eq(res, { source1: true }));
+    res = mgr.set_values({ source1: { chn1: 3, chn2: { subchn1: null, subchn2: null }}});
+    assert(val_eq(res, { source1: true }));
+    assert(updates.length == 0);
+    await sleep(50);
+    assert(updates.length == 1);
+    assert(val_eq(updates[0], { source1: { age: 5,
+                                           values: { chn1: 3, chn2: { subchn1: null,
+                                                                      subchn2: null }}}}));
+    updates.length = 0; // clear
+
+    res = mgr.set_values({ source1: { chn1: 0, chn2: { subchn1: 1, subchn2: 2 }}});
+    assert(val_eq(res, { source1: true }));
+    res = mgr.set_values({ source1: { chn1: 3, chn2: null}});
+    assert(val_eq(res, { source1: true }));
+    // This should not trigger any change.
+    res = mgr.set_values({ source1: { chn1: 3, chn2: { subchn1: null, subchn2: null }}});
+    assert(val_eq(res, { source1: true }));
+    assert(updates.length == 0);
+    await sleep(50);
+    assert(updates.length == 1);
+    assert(val_eq(updates[0], { source1: { age: 7,
+                                           values: { chn1: 3, chn2: null }}}));
+    updates.length = 0; // clear
+
+    res = mgr.set_values({ source1: { chn1: 0, chn2: { subchn1: 1, subchn2: 2 }}});
+    assert(val_eq(res, { source1: true }));
+    res = mgr.set_values({ source1: { chn1: 3, chn2: { subchn1: null, subchn2: null }}});
+    assert(val_eq(res, { source1: true }));
+    assert(updates.length == 0);
+    await sleep(50);
+    assert(updates.length == 1);
+    // chn2 didn't exist before this but we are still getting the deletion notification.
+    // This is OK though it doesn't HAVE to be the case.
+    // If we have a more accurate change reporting
+    // (essentially requiring saving the old state) this could report nothing.
+    // or even with not update event.
+    assert(val_eq(updates[0], { source1: { age: 9,
+                                           values: { chn1: 3, chn2: { subchn1: null,
+                                                                      subchn2: null }}}}));
+    updates.length = 0; // clear
+
+    mgr.remove_source(src1);
+    sock.disconnect();
+}
+
 module.exports = async function test() {
     await test_call_and_signal();
     await test_rejection();
@@ -554,4 +846,6 @@ module.exports = async function test() {
     await test_source_remove();
     await test_set_get();
     await test_set_get_async();
+    await test_watch();
+    await test_watch_delete();
 }

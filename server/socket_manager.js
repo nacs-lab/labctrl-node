@@ -164,13 +164,95 @@ class Source {
         data.signals.delete(name);
     }
 
-    watch_values(params, sock) {
+    // For watching and unwatching, we assume the client will take care of deduplicate
+    // watches on the exact same path so we won't keep a reference count on the server.
+    // OTOH, for watches that has overlap/includes each other,
+    // we will treat them as individual entries since otherwise it'll be a little hard
+    // to make atomic update that removes a wider watch but keep a narrower one.
+    watch_values({ age, path }, sock) {
         let data = this.#get_socket_data(sock);
-        // TODO add watches and queue update
+        let needs_update = !age || age < this.#age;
+        let add_watch = function (watch, path, value, pending) {
+            // Yes, we would like to watch this.
+            if (!is_object(path)) {
+                // Already watched
+                if (watch === true || (watch instanceof Watch && watch.all))
+                    return [watch, pending];
+                if (!watch) {
+                    watch = true;
+                }
+                else {
+                    watch.all = true;
+                }
+                if (!needs_update || value === undefined)
+                    return [watch, pending];
+                return [watch, queue_update(true, value, pending)];
+            }
+            for (let name of Object.getOwnPropertyNames(path)) {
+                let subpath = path[name];
+                let subwatch = watch instanceof Watch ? watch.subwatch[name] : undefined;
+                let subpending = pending ? pending[name] : undefined;
+                let subvalue = value ? value[name] : undefined;
+                [subwatch, subpending] = add_watch(subwatch, subpath, subvalue, subpending);
+                if (subwatch) {
+                    if (!(watch instanceof Watch)) {
+                        let all = watch === true;
+                        watch = new Watch();
+                        watch.all = all;
+                    }
+                    watch.subwatch[name] = subwatch;
+                }
+                if (!needs_update || subvalue === undefined)
+                    continue;
+                if (subpending !== undefined) {
+                    if (!is_object(pending))
+                        pending = Object.create(null);
+                    pending[name] = subpending;
+                }
+            }
+            return [watch, pending];
+        };
+        let [watch, pending] = add_watch(data.watching, path,
+                                         this.#values, data.pending_update);
+        data.watching = watch;
+        if (needs_update && pending !== undefined) {
+            data.pending_update = pending;
+            this.#mgr.ensure_update_timer();
+        }
     }
-    unwatch_values(params, sock) {
+    unwatch_values({ path }, sock) {
         let data = this.#get_socket_data(sock);
-        // TODO remove watches
+        let remove_watch = function (watch, path) {
+            if (!watch)
+                return undefined;
+            // Yes, we would like to unwatch this.
+            if (!is_object(path)) {
+                // Not watching
+                if (watch === true)
+                    return undefined;
+                if (watch === undefined || !watch.all)
+                    return watch;
+                watch.all = false;
+                return watch;
+            }
+            if (!(watch instanceof Watch))
+                return watch;
+            for (let name of Object.getOwnPropertyNames(path)) {
+                let subpath = path[name];
+                let subwatch = watch.subwatch[name];
+                subwatch = remove_watch(subwatch, subpath);
+                if (!subwatch) {
+                    delete watch.subwatch[name];
+                }
+                else {
+                    watch.subwatch[name] = subwatch;
+                }
+            }
+            if (object_empty(watch.subwatch))
+                return watch.all ? true : undefined;
+            return watch;
+        };
+        data.watching = remove_watch(data.watching, path);
     }
 };
 
