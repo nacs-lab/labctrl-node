@@ -18,6 +18,8 @@
 
 "use strict";
 
+const { is_object } = require('../lib/utils');
+
 // Event generation is likely per source
 // and each socket is more likely to subscribe to a single source
 // so we can store the subscription and data age info per source
@@ -50,6 +52,7 @@ class Source {
     set socket_manager(mgr) {
         this.#mgr = mgr;
     }
+    #values = Object.create(null)
     #sockets = new Map()
 
     constructor(id) {
@@ -83,9 +86,32 @@ class Source {
 
     // abstract: set_values(params)
     // abstract: call_method(name, params)
-    get_values() {
-        // TODO
-        return Object.create(null);
+    // This may return a reference to the internal storage.
+    // Do not cache the returned object and do not mutate it.
+    get_values({ age, path }) {
+        if ((age && age >= this.#age))
+            return null;
+        let get_val = function (value, path) {
+            let res = Object.create(null);
+            for (let name of Object.getOwnPropertyNames(path)) {
+                if (!Object.prototype.hasOwnProperty.call(value, name)) {
+                    // Signal to the caller that the subtree/value doesn't exist (anymore).
+                    res[name] = null;
+                    continue;
+                }
+                let subpath = path[name];
+                let subvalue = value[name];
+                if (!is_object(subpath)) {
+                    res[name] = subvalue;
+                }
+                else {
+                    res[name] = get_val(subvalue, subpath);
+                }
+            }
+            return res;
+        };
+        let values = is_object(path) ? get_val(this.#values, path) : this.#values;
+        return { age: this.#age, values };
     }
 
     listen_signal(name, sock) {
