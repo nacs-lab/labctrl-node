@@ -33,6 +33,16 @@ class DummySocket extends EventEmitter {
         // Make sure the async call finishes.
         await sleep(1);
     }
+    async listen(...args) {
+        this.emit('listen', ...args);
+        // Make sure the async call finishes.
+        await sleep(1);
+    }
+    async unlisten(...args) {
+        this.emit('unlisten', ...args);
+        // Make sure the async call finishes.
+        await sleep(1);
+    }
 };
 
 class TestSource extends SocketManager.Source {
@@ -58,9 +68,17 @@ class TestSource extends SocketManager.Source {
             })();
         }
     }
+    async emit_signal(...arg) {
+        super.emit_signal(...arg);
+        // Make sure the async call finishes.
+        // This doesn't matter for the actual server since
+        // we'll not wait to observer any effect on the reciever but it does matter
+        // in the test...
+        await sleep(1);
+    }
 };
 
-async function test_call() {
+async function test_call_and_signal() {
     let mgr = new SocketManager();
     let sock = new DummySocket();
     let src = new TestSource('source1');
@@ -130,6 +148,49 @@ async function test_call() {
     assert(src2.test_field == 4321);
     assert(counter == 5);
 
+    let val1 = 0;
+    let val2 = 0;
+    sock.on('signal', ({ id, name, params }) => {
+        if (id == 'source1' && name == 'signal1') {
+            val1 = params;
+        }
+        else if (id == 'source2' && name == 'signal1') {
+            val2 = params;
+        }
+        else {
+            assert(false && "Unknown signal fired.");
+        }
+    });
+    await sock.listen('source1', 'signal1');
+    assert(counter == 6);
+    await sock.listen('source2', 'signal1');
+    assert(counter == 7);
+    assert(val1 == 0);
+    assert(val2 == 0);
+    await src.emit_signal('signal1', 10);
+    assert(counter == 8);
+    assert(val1 == 10);
+    assert(val2 == 0);
+    await src2.emit_signal('signal1', 100);
+    assert(counter == 9);
+    assert(val1 == 10);
+    assert(val2 == 100);
+    await src.emit_signal('signal2', 1000);
+    await src2.emit_signal('signal2', 3);
+    assert(val1 == 10);
+    assert(val2 == 100);
+    await sock.unlisten('source1', 'signal1');
+    assert(counter == 10);
+    await sock.unlisten('source2', 'signal1');
+    assert(counter == 11);
+    assert(val1 == 10);
+    assert(val2 == 100);
+    await src.emit_signal('signal1', 10000);
+    await src2.emit_signal('signal1', 10000);
+    assert(val1 == 10);
+    assert(val2 == 100);
+    assert(counter == 11);
+
     sock.disconnect();
     mgr.remove_source(src);
     mgr.remove_source(src2);
@@ -139,11 +200,12 @@ async function test_rejection() {
     let mgr = new SocketManager();
     let sock = new DummySocket();
     let src = new TestSource('source1');
+    let enable = false;
     let counter = 0;
     mgr.set_auth_handler((s) => {
         assert(s === sock);
         counter += 1;
-        return false;
+        return enable;
     });
     mgr.add_source(src);
 
@@ -161,6 +223,35 @@ async function test_rejection() {
     });
     assert(res === 890);
     assert(counter == 1);
+
+    let sigval = 0;
+    sock.on('signal', ({ id, name, params }) => {
+        assert(id == 'source1' && name == 'signal1');
+        sigval = params;
+    });
+
+    mgr.add_socket(sock);
+    enable = true;
+    await sock.listen('source1', 'signal1');
+    assert(counter == 2);
+    await src.emit_signal('signal1', 10);
+    assert(sigval == 10);
+    assert(counter == 3);
+    enable = false;
+    await src.emit_signal('signal1', 100);
+    assert(sigval == 10);
+    assert(counter == 4);
+    await src.emit_signal('signal1', 1000);
+    assert(sigval == 10);
+    assert(counter == 4);
+
+    mgr.add_socket(sock);
+    await sock.listen('source1', 'signal1');
+    assert(counter == 5);
+    enable = true;
+    await src.emit_signal('signal1', 100);
+    assert(sigval == 10);
+    assert(counter == 5);
 
     mgr.remove_source(src);
 }
@@ -185,12 +276,28 @@ async function test_socket_disconnect() {
     await sock.call('source1', 'method2', 1000);
     assert(src.test_field == 1000);
     assert(counter == 1);
+
+    let val1 = 0;
+    sock.on('signal', ({ id, name, params }) => {
+        if (id == 'source1' && name == 'signal1') {
+            val1 = params;
+        }
+    });
+    await sock.listen('source1', 'signal1');
+    assert(val1 == 0);
+    assert(counter == 2);
+    await src.emit_signal('signal1', 10);
+    assert(val1 == 10);
+    assert(counter == 3);
+
     sock.disconnect();
 
     await sock.call('source1', 'method2', 2000);
+    await src.emit_signal('signal1', 100);
     await sleep(10);
     assert(src.test_field == 1000);
-    assert(counter == 1);
+    assert(val1 == 10);
+    assert(counter == 3);
 
     mgr.remove_source(src);
 }
@@ -208,18 +315,31 @@ async function test_source_remove() {
     await sock.call('source1', 'method2', 1000);
     assert(src.test_field == 1000);
 
+    let val1 = 0;
+    sock.on('signal', ({ id, name, params }) => {
+        if (id == 'source1' && name == 'signal1') {
+            val1 = params;
+        }
+    });
+    await sock.listen('source1', 'signal1');
+    assert(val1 == 0);
+    await src.emit_signal('signal1', 10);
+    assert(val1 == 10);
+
     mgr.remove_source(src);
 
     console.log("Expect error printed below:");
     await sock.call('source1', 'method2', 2000);
+    await src.emit_signal('signal1', 100);
     await sleep(10);
     assert(src.test_field == 1000);
+    assert(val1 == 10);
 
     sock.disconnect();
 }
 
 module.exports = async function test() {
-    await test_call();
+    await test_call_and_signal();
     await test_rejection();
     await test_socket_disconnect();
     await test_source_remove();

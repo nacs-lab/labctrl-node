@@ -23,6 +23,7 @@
 // so we can store the subscription and data age info per source
 // in order to minimize the scanning required when emitting events/updates.
 class SocketData {
+    signals = new Set()
 };
 
 class Source {
@@ -70,6 +71,16 @@ class Source {
         this.#sockets.delete(sock);
     }
 
+    // To be called by the source implementation.
+    emit_signal(name, params) {
+        for (let [sock, data] of this.#sockets) {
+            if (data.signals.has(name)) {
+                this.#mgr.auth_socket(sock)
+                    .then((ok) => ok && sock.emit('signal', { id: this.id, name, params }));
+            }
+        }
+    }
+
     // abstract: set_values(params)
     // abstract: call_method(name, params)
     get_values() {
@@ -79,11 +90,11 @@ class Source {
 
     listen_signal(name, sock) {
         let data = this.#get_socket_data(sock);
-        // TODO
+        data.signals.add(name);
     }
     unlisten_signal(name, sock) {
         let data = this.#get_socket_data(sock);
-        // TODO
+        data.signals.delete(name);
     }
 
     watch_values(params, sock) {
