@@ -15,6 +15,17 @@ add_custom_target(test-all
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   DEPENDS npm-init)
 
+function(runtest_target name)
+  add_custom_target("runtest-${name}"
+    COMMAND "NODE_CONFIG_DIR=${CONFIG_DIR}"
+    "NODE_ENV=development"
+    "LABCTRL_LIB_DIR=${PROJECT_BINARY_DIR}/addon"
+    "NEXT_DIST_DIR=${BIN_DIR_REL}/dev" "${NODE_EXECUTABLE}" tests/runtests.js "${name}"
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+    DEPENDS npm-init)
+endfunction()
+runtest_target(user)
+
 add_custom_target(test-server
   COMMAND "NODE_CONFIG_DIR=${CONFIG_DIR}"
   "NODE_ENV=development"
