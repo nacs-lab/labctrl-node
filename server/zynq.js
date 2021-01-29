@@ -1,5 +1,5 @@
 /*************************************************************************
- *   Copyright (c) 2019 - 2019 Yichao Yu <yyc1992@gmail.com>             *
+ *   Copyright (c) 2019 - 2021 Yichao Yu <yyc1992@gmail.com>             *
  *                                                                       *
  *   This library is free software; you can redistribute it and/or       *
  *   modify it under the terms of the GNU Lesser General Public          *
@@ -75,10 +75,9 @@ class ZynqSocket extends Dealer {
     }
     async _set_names(cmd, names) {
         let msg = Buffer.allocUnsafe(0);
-        names.forEach(([key, name]) => {
+        for (let [key, name] of names)
             msg = Buffer.concat([msg, Buffer.from([key]),
                                  Buffer.from(name + '\0')]);
-        });
         let [rep] = await this.query([cmd, msg]);
         return this._check_errno(rep);
     }
@@ -147,12 +146,12 @@ class ZynqSocket extends Dealer {
     }
     async _set_dds(cmd, vals) {
         let msg = Buffer.allocUnsafe(0);
-        vals.forEach(([key, val]) => {
+        for (let [key, val] of vals) {
             let buff = Buffer.allocUnsafe(5);
             buff.writeUInt8(key);
             buff.writeUInt32(val, 1);
             msg = Buffer.concat([msg, buff]);
-        });
+        }
         let [rep] = await this.query([cmd, msg]);
         return this._check_errno(rep);
     }
@@ -327,21 +326,21 @@ class Zynq {
                 let state = ttl_state(this.#ttl_ovr_hi, this.#ttl_ovr_lo, this.#ttl_val, i);
                 res.push([`ttl${i}`, ...state]);
             }
-            this.#dds_val.forEach((val, chn) => {
+            for (let [chn, val] of this.#dds_val) {
                 res.push([dds_chn_name(chn), val, this.#dds_ovr.has(chn)]);
-            });
+            }
         }
         else {
-            chns.forEach(chn => {
+            for (let chn of chns) {
                 if (chn == 'clock') {
                     res.push(['clock', this.#clock, false]);
-                    return;
+                    continue;
                 }
                 let m;
                 if (m = chn.match(/^ttl([0-9]*)$/)) {
                     let i = Number(m[1]);
                     if (i >= 32)
-                        return;
+                        continue;
                     let state = ttl_state(this.#ttl_ovr_hi, this.#ttl_ovr_lo, this.#ttl_val, i);
                     res.push([chn, ...state]);
                 }
@@ -356,10 +355,10 @@ class Zynq {
                     }
                     let val = this.#dds_val.get(i);
                     if (val === undefined)
-                        return;
+                        continue;
                     res.push([chn, val, this.#dds_ovr.has(i)]);
                 }
-            });
+            }
         }
         return res;
     }
@@ -375,7 +374,7 @@ class Zynq {
         let dds_cmd = [];
         let dds_ovr_cmd = [];
 
-        vals.forEach(([chn, val, ovr]) => {
+        for (let [chn, val, ovr] of vals) {
             if (chn == 'clock') {
                 if (val != this.#clock) {
                     this.#clock = val;
@@ -384,13 +383,13 @@ class Zynq {
                 this.#sock.set_clock(val).catch(e => {
                     console.error("Error setting clock: ", e);
                 });
-                return;
+                continue;
             }
             let m;
             if (m = chn.match(/^ttl([0-9]*)$/)) {
                 let i = Number(m[1]);
                 if (i >= 32)
-                    return;
+                    continue;
                 let cur_state = ttl_state(this.#ttl_ovr_hi, this.#ttl_ovr_lo, this.#ttl_val, i);
                 if (val != cur_state[0] || ovr != cur_state[1]) {
                     if (ovr) {
@@ -459,7 +458,7 @@ class Zynq {
                     dds_cmd.push([i, val]);
                 }
             }
-        });
+        }
         this._send_ttl_cmd(ttl_ovr_hi, ttl_ovr_lo, ttl_ovr_normal, ttl_hi, ttl_lo);
         this._send_dds_cmd(dds_cmd, dds_ovr_cmd);
         this._fire_update_callback(changes);
@@ -623,43 +622,43 @@ class Zynq {
     _handle_dds_update(dds_val, dds_ovr_val, changes) {
         let chns = new Set();
         let ovr_chns = new Set();
-        dds_ovr_val.forEach(([chn, val]) => {
+        for (let [chn, val] of dds_ovr_val) {
             ovr_chns.add(chn);
             chns.add(chn);
             if (this.#dds_val.get(chn) != val) {
                 this.#dds_val.set(chn, val);
             }
             else if (this.#dds_ovr.has(chn)) {
-                return;
+                continue;
             }
             this.#dds_ovr.add(chn);
             changes.push([dds_chn_name(chn), val, true]);
-        });
-        dds_val.forEach(([chn, val]) => {
+        }
+        for (let [chn, val] of dds_val) {
             chns.add(chn);
             if (this.#dds_val.get(chn) === val)
-                return;
+                continue;
             // If we've already seen this channel in the override result,
             // assume the value from override is correct.
             if (ovr_chns.has(chn))
-                return;
+                continue;
             this.#dds_val.set(chn, val);
             changes.push([dds_chn_name(chn), val, false]);
-        });
-        this.#dds_val.forEach((val, chn, map) => {
+        }
+        for (let [chn, val] of this.#dds_val) {
             if (chns.has(chn))
-                return;
-            map.delete(chn);
+                continue;
+            this.#dds_val.delete(chn);
             changes.push([dds_chn_name(chn), null, false]);
-        });
-        this.#dds_ovr.forEach((chn, _, map) => {
+        }
+        for (let chn of this.#dds_ovr) {
             if (ovr_chns.has(chn))
-                return;
+                continue;
             // We only need to push the override update if the channel still exist.
             if (chns.has(chn))
                 changes.push([dds_chn_name(chn), this.#dds_val.get(chn), false]);
-            map.delete(chn);
-        });
+            this.#dds_ovr.delete(chn);
+        }
     }
     async _update_state() {
         // Previous one haven't finished.

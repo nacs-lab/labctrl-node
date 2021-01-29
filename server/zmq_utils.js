@@ -172,9 +172,8 @@ class Dealer {
     }
 
     abort_all() {
-        this.#waiters.forEach(cb => {
+        for (let [id, cb] of this.#waiters)
             cb.reject(new Error('Socket is closed'));
-        });
         this.#waiters.clear();
     }
     open() {
