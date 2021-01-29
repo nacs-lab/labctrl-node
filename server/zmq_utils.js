@@ -19,8 +19,8 @@
 const zmq = require('zeromq');
 
 class BufferReader {
+    pos = 0
     constructor(buff) {
-        this.pos = 0;
         this.buff = buff;
     }
     byte_left() {
@@ -80,12 +80,11 @@ module.exports.BufferReader = BufferReader;
 class Dealer {
     #addr
     #sock
-    #waiters
+    #waiters = new Map()
     #max_id = 0
     #worker_running = false
     constructor(addr) {
         this.#addr = addr;
-        this.#waiters = new Map();
         this.open();
     }
 

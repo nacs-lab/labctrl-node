@@ -283,19 +283,16 @@ class Zynq {
     #prev_update_time = 0
 
     #max_watcher_id = 0
-    #update_watchers
+    #update_watchers = new Map()
 
     #ttl_ovr_lo = 0
     #ttl_ovr_hi = 0
     #ttl_val = 0
     #clock = 255
-    #dds_val
-    #dds_ovr
+    #dds_val = new Map()
+    #dds_ovr = new Set()
     constructor(params) {
         this.reconfig(params);
-        this.#dds_val = new Map();
-        this.#dds_ovr = new Set();
-        this.#update_watchers = new Map();
         this._liveness_id_check();
     }
 
