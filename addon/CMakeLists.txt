@@ -7,6 +7,7 @@ set(SRCS
 
 add_library(labctrl-lib SHARED ${SRCS})
 add_dependencies(labctrl-lib npm-init)
+add_dependencies(compile-all labctrl-lib)
 set_target_properties(labctrl-lib PROPERTIES PREFIX "" SUFFIX ".node"
   OUTPUT_NAME labctrl
   COMPILE_FLAGS "${DEP_LDFLAGS_OTHER}")

@@ -13,7 +13,7 @@ add_custom_target(test-all
   "LABCTRL_LIB_DIR=${PROJECT_BINARY_DIR}/addon"
   "NEXT_DIST_DIR=${BIN_DIR_REL}/dev" "${NODE_EXECUTABLE}" tests/runtests.js
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-  DEPENDS npm-init)
+  DEPENDS compile-all)
 
 function(runtest_target name)
   add_custom_target("runtest-${name}"
@@ -22,7 +22,7 @@ function(runtest_target name)
     "LABCTRL_LIB_DIR=${PROJECT_BINARY_DIR}/addon"
     "NEXT_DIST_DIR=${BIN_DIR_REL}/dev" "${NODE_EXECUTABLE}" tests/runtests.js "${name}"
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-    DEPENDS npm-init)
+    DEPENDS compile-all)
 endfunction()
 runtest_target(user)
 
@@ -32,7 +32,7 @@ add_custom_target(test-server
   "LABCTRL_LIB_DIR=${PROJECT_BINARY_DIR}/addon"
   "NEXT_DIST_DIR=${BIN_DIR_REL}/dev" "${NODE_EXECUTABLE}" tests/test_server.js
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-  DEPENDS npm-init)
+  DEPENDS compile-all)
 
 add_custom_target(node-repl
   COMMAND "NODE_CONFIG_DIR=${CONFIG_DIR}"
@@ -40,7 +40,7 @@ add_custom_target(node-repl
   "LABCTRL_LIB_DIR=${PROJECT_BINARY_DIR}/addon"
   "NEXT_DIST_DIR=${BIN_DIR_REL}/dev" "${NODE_EXECUTABLE}" --experimental-repl-await
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-  DEPENDS npm-init)
+  DEPENDS compile-all)
 
 add_custom_target(recreate-testuser
   COMMAND "NODE_CONFIG_DIR=${CONFIG_DIR}"
@@ -48,4 +48,4 @@ add_custom_target(recreate-testuser
   "LABCTRL_LIB_DIR=${PROJECT_BINARY_DIR}/addon"
   "NEXT_DIST_DIR=${BIN_DIR_REL}/dev" "${NODE_EXECUTABLE}" tests/recreate_testuser.js
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-  DEPENDS npm-init)
+  DEPENDS compile-all)

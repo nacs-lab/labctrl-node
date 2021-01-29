@@ -30,6 +30,8 @@ set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${LINKER_FLAGS}")
 
 node_targets()
 
+add_custom_target(compile-all ALL)
+
 add_subdirectory(addon)
 add_subdirectory(tests)
 
@@ -37,7 +39,7 @@ file(RELATIVE_PATH BIN_DIR_REL "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
 add_custom_target(deploy
   COMMAND "${PROJECT_SOURCE_DIR}/cmake/deploy_next.sh" "${BIN_DIR_REL}"
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
-  DEPENDS npm-init)
+  DEPENDS compile-all)
 
 install(DIRECTORY apis components lib pages server
   DESTINATION "${SERVER_DIR}"
