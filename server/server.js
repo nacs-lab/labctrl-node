@@ -83,9 +83,9 @@ class Server {
             return this.handle(req, res);
         });
     }
-    listen() {
+    listen(...args) {
         this.prepare = this.prepare.then(() => {
-            this.http.listen.apply(this.http, arguments);
+            this.http.listen.apply(this.http, args);
         });
     }
 };
