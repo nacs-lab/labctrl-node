@@ -1,5 +1,5 @@
 /*************************************************************************
- *   Copyright (c) 2019 - 2019 Yichao Yu <yyc1992@gmail.com>             *
+ *   Copyright (c) 2019 - 2021 Yichao Yu <yyc1992@gmail.com>             *
  *                                                                       *
  *   This library is free software; you can redistribute it and/or       *
  *   modify it under the terms of the GNU Lesser General Public          *
@@ -23,6 +23,7 @@ const User = require('./user');
 const user_session = require('./user_session');
 
 const body_parser = require('body-parser');
+const cls = require('cls-hooked');
 const compression = require('compression');
 const cookie_parser = require('cookie-parser');
 const express = require('express');
@@ -33,6 +34,10 @@ const path = require('path');
 const data_dir = path.join(__dirname, '../public/');
 
 class Server {
+    static namespace = cls.createNamespace('labctrl-server-ns');
+    static current() {
+        return this.namespace.get('server');
+    }
     constructor() {
         this.next = next({ dev: process.env.NODE_ENV == 'development' });
         this.handle = this.next.getRequestHandler();
@@ -44,12 +49,20 @@ class Server {
     init() {
         this.express = express();
         this.http = http.createServer(this.express);
+        let setup_ns = (req, res, next) => {
+            return Server.namespace.runAndReturn(() => {
+                Server.namespace.set('server', this);
+                return next();
+            });
+        };
+
         this.express.use(compression());
         this.express.use('/favicon.ico',
                          express.static(path.join(data_dir, 'img/favicon.ico')));
         this.express.use(body_parser.json());
         this.express.use(cookie_parser());
         this.express.use(user_session);
+        this.express.use(setup_ns);
         this.express.post('/api', async (req, res, next) => {
             // This handles the client version of the API.
 
