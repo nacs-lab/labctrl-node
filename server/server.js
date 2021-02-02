@@ -20,6 +20,7 @@
 
 const api = require('./api');
 const SocketManager = require('./socket_manager');
+const DemoSource = require('./demo_source');
 const User = require('./user');
 const user_session = require('./user_session');
 
@@ -51,6 +52,7 @@ class Server {
         this.handle = this.next.getRequestHandler();
         this.sock_mgr = new SocketManager();
         this.sock_mgr.set_auth_handler((sock) => this.request_loggedin(sock.request));
+        this.sock_mgr.add_source(new DemoSource('demo0'));
         this.prepare = Promise.all([this.next.prepare(),
                                     User.init()]).then(() => {
                                         this.init();
