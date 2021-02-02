@@ -20,7 +20,7 @@
 
 const Server = require('./server');
 
-const { is_object } = require('../lib/utils');
+const { is_object, object_empty, update_object, copy_object } = require('../lib/utils');
 
 class socket {
     static async #get_sock_mgr(ctx) {
@@ -74,6 +74,72 @@ class socket {
         if (!sock_mgr)
             return;
         return sock_mgr.set_values(params);
+    }
+
+    // Maintain a "cache" on the server side so that we can return the same result
+    // on the server and the client (and so that the server rendered page is usable).
+    // We can bypass the authentication here
+    // since the cache is isolated from the actual values.
+    static put(values, ages) {
+        if (!values)
+            return;
+        let cache = Server.namespace.get('value_cache');
+        if (!cache) {
+            cache = Object.create(null);
+            Server.namespace.set('value_cache', cache);
+        }
+        for (let src_id of Object.getOwnPropertyNames(values)) {
+            let src_values = values[src_id];
+            if (!is_object(src_values))
+                continue;
+            let tree = cache[src_id];
+            if (!tree)
+                tree = Object.create(null);
+            if (update_object(tree, src_values, false)) {
+                if (object_empty(tree)) {
+                    delete cache[src_id];
+                }
+                else {
+                    cache[src_id] = tree;
+                }
+            }
+        }
+    }
+    static get_cached(params) {
+        // Get value from cache
+        let cache = Server.namespace.get('value_cache');
+        if (!cache)
+            return;
+        let collect_res = (tree, params) => {
+            let res;
+            for (let name of Object.getOwnPropertyNames(params)) {
+                let subtree = tree[name];
+                if (subtree === undefined)
+                    continue;
+                let subparams = params[name];
+                let add_res = (subres) => {
+                    if (!res)
+                        res = Object.create(null);
+                    res[name] = subres;
+                };
+                if (is_object(subparams)) {
+                    if (!is_object(subtree))
+                        continue;
+                    let subres = collect_res(subtree, subparams);
+                    if (subres !== undefined) {
+                        add_res(subres);
+                    }
+                }
+                else if (is_object(subtree)) {
+                    add_res(copy_object(subtree));
+                }
+                else {
+                    add_res(subtree);
+                }
+            }
+            return res;
+        };
+        return collect_res(cache, params);
     }
 };
 
