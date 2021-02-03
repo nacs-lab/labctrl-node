@@ -97,6 +97,11 @@ export default class Wrapper extends React.Component {
                   <i className="fas fa-id-card mr-2"></i> Profile
                 </a>
               </Link>
+              <Link href="/demo">
+                <a className="dropdown-item">
+                  <i className="fas fa-code mr-2"></i> Demo
+                </a>
+              </Link>
               {
                   user.admin ? <React.Fragment>
                     <div className="dropdown-divider"></div>
