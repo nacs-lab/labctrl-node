@@ -122,7 +122,7 @@ export default class Wrapper extends React.Component {
             {/* Left navbar links */}
             <ul className="navbar-nav">
               <li className="nav-item">
-                <a className="nav-link" id="sidebar-botton"
+                <a className="nav-link" id="sidebar-button"
                   data-widget="pushmenu" href="#"><i className="fas fa-bars"></i></a>
               </li>
             </ul>
@@ -199,7 +199,7 @@ export default class Wrapper extends React.Component {
             * without reloading the scripts (from AdminLTE)
             * that would have set up the overlay if this wasn't there. */}
           <div id="sidebar-overlay"
-            onClick={()=>$('#sidebar-botton').PushMenu('collapse')}></div>
+            onClick={()=>$('#sidebar-button').PushMenu('collapse')}></div>
         </div>;
         return <NotifyProvider>{dom}</NotifyProvider>;
     }
