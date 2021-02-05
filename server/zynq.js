@@ -360,7 +360,7 @@ class Zynq {
         return res;
     }
     set_channels(vals) {
-        let changes;
+        let changes = [];
 
         let ttl_ovr_hi = 0;
         let ttl_ovr_lo = 0;
