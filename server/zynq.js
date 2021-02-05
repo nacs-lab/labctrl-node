@@ -64,7 +64,7 @@ class ZynqSocket extends Dealer {
         let reader = new BufferReader(rep);
         return reader.read_str0();
     }
-    _check_errno(rep) {
+    #check_errno(rep) {
         let reader = new BufferReader(rep);
         if (!reader.byte_left())
             return false;
@@ -73,15 +73,15 @@ class ZynqSocket extends Dealer {
             return true;
         return false;
     }
-    async _set_names(cmd, names) {
+    async #set_names(cmd, names) {
         let msg = Buffer.allocUnsafe(0);
         for (let [key, name] of names)
             msg = Buffer.concat([msg, Buffer.from([key]),
                                  Buffer.from(name + '\0')]);
         let [rep] = await this.query([cmd, msg]);
-        return this._check_errno(rep);
+        return this.#check_errno(rep);
     }
-    async _get_names(cmd) {
+    async #get_names(cmd) {
         let [rep] = await this.query(cmd);
         let reader = new BufferReader(rep);
         let names = [];
@@ -93,16 +93,16 @@ class ZynqSocket extends Dealer {
         return names;
     }
     set_ttl_names(names) {
-        return this._set_names('set_ttl_names', names);
+        return this.#set_names('set_ttl_names', names);
     }
     get_ttl_names() {
-        return this._get_names('get_ttl_names');
+        return this.#get_names('get_ttl_names');
     }
     set_dds_names(names) {
-        return this._set_names('set_dds_names', names);
+        return this.#set_names('set_dds_names', names);
     }
     get_dds_names() {
-        return this._get_names('get_dds_names');
+        return this.#get_names('get_dds_names');
     }
     async override_ttl(hi, lo, normal) {
         let msg = Buffer.allocUnsafe(12);
@@ -133,7 +133,7 @@ class ZynqSocket extends Dealer {
     }
     async set_clock(clock) {
         let [rep] = await this.query(['set_clock', Buffer.from([clock])]);
-        return this._check_errno(rep);
+        return this.#check_errno(rep);
     }
     async get_clock() {
         let [rep] = await this.query('get_clock');
@@ -144,7 +144,7 @@ class ZynqSocket extends Dealer {
         }
         return reader.read_uint8();
     }
-    async _set_dds(cmd, vals) {
+    async #set_dds(cmd, vals) {
         let msg = Buffer.allocUnsafe(0);
         for (let [key, val] of vals) {
             let buff = Buffer.allocUnsafe(5);
@@ -153,9 +153,9 @@ class ZynqSocket extends Dealer {
             msg = Buffer.concat([msg, buff]);
         }
         let [rep] = await this.query([cmd, msg]);
-        return this._check_errno(rep);
+        return this.#check_errno(rep);
     }
-    async _get_dds(cmd, chns) {
+    async #get_dds(cmd, chns) {
         let req;
         if (chns !== undefined && chns.length > 0) {
             req = [cmd, Buffer.from(chns)];
@@ -171,20 +171,20 @@ class ZynqSocket extends Dealer {
         return res;
     }
     override_dds(vals) {
-        return this._set_dds('override_dds', vals);
+        return this.#set_dds('override_dds', vals);
     }
     get_override_dds() {
-        return this._get_dds('get_override_dds');
+        return this.#get_dds('get_override_dds');
     }
     set_dds(vals) {
-        return this._set_dds('set_dds', vals);
+        return this.#set_dds('set_dds', vals);
     }
     get_dds(chns) {
-        return this._get_dds('get_dds', chns);
+        return this.#get_dds('get_dds', chns);
     }
     async reset_dds(chn) {
         let [rep] = await this.query(['reset_dds', Buffer.from([chn])]);
-        return this._check_errno(rep);
+        return this.#check_errno(rep);
     }
     async state_id() {
         let [rep] = await this.query('state_id');
@@ -210,7 +210,7 @@ class ZynqSocket extends Dealer {
         msg.writeBigUInt64(id[1], 8);
         msg.writeInt8(type, 16);
         let [rep] = await this.query(['wait_seq', msg]);
-        return this._check_errno(rep);
+        return this.#check_errno(rep);
     }
     async cancel_seq(id) {
         let msg;
@@ -224,7 +224,7 @@ class ZynqSocket extends Dealer {
             msg = ['canncel_seq', buf];
         }
         let [rep] = await this.query(msg);
-        return this._check_errno(rep);
+        return this.#check_errno(rep);
     }
 };
 
@@ -293,7 +293,7 @@ class Zynq {
     #dds_ovr = new Set()
     constructor(params) {
         this.reconfig(params);
-        this._liveness_id_check();
+        this.#liveness_id_check();
     }
 
     watch_update(cb) {
@@ -456,11 +456,11 @@ class Zynq {
                 }
             }
         }
-        this._send_ttl_cmd(ttl_ovr_hi, ttl_ovr_lo, ttl_ovr_normal, ttl_hi, ttl_lo);
-        this._send_dds_cmd(dds_cmd, dds_ovr_cmd);
-        this._fire_update_callback(changes);
+        this.#send_ttl_cmd(ttl_ovr_hi, ttl_ovr_lo, ttl_ovr_normal, ttl_hi, ttl_lo);
+        this.#send_dds_cmd(dds_cmd, dds_ovr_cmd);
+        this.#fire_update_callback(changes);
     }
-    _send_ttl_cmd(ttl_ovr_hi, ttl_ovr_lo, ttl_ovr_normal, ttl_hi, ttl_lo) {
+    #send_ttl_cmd(ttl_ovr_hi, ttl_ovr_lo, ttl_ovr_normal, ttl_hi, ttl_lo) {
         if (ttl_hi || ttl_lo) {
             // Set the TTL value first before disabling override to minimize
             // output flip flop.
@@ -474,7 +474,7 @@ class Zynq {
             });
         }
     }
-    _send_dds_cmd(dds_cmd, dds_ovr_cmd) {
+    #send_dds_cmd(dds_cmd, dds_ovr_cmd) {
         if (dds_cmd.length > 0) {
             this.#sock.set_dds(dds_cmd).catch(e => {
                 console.error("Error set dds: ", e);
@@ -538,10 +538,10 @@ class Zynq {
             }
             this.#dds_ovr.delete(i);
         }
-        this._fire_update_callback(changes);
+        this.#fire_update_callback(changes);
     }
 
-    _should_update(cur_t) {
+    #should_update(cur_t) {
         // State changed or state unknown.
         if (!compare_array(this.#state_id, this.#prev_state_id) ||
             compare_array(this.#state_id, [0, 0]) || this.#state_id[0] < 0)
@@ -552,9 +552,9 @@ class Zynq {
         return false;
     }
 
-    async _update_state_real() {
+    async #update_state_real() {
         let cur_t = Date.now();
-        if (!this._should_update(cur_t))
+        if (!this.#should_update(cur_t))
             return;
         this.#prev_state_id = this.#state_id;
         this.#prev_update_time = cur_t;
@@ -586,11 +586,11 @@ class Zynq {
         });
 
         await Promise.all([ttl_ovr_res, ttl_res, clock_res, dds_res, dds_ovr_res]);
-        this._handle_ttl_update(ttl_ovr_hi, ttl_ovr_lo, ttl_val, changes);
-        this._handle_dds_update(dds_val, dds_ovr_val, changes);
-        this._fire_update_callback(changes);
+        this.#handle_ttl_update(ttl_ovr_hi, ttl_ovr_lo, ttl_val, changes);
+        this.#handle_dds_update(dds_val, dds_ovr_val, changes);
+        this.#fire_update_callback(changes);
     }
-    _fire_update_callback(changes) {
+    #fire_update_callback(changes) {
         if (changes.length == 0)
             return;
         this.#update_watchers.forEach(async cb => {
@@ -603,7 +603,7 @@ class Zynq {
             }
         });
     }
-    _handle_ttl_update(ttl_ovr_hi, ttl_ovr_lo, ttl_val, changes) {
+    #handle_ttl_update(ttl_ovr_hi, ttl_ovr_lo, ttl_val, changes) {
         ttl_val = (ttl_val | ttl_ovr_hi) & ~ttl_ovr_lo;
         for (let i = 0; i < 32; i++) {
             let old_st = ttl_state(this.#ttl_ovr_hi, this.#ttl_ovr_lo, this.#ttl_val, i);
@@ -616,7 +616,7 @@ class Zynq {
         this.#ttl_ovr_lo = ttl_ovr_lo;
         this.#ttl_val = ttl_val;
     }
-    _handle_dds_update(dds_val, dds_ovr_val, changes) {
+    #handle_dds_update(dds_val, dds_ovr_val, changes) {
         let chns = new Set();
         let ovr_chns = new Set();
         for (let [chn, val] of dds_ovr_val) {
@@ -657,20 +657,20 @@ class Zynq {
             this.#dds_ovr.delete(chn);
         }
     }
-    async _update_state() {
+    async #update_state() {
         // Previous one haven't finished.
         if (this.#update_running)
             return;
         this.#update_running = true;
         try {
-            this._update_state_real();
+            this.#update_state_real();
         }
         catch {
         }
         this.#update_running = false;
     }
 
-    async _liveness_id_check() {
+    async #liveness_id_check() {
         while (this.#sock) {
             try {
                 let timeout = setTimeout(() => {
@@ -690,7 +690,7 @@ class Zynq {
                     this.#sock.abort_all();
                 }
                 this.#live = true;
-                this._update_state();
+                this.#update_state();
                 if (this.#state_id[0] < 0) {
                     await sleep(100);
                 }
