@@ -514,29 +514,29 @@ class Zynq {
         this.#sock = undefined;
     }
 
-    async set_startup(startup) {
-        return await this.#sock.set_startup(startup);
+    set_startup(startup) {
+        return this.#sock.set_startup(startup);
     }
-    async get_startup() {
-        return await this.#sock.get_startup();
-    }
-
-    async name_id() {
-        return await this.#sock.name_id();
+    get_startup() {
+        return this.#sock.get_startup();
     }
 
-    async set_ttl_names(names) {
-        return await this.#sock.set_ttl_names(names);
-    }
-    async get_ttl_names() {
-        return await this.#sock.get_ttl_names();
+    name_id() {
+        return this.#sock.name_id();
     }
 
-    async set_dds_names(names) {
-        return await this.#sock.set_dds_names(names);
+    set_ttl_names(names) {
+        return this.#sock.set_ttl_names(names);
     }
-    async get_dds_names() {
-        return await this.#sock.get_dds_names();
+    get_ttl_names() {
+        return this.#sock.get_ttl_names();
+    }
+
+    set_dds_names(names) {
+        return this.#sock.set_dds_names(names);
+    }
+    get_dds_names() {
+        return this.#sock.get_dds_names();
     }
 
     async reset_dds(chn) {
