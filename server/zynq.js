@@ -195,6 +195,15 @@ class ZynqSocket extends Dealer {
         }
         return [reader.read_int64(), reader.read_uint64()];
     }
+    async name_id() {
+        let [rep] = await this.query('name_id');
+        let reader = new BufferReader(rep);
+        if (reader.byte_left() < 16) {
+            console.warn(`Invalid name_id reply: Reply too short.`);
+            return [0n, 0n];
+        }
+        return [reader.read_int64(), reader.read_uint64()];
+    }
     async run_cmdlist(cmdlist) {
         let ver = Buffer.from([1, 0, 0, 0]);
         let [rep] = await this.query(['run_cmdlist', ver, cmdlist]);
@@ -510,6 +519,10 @@ class Zynq {
     }
     async get_startup() {
         return await this.#sock.get_startup();
+    }
+
+    async name_id() {
+        return await this.#sock.name_id();
     }
 
     async set_ttl_names(names) {
