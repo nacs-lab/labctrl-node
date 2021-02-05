@@ -18,7 +18,7 @@
 
 "use strict";
 
-const SocketManager = require('../server/socket_manager');
+const SocketManager = require('./socket_manager');
 
 class DemoSource extends SocketManager.Source {
     #bool_fields = ['bool1', 'ovr_bool1', 'bool2',

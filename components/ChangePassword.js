@@ -20,7 +20,7 @@
 
 const { validate_password } = require('../lib/account');
 import api from '../lib/api';
-import RedirectIn from '../components/RedirectIn';
+import RedirectIn from './RedirectIn';
 
 import Link from 'next/link';
 import React from 'react';
