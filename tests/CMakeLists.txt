@@ -26,6 +26,7 @@ function(runtest_target name)
 endfunction()
 runtest_target(user)
 runtest_target(socket_manager)
+runtest_target(zynq)
 
 add_custom_target(test-server
   COMMAND "NODE_CONFIG_DIR=${CONFIG_DIR}"
