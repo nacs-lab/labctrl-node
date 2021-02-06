@@ -18,6 +18,7 @@
 
 const { BufferReader, Dealer } = require('./zmq_utils');
 const sleep = require('../lib/sleep');
+const { array_equal } = require('../lib/utils');
 const { parse_cmdlist } = require(process.env.LABCTRL_LIB_DIR + '/labctrl');
 
 class ParseError {
@@ -236,17 +237,6 @@ class ZynqSocket extends Dealer {
         return this.#check_errno(rep);
     }
 };
-
-function compare_array(a, b) {
-    if (a.length != b.length)
-        return false;
-    for (let i in a) {
-        if (a[i] != b[i]) {
-            return false;
-        }
-    }
-    return true;
-}
 
 function ttl_state(ttl_ovr_hi, ttl_ovr_lo, ttl_val, i) {
     let mask = 1 << i;
@@ -556,8 +546,8 @@ class Zynq {
 
     #should_update(cur_t) {
         // State changed or state unknown.
-        if (!compare_array(this.#state_id, this.#prev_state_id) ||
-            compare_array(this.#state_id, [0, 0]) || this.#state_id[0] < 0)
+        if (!array_equal(this.#state_id, this.#prev_state_id) ||
+            array_equal(this.#state_id, [0, 0]) || this.#state_id[0] < 0)
             return true;
         // one minute since last update.
         if (cur_t - this.#prev_update_time > 60000)
@@ -621,7 +611,7 @@ class Zynq {
         for (let i = 0; i < 32; i++) {
             let old_st = ttl_state(this.#ttl_ovr_hi, this.#ttl_ovr_lo, this.#ttl_val, i);
             let new_st = ttl_state(ttl_ovr_hi, ttl_ovr_lo, ttl_val, i);
-            if (compare_array(old_st, new_st))
+            if (array_equal(old_st, new_st))
                 continue;
             changes.push([`ttl${i}`, ...new_st]);
         }
