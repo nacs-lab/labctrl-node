@@ -684,9 +684,10 @@ class Zynq {
     }
 
     async #liveness_id_check() {
+        let timeout;
         while (this.#sock) {
             try {
-                let timeout = setTimeout(() => {
+                timeout = setTimeout(() => {
                     if (!this.#sock)
                         return;
                     // Too long without any reply, try restarting.
@@ -697,6 +698,7 @@ class Zynq {
                 }, 10000);
                 this.#state_id = await this.#sock.state_id();
                 clearTimeout(timeout);
+                timeout = undefined;
                 if (this.#state_id[1] != this.#prev_state_id[1] &&
                     this.#prev_state_id[1] != 0) {
                     console.warn(`Zynq server ${this.#sock.addr} restarted, abort all requests.`);
@@ -714,6 +716,11 @@ class Zynq {
             catch {
                 continue;
             }
+        }
+        // Clear the timeout check so that we don't have to wait for it to finish
+        // before the process can exit.
+        if (timeout !== undefined) {
+            clearTimeout(timeout);
         }
     }
 
