@@ -23,6 +23,7 @@ const EventEmitter = require('events');
 
 const sleep = require('../lib/sleep');
 const SocketManager = require('../server/socket_manager');
+const { object_equal } = require('../lib/utils');
 
 class DummySocket extends EventEmitter {
     disconnect() {
@@ -108,45 +109,6 @@ class TestSource extends SocketManager.Source {
         await sleep(1);
     }
 };
-
-/**
- * Comparing arbitrary values. Assuming the values are JSON-serializable.
- * This should be equivalent to checking if the two values can be represented by
- * the same JSON string.
- */
-function val_eq(a, b) {
-    if (Object.is(a, b))
-        return true;
-
-    var atyp = typeof a;
-    var btyp = typeof b;
-
-    // `typeof null` is `"object"` but `!!null` is `false`
-    if (atyp != "object" || !a)
-        return false;
-    if (btyp != "object" || !b)
-        return false;
-
-    var aprops = Object.getOwnPropertyNames(a);
-    var bprops = Object.getOwnPropertyNames(b);
-
-    // If number of properties is different,
-    // objects are not equivalent
-    if (aprops.length != bprops.length)
-        return false;
-
-    for (var i = 0; i < aprops.length; i++) {
-        var pn = aprops[i];
-
-        // We do not support self referencing structure which should be fine
-        // since we only need to deal with JSON compabible objects
-        if (!val_eq(a[pn], b[pn])) {
-            return false;
-        }
-    }
-
-    return true;
-}
 
 async function test_call_and_signal() {
     let mgr = new SocketManager();
@@ -333,7 +295,7 @@ async function test_rejection() {
     await sock.watch({ source1: { path: { chn1: 0 } } });
     assert(counter == 6);
     enable = true;
-    assert(val_eq(mgr.set_values({ source1: { chn1: 20 }}), { source1: true }));
+    assert(object_equal(mgr.set_values({ source1: { chn1: 20 }}), { source1: true }));
     assert(updates.length == 0);
     assert(counter == 6);
 
@@ -341,12 +303,12 @@ async function test_rejection() {
     await sock.watch({ source1: { path: { chn1: 0 } } });
     assert(counter == 7);
     enable = false;
-    assert(val_eq(mgr.set_values({ source1: { chn1: 20 }}), { source1: true }));
+    assert(object_equal(mgr.set_values({ source1: { chn1: 20 }}), { source1: true }));
     assert(counter == 7);
     await sleep(50);
     assert(updates.length == 0);
     assert(counter == 8);
-    assert(val_eq(mgr.set_values({ source1: { chn1: 40 }}), { source1: true }));
+    assert(object_equal(mgr.set_values({ source1: { chn1: 40 }}), { source1: true }));
     await sleep(50);
     assert(updates.length == 0);
     assert(counter == 8);
@@ -451,36 +413,36 @@ async function test_set_get() {
     mgr.add_source(src1);
     mgr.add_source(src2);
 
-    assert(val_eq(mgr.set_values({ source1: { chn1: 20, chn2: 30 },
-                                   source2: { chn1: -1, chn2: -2 }}),
-                  { source1: true, source2: true }));
+    assert(object_equal(mgr.set_values({ source1: { chn1: 20, chn2: 30 },
+                                         source2: { chn1: -1, chn2: -2 }}),
+                        { source1: true, source2: true }));
     let res = mgr.get_values({ source1: { path: { chn1: 0, chn2: 0 }},
                                source2: { path: { chn1: 0, chn2: 0 }}});
-    assert(val_eq(res, { source1: { age: 2, values: { chn1: 20, chn2: 30 }},
-                         source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
+    assert(object_equal(res, { source1: { age: 2, values: { chn1: 20, chn2: 30 }},
+                               source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
     res = mgr.get_values({ source1: { age: 2, path: { chn1: 0, chn2: 0 }},
                            source2: { age: 2, path: { chn1: 0, chn2: 0 }}});
-    assert(val_eq(res, { source1: null, source2: null}));
+    assert(object_equal(res, { source1: null, source2: null}));
     res = mgr.get_values({ source1: { path: { chn1: 0 }},
                            source2: { path: { chn2: 0 }}});
-    assert(val_eq(res, { source1: { age: 2, values: { chn1: 20 }},
-                         source2: { age: 2, values: { chn2: -2 }}}));
-    assert(val_eq(mgr.set_values({ source1: { chn1: null, chn3: 90 }}),
-                  { source1: true }));
+    assert(object_equal(res, { source1: { age: 2, values: { chn1: 20 }},
+                               source2: { age: 2, values: { chn2: -2 }}}));
+    assert(object_equal(mgr.set_values({ source1: { chn1: null, chn3: 90 }}),
+                        { source1: true }));
     assert(src1.age == 3);
     assert(src2.age == 2);
     res = mgr.get_values({ source1: { path: 0 },
                            source2: { path: 0 }});
-    assert(val_eq(res, { source1: { age: 3, values: { chn3: 90, chn2: 30 }},
-                         source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
+    assert(object_equal(res, { source1: { age: 3, values: { chn3: 90, chn2: 30 }},
+                               source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
     // Try to access deleted/non-existing channels
     res = mgr.get_values({ source1: { path: { chn1: 0, chn10: { subchn: 0 } } }});
-    assert(val_eq(res, { source1: { age: 3, values: { chn1: null, chn10: null }}}));
-    assert(val_eq(mgr.set_values({ source2: { chn1: { sub1: 30, sub2: 40 }}}),
-                  { source2: true }));
+    assert(object_equal(res, { source1: { age: 3, values: { chn1: null, chn10: null }}}));
+    assert(object_equal(mgr.set_values({ source2: { chn1: { sub1: 30, sub2: 40 }}}),
+                        { source2: true }));
     res = mgr.get_values({ source2: { path: 0 }});
-    assert(val_eq(res, { source2: { age: 3, values: { chn1: { sub1: 30, sub2: 40 },
-                                                      chn2: -2 }}}));
+    assert(object_equal(res, { source2: { age: 3, values: { chn1: { sub1: 30, sub2: 40 },
+                                                            chn2: -2 }}}));
 
     assert(counter == 0);
     await sock.set({ source1: { chn3: 10 }});
@@ -488,20 +450,20 @@ async function test_set_get() {
     res = await new Promise((resolve, reject) => {
         sock.get({ source1: { path: 0 }}, resolve);
     });
-    assert(val_eq(res, { source1: { age: 4, values: { chn3: 10, chn2: 30 }}}));
+    assert(object_equal(res, { source1: { age: 4, values: { chn3: 10, chn2: 30 }}}));
     assert(counter == 2);
 
     res = await new Promise((resolve, reject) => {
         sock.set({ source1: { chn2: 42 }, source2: { chn1: { sub4: 4 }}}, resolve);
     });
-    assert(val_eq(res, { source1: true, source2: true }));
+    assert(object_equal(res, { source1: true, source2: true }));
     assert(counter == 3);
     res = await new Promise((resolve, reject) => {
         sock.get({ source1: { path: 0 }, source2: { path: 0 }}, resolve);
     });
-    assert(val_eq(res, { source1: { age: 5, values: { chn3: 10, chn2: 42 }},
-                         source2: { age: 4, values: { chn1: { sub1: 30, sub2: 40, sub4: 4 },
-                                                      chn2: -2 }}}));
+    assert(object_equal(res, { source1: { age: 5, values: { chn3: 10, chn2: 42 }},
+                               source2: { age: 4, values: { chn1: { sub1: 30, sub2: 40, sub4: 4 },
+                                                            chn2: -2 }}}));
     assert(counter == 4);
 
     mgr.remove_source(src1);
@@ -528,56 +490,56 @@ async function test_set_get_async() {
     let res = mgr.set_values({ source1: { chn1: 20, chn2: 30 },
                                source2: { chn1: -1, chn2: -2 }});
     assert(res instanceof Promise);
-    assert(val_eq(await res, { source1: true, source2: true }));
+    assert(object_equal(await res, { source1: true, source2: true }));
     res = mgr.get_values({ source1: { path: { chn1: 0, chn2: 0 }},
                            source2: { path: { chn1: 0, chn2: 0 }}});
-    assert(val_eq(res, { source1: { age: 2, values: { chn1: 20, chn2: 30 }},
-                         source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
+    assert(object_equal(res, { source1: { age: 2, values: { chn1: 20, chn2: 30 }},
+                               source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
     res = mgr.get_values({ source1: { age: 2, path: { chn1: 0, chn2: 0 }},
                            source2: { age: 2, path: { chn1: 0, chn2: 0 }}});
-    assert(val_eq(res, { source1: null, source2: null}));
+    assert(object_equal(res, { source1: null, source2: null}));
     res = mgr.get_values({ source1: { path: { chn1: 0 }},
                            source2: { path: { chn2: 0 }}});
-    assert(val_eq(res, { source1: { age: 2, values: { chn1: 20 }},
-                         source2: { age: 2, values: { chn2: -2 }}}));
+    assert(object_equal(res, { source1: { age: 2, values: { chn1: 20 }},
+                               source2: { age: 2, values: { chn2: -2 }}}));
     res = mgr.set_values({ source1: { chn1: null, chn3: 90 }});
     assert(res instanceof Promise);
-    assert(val_eq(await res, { source1: true }));
+    assert(object_equal(await res, { source1: true }));
     assert(src1.age == 3);
     assert(src2.age == 2);
     res = mgr.get_values({ source1: { path: 0 },
                            source2: { path: 0 }});
-    assert(val_eq(res, { source1: { age: 3, values: { chn3: 90, chn2: 30 }},
-                         source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
-    assert(val_eq(mgr.set_values({ source2: { chn1: { sub1: 30, sub2: 40 }}}),
-                  { source2: true }));
+    assert(object_equal(res, { source1: { age: 3, values: { chn3: 90, chn2: 30 }},
+                               source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
+    assert(object_equal(mgr.set_values({ source2: { chn1: { sub1: 30, sub2: 40 }}}),
+                        { source2: true }));
     res = mgr.get_values({ source2: { path: 0 }});
-    assert(val_eq(res, { source2: { age: 3, values: { chn1: { sub1: 30, sub2: 40 },
-                                                      chn2: -2 }}}));
+    assert(object_equal(res, { source2: { age: 3, values: { chn1: { sub1: 30, sub2: 40 },
+                                                            chn2: -2 }}}));
 
     assert(counter == 0);
     await sock.set({ source1: { chn3: 10 }});
     assert(counter == 1);
     res = mgr.get_values({ source1: { path: 0 }});
-    assert(val_eq(res, { source1: { age: 3, values: { chn3: 90, chn2: 30 }}}));
+    assert(object_equal(res, { source1: { age: 3, values: { chn3: 90, chn2: 30 }}}));
     await sleep(30);
     res = await new Promise((resolve, reject) => {
         sock.get({ source1: { path: 0 }}, resolve);
     });
-    assert(val_eq(res, { source1: { age: 4, values: { chn3: 10, chn2: 30 }}}));
+    assert(object_equal(res, { source1: { age: 4, values: { chn3: 10, chn2: 30 }}}));
     assert(counter == 2);
 
     res = await new Promise((resolve, reject) => {
         sock.set({ source1: { chn2: 42 }, source2: { chn1: { sub4: 4 }}}, resolve);
     });
-    assert(val_eq(res, { source1: true, source2: true }));
+    assert(object_equal(res, { source1: true, source2: true }));
     assert(counter == 3);
     res = await new Promise((resolve, reject) => {
         sock.get({ source1: { path: 0 }, source2: { path: 0 }}, resolve);
     });
-    assert(val_eq(res, { source1: { age: 5, values: { chn3: 10, chn2: 42 }},
-                         source2: { age: 4, values: { chn1: { sub1: 30, sub2: 40, sub4: 4 },
-                                                      chn2: -2 }}}));
+    assert(object_equal(res, { source1: { age: 5, values: { chn3: 10, chn2: 42 }},
+                               source2: { age: 4, values: { chn1: { sub1: 30, sub2: 40, sub4: 4 },
+                                                            chn2: -2 }}}));
     assert(counter == 4);
 
     mgr.remove_source(src1);
@@ -607,11 +569,11 @@ async function test_watch() {
 
     let res = mgr.set_values({ source1: { chn1: 20, chn2: 30 },
                                source2: { chn1: -1, chn2: -2 }});
-    assert(val_eq(res, { source1: true, source2: true }));
+    assert(object_equal(res, { source1: true, source2: true }));
     res = mgr.get_values({ source1: { path: { chn1: 0, chn2: 0 }},
                            source2: { path: { chn1: 0, chn2: 0 }}});
-    assert(val_eq(res, { source1: { age: 2, values: { chn1: 20, chn2: 30 }},
-                         source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
+    assert(object_equal(res, { source1: { age: 2, values: { chn1: 20, chn2: 30 }},
+                               source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
 
     assert(counter == 0);
     // Watching subpath
@@ -621,7 +583,7 @@ async function test_watch() {
     // Wait for the update timer to fire.
     await sleep(50);
     assert(updates.length == 1);
-    assert(val_eq(updates[0], { source1: { age: 2, values: { chn1: 20 }}}));
+    assert(object_equal(updates[0], { source1: { age: 2, values: { chn1: 20 }}}));
     assert(counter == 2);
     updates.length = 0; // clear
 
@@ -632,7 +594,7 @@ async function test_watch() {
     // Wait for the update timer to fire.
     await sleep(50);
     assert(updates.length == 1);
-    assert(val_eq(updates[0], { source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
+    assert(object_equal(updates[0], { source2: { age: 2, values: { chn1: -1, chn2: -2 }}}));
     assert(counter == 4);
     updates.length = 0; // clear
 
@@ -643,38 +605,38 @@ async function test_watch() {
     // Wait for the update timer to fire.
     await sleep(50);
     assert(updates.length == 1);
-    assert(val_eq(updates[0], { source2: { age: 2, values: { chn1: -1 }}}));
+    assert(object_equal(updates[0], { source2: { age: 2, values: { chn1: -1 }}}));
     assert(counter == 6);
     updates.length = 0; // clear
 
     // Nothing changed
     res = mgr.set_values({ source1: { chn1: 20, chn2: 30 },
                            source2: { chn1: -1, chn2: -2 }});
-    assert(val_eq(res, { source1: true, source2: true }));
+    assert(object_equal(res, { source1: true, source2: true }));
     await sleep(50);
     assert(updates.length == 0);
     assert(counter == 6);
 
     res = mgr.set_values({ source1: { chn1: 20, chn2: 2 },
                            source2: { chn1: 1, chn2: -2 }});
-    assert(val_eq(res, { source1: true, source2: true }));
+    assert(object_equal(res, { source1: true, source2: true }));
     assert(updates.length == 0);
     assert(counter == 6);
     await sleep(50);
     assert(updates.length == 1);
-    assert(val_eq(updates[0], { source2: { age: 3, values: { chn1: 1 }}}));
+    assert(object_equal(updates[0], { source2: { age: 3, values: { chn1: 1 }}}));
     assert(counter == 7);
     updates.length = 0; // clear
 
     res = mgr.set_values({ source1: { chn1: 1 },
                            source2: { chn2: 2 }});
-    assert(val_eq(res, { source1: true, source2: true }));
+    assert(object_equal(res, { source1: true, source2: true }));
     assert(updates.length == 0);
     assert(counter == 7);
     await sleep(50);
     assert(updates.length == 1);
-    assert(val_eq(updates[0], { source1: { age: 4, values: { chn1: 1 }},
-                                source2: { age: 4, values: { chn2: 2 }}}));
+    assert(object_equal(updates[0], { source1: { age: 4, values: { chn1: 1 }},
+                                      source2: { age: 4, values: { chn2: 2 }}}));
     assert(counter == 8);
     updates.length = 0; // clear
 
@@ -683,12 +645,12 @@ async function test_watch() {
 
     // Set a value of `0` to catch potentially faulty logic
     res = mgr.set_values({ source2: { chn1: 0, chn2: 0 }});
-    assert(val_eq(res, { source2: true }));
+    assert(object_equal(res, { source2: true }));
     assert(updates.length == 0);
     assert(counter == 9);
     await sleep(50);
     assert(updates.length == 1);
-    assert(val_eq(updates[0], { source2: { age: 5, values: { chn1: 0 }}}));
+    assert(object_equal(updates[0], { source2: { age: 5, values: { chn1: 0 }}}));
     assert(counter == 10);
     updates.length = 0; // clear
 
@@ -698,7 +660,7 @@ async function test_watch() {
     assert(counter == 11);
     await sleep(50);
     assert(updates.length == 1);
-    assert(val_eq(updates[0], { source2: { age: 5, values: { chn2: 0 }}}));
+    assert(object_equal(updates[0], { source2: { age: 5, values: { chn2: 0 }}}));
     assert(counter == 12);
     updates.length = 0; // clear
 
@@ -719,7 +681,7 @@ async function test_watch() {
     assert(updates.length == 0);
     await sleep(50);
     assert(updates.length == 1);
-    assert(val_eq(updates[0], { source2: { age: 5, values: { chn2: 0 }}}));
+    assert(object_equal(updates[0], { source2: { age: 5, values: { chn2: 0 }}}));
     assert(counter == 17);
     updates.length = 0; // clear
 
@@ -729,7 +691,7 @@ async function test_watch() {
     assert(counter == 18);
     await sleep(50);
     assert(updates.length == 1);
-    assert(val_eq(updates[0], { source1: { age: 5, values: { chn1: 0 }}}));
+    assert(object_equal(updates[0], { source1: { age: 5, values: { chn1: 0 }}}));
     assert(counter == 19);
     updates.length = 0; // clear
 
@@ -743,8 +705,8 @@ async function test_watch() {
     assert(updates.length == 0);
     await sleep(50);
     assert(updates.length == 1);
-    assert(val_eq(updates[0], { source1: { age: 6, values: { chn1: 1 }},
-                                source2: { age: 7, values: { chn1: 2, chn2: 3 }}}));
+    assert(object_equal(updates[0], { source1: { age: 6, values: { chn1: 1 }},
+                                      source2: { age: 7, values: { chn1: 2, chn2: 3 }}}));
     assert(counter == 23);
     updates.length = 0; // clear
 
@@ -754,7 +716,7 @@ async function test_watch() {
     assert(counter == 24);
     await sleep(50);
     assert(updates.length == 1);
-    assert(val_eq(updates[0], { source1: { age: 7, values: { chn1: null }}}));
+    assert(object_equal(updates[0], { source1: { age: 7, values: { chn1: null }}}));
     assert(counter == 25);
     updates.length = 0; // clear
 
@@ -776,52 +738,53 @@ async function test_watch_delete() {
     });
 
     let res = mgr.set_values({ source1: { chn1: 1, chn2: { subchn1: 1, subchn2: 2 }}});
-    assert(val_eq(res, { source1: true }));
+    assert(object_equal(res, { source1: true }));
     res = mgr.get_values({ source1: { path: 0 }});
-    assert(val_eq(res, { source1: { age: 2, values: { chn1: 1, chn2: { subchn1: 1,
-                                                                       subchn2: 2 }}}}));
+    assert(object_equal(res, { source1: { age: 2, values: { chn1: 1, chn2: { subchn1: 1,
+                                                                             subchn2: 2 }}}}));
 
     await sock.watch({ source1: { path: 0 }});
 
     res = mgr.set_values({ source1: { chn1: 3, chn2: { subchn1: 2, subchn2: 3 }}});
-    assert(val_eq(res, { source1: true }));
+    assert(object_equal(res, { source1: true }));
     assert(updates.length == 0);
     await sleep(50);
     assert(updates.length == 1);
-    assert(val_eq(updates[0], { source1: { age: 3, values: { chn1: 3, chn2: { subchn1: 2,
-                                                                              subchn2: 3 }}}}));
+    assert(object_equal(updates[0], { source1: { age: 3, values: { chn1: 3,
+                                                                   chn2: { subchn1: 2,
+                                                                           subchn2: 3 }}}}));
     updates.length = 0; // clear
 
     res = mgr.set_values({ source1: { chn1: 0, chn2: { subchn1: 1, subchn2: 2 }}});
-    assert(val_eq(res, { source1: true }));
+    assert(object_equal(res, { source1: true }));
     res = mgr.set_values({ source1: { chn1: 3, chn2: { subchn1: null, subchn2: null }}});
-    assert(val_eq(res, { source1: true }));
+    assert(object_equal(res, { source1: true }));
     assert(updates.length == 0);
     await sleep(50);
     assert(updates.length == 1);
-    assert(val_eq(updates[0], { source1: { age: 5,
-                                           values: { chn1: 3, chn2: { subchn1: null,
-                                                                      subchn2: null }}}}));
+    assert(object_equal(updates[0], { source1: { age: 5,
+                                                 values: { chn1: 3, chn2: { subchn1: null,
+                                                                            subchn2: null }}}}));
     updates.length = 0; // clear
 
     res = mgr.set_values({ source1: { chn1: 0, chn2: { subchn1: 1, subchn2: 2 }}});
-    assert(val_eq(res, { source1: true }));
+    assert(object_equal(res, { source1: true }));
     res = mgr.set_values({ source1: { chn1: 3, chn2: null}});
-    assert(val_eq(res, { source1: true }));
+    assert(object_equal(res, { source1: true }));
     // This should not trigger any change.
     res = mgr.set_values({ source1: { chn1: 3, chn2: { subchn1: null, subchn2: null }}});
-    assert(val_eq(res, { source1: true }));
+    assert(object_equal(res, { source1: true }));
     assert(updates.length == 0);
     await sleep(50);
     assert(updates.length == 1);
-    assert(val_eq(updates[0], { source1: { age: 7,
-                                           values: { chn1: 3, chn2: null }}}));
+    assert(object_equal(updates[0], { source1: { age: 7,
+                                                 values: { chn1: 3, chn2: null }}}));
     updates.length = 0; // clear
 
     res = mgr.set_values({ source1: { chn1: 0, chn2: { subchn1: 1, subchn2: 2 }}});
-    assert(val_eq(res, { source1: true }));
+    assert(object_equal(res, { source1: true }));
     res = mgr.set_values({ source1: { chn1: 3, chn2: { subchn1: null, subchn2: null }}});
-    assert(val_eq(res, { source1: true }));
+    assert(object_equal(res, { source1: true }));
     assert(updates.length == 0);
     await sleep(50);
     assert(updates.length == 1);
@@ -830,9 +793,9 @@ async function test_watch_delete() {
     // If we have a more accurate change reporting
     // (essentially requiring saving the old state) this could report nothing.
     // or even with not update event.
-    assert(val_eq(updates[0], { source1: { age: 9,
-                                           values: { chn1: 3, chn2: { subchn1: null,
-                                                                      subchn2: null }}}}));
+    assert(object_equal(updates[0], { source1: { age: 9,
+                                                 values: { chn1: 3, chn2: { subchn1: null,
+                                                                            subchn2: null }}}}));
     updates.length = 0; // clear
 
     mgr.remove_source(src1);
