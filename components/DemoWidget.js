@@ -22,69 +22,14 @@ import BoolField from './BoolField';
 import NameField from './NameField';
 import NumberField from './NumberField';
 
-// Explicitly passing the scroll event over in case we are scrolling
-// in a subpage and the event didn't propagate to the top level.
-import { ScrollWatcher } from '../lib/event';
+import DataWidget from './DataWidget';
 
 import React from 'react';
 
-export default class DemoWidget extends React.Component {
-    _children = Object.create(null)
-    _register = Object.create(null)
-    constructor(props) {
-        super(props);
-        this.state = {
-            changed: false,
-            immediate: false
-        };
-    }
-    get_register_func(id) {
-        let func = this._register[id];
-        if (func === undefined) {
-            func = (child) => this.register_child(id, child);
-            this._register[id] = func;
-        }
-        return func;
-    }
-    register_child(id, child) {
-        if (child) {
-            this._children[id] = child;
-        }
-        else {
-            delete this._children[id];
-        }
-        this.refresh_changed_state();
-    }
-    refresh_changed_state = (changed=false) => {
-        if (!changed) {
-            for (let id in this._children) {
-                let child = this._children[id];
-                if (child.changed()) {
-                    changed = true;
-                    break;
-                }
-            }
-        }
-        this.setState({ changed });
-    }
-    immediate_change = (e) => {
-        let target = e.target;
-        let value = target.type === 'checkbox' ? target.checked : target.value;
-        this.setState({ immediate: value });
-    }
-    submit = () => {
-        for (let id in this._children) {
-            this._children[id].submit();
-        }
-    }
-    cancel = () => {
-        for (let id in this._children) {
-            this._children[id].cancel();
-        }
-    }
+export default class DemoWidget extends DataWidget {
     render() {
         return <div className="span8 offset2" style={{width: "100%"}}
-                 onWheel={ScrollWatcher.callback}>
+                 onWheel={this.on_wheel_cb}>
           <legend className="text-center">Demo</legend>
           <div className="container">
             <BoolField path={['demo0', 'bool1']} ovr_path={['demo0', 'ovr_bool1']}
