@@ -44,10 +44,10 @@ add_custom_target(node-repl
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   DEPENDS compile-all)
 
-add_custom_target(recreate-testuser
+add_custom_target(recreate-testdb
   COMMAND "NODE_CONFIG_DIR=${CONFIG_DIR}"
   "NODE_ENV=development"
   "LABCTRL_LIB_DIR=${PROJECT_BINARY_DIR}/addon"
-  "NEXT_DIST_DIR=${BIN_DIR_REL}/dev" "${NODE_EXECUTABLE}" tests/recreate_testuser.js
+  "NEXT_DIST_DIR=${BIN_DIR_REL}/dev" "${NODE_EXECUTABLE}" tests/recreate_testdb.js
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   DEPENDS compile-all)

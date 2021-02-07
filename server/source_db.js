@@ -46,6 +46,15 @@ class SourceDB extends DB.Model {
         }
     }
 
+    // Hijack the init function ;-p
+    // The importer should wait for `SourceDB.init()`
+    // or `SourceDB.register_all()` before continuing.
+    static init(...args) {
+        if (args.length > 0)
+            return super.init(...args);
+        return init_job;
+    }
+
     static async register_all(sock_mgr) {
         await init_job;
         for (let entry of await this.findAll()) {
