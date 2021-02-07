@@ -24,6 +24,12 @@ import { ScrollWatcher } from '../lib/event';
 
 import React from 'react';
 
+// Children that are registered with `register_child`
+// are expected to have at least three methods:
+//
+//   1. `changed()`
+//   2. `submit()`
+//   3. `cancel()`
 export default class DataWidget extends React.Component {
     #children = Object.create(null)
     #register = Object.create(null)
