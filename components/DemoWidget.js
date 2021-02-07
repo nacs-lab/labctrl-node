@@ -103,8 +103,8 @@ export default class DemoWidget extends React.Component {
               step={2**-16} minScroll={0.00005} immediate={this.state.immediate}
               ref={this.get_register_func('amp1')} onChange={this.refresh_changed_state}/>
             <NumberField path={['demo0', 'freq1']} ovr_path={['demo0', 'ovr_freq1']}
-              minScale={0} maxScale={9} minValue={0} maxValue={2e9} unit="Hz"
-              step={2e9 / 2**31} minScroll={1} immediate={this.state.immediate}
+              minScale={0} maxScale={9} minValue={0} maxValue={2**31} unit="Hz"
+              step={1} scale={2e9 / 2**31} minScroll={1} immediate={this.state.immediate}
               ref={this.get_register_func('freq1')} onChange={this.refresh_changed_state}/>
             <NameField path={['demo0', 'name_volt1']} standalone={true}/>
             <NumberField path={['demo0', 'volt1']} ovr_path={['demo0', 'ovr_volt1']}
@@ -118,8 +118,8 @@ export default class DemoWidget extends React.Component {
               step={2**-16} minScroll={0.00005} immediate={this.state.immediate}
               ref={this.get_register_func('amp2')} onChange={this.refresh_changed_state}/>
             <NumberField path={['demo0', 'freq2']}
-              minScale={0} maxScale={9} minValue={0} maxValue={2e9} unit="Hz"
-              step={2e9 / 2**31} minScroll={1} immediate={this.state.immediate}
+              minScale={0} maxScale={9} minValue={0} maxValue={2**31} unit="Hz"
+              step={1} scale={2e9 / 2**31} minScroll={1} immediate={this.state.immediate}
               ref={this.get_register_func('freq2')} onChange={this.refresh_changed_state}/>
             <NameField path={['demo0', 'name_volt2']} standalone={true}/>
             <NumberField path={['demo0', 'volt2']}

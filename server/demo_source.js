@@ -23,7 +23,7 @@ const SocketManager = require('./socket_manager');
 class DemoSource extends SocketManager.Source {
     #bool_fields = ['bool1', 'ovr_bool1', 'bool2',
                     'ovr_freq1', 'ovr_amp1', 'ovr_volt1']
-    #value_range = { freq1: [0, 2e9, 2e9 / 2**31], freq2: [0, 2e9, 2e9 / 2**31],
+    #value_range = { freq1: [0, 2**31, 1], freq2: [0, 2**31, 1],
                      amp1: [0, 1, 2**-16], amp2: [0, 1, 2**-16],
                      volt1: [-10, 10, 20 / 2**16], volt2: [-10, 10, 20 / 2**16] }
     #name_fields = ['name_bool1', 'name_rf1', 'name_volt1',
