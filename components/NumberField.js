@@ -170,16 +170,7 @@ export default class NumberField extends SingleField {
                 lscale = Math.floor((maxScale + 0.5) / 3);
             scale = 10**(lscale * 3);
         }
-        let { step = 0 } = this.props;
-        if (!(step > 0))
-            return [String(v / scale), lscale];
-        let [lo, hi] = find_bound(v, step, scale);
-        let digit;
-        [v, digit] = find_min_digit(lo, hi);
-        if (digit === undefined)
-            return [String(v), lscale];
-        let vs = digit < 0 ? v.toFixed(-digit) : v.toFixed();
-        return [vs, lscale];
+        return this.raw2disp_scale(v, lscale, scale);
     }
     defaultdisp() {
         return ['', 0];
