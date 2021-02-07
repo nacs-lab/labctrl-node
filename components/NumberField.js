@@ -137,15 +137,16 @@ export default class NumberField extends SingleField {
     }
 
     disp2raw(v) {
-        return this._normalize_value(Number(v[0]) * 10**(v[1] * 3));
+        let { scale: vscale = 1 } = this.props;
+        return this._normalize_value(Number(v[0]) * 10**(v[1] * 3) / vscale);
     }
     raw2disp_scale(v, lscale, scale) {
         if (scale === undefined)
             scale = 10**(lscale * 3);
-        let { step = 0 } = this.props;
+        let { step = 0, scale: vscale = 1 } = this.props;
         if (!(step > 0))
             return [String(v / scale), lscale];
-        let [lo, hi] = find_bound(v, step, scale);
+        let [lo, hi] = find_bound(v, step * vscale, scale);
         let digit;
         [v, digit] = find_min_digit(lo, hi);
         if (digit === undefined)
@@ -154,18 +155,20 @@ export default class NumberField extends SingleField {
         return [vs, lscale];
     }
     raw2disp(v) {
-        v = this._normalize_value(v);
+        let { scale: vscale = 1 } = this.props;
+        v = this._normalize_value(v) * vscale;
         let { minScale = -24, maxScale = 24 } = this.props;
         let lscale = scale_from_state(this.state);
         let scale = 10**(lscale * 3);
-        if (Math.abs(v) < 0.1 * scale) {
-            lscale = Math.floor(Math.log10(Math.abs(v) / 0.1) / 3);
+        let vabs = Math.abs(v);
+        if (vabs < 0.1 * scale) {
+            lscale = Math.floor(Math.log10(vabs / 0.1) / 3);
             if (lscale * 3 < minScale)
                 lscale = Math.ceil((minScale - 0.5) / 3);
             scale = 10**(lscale * 3);
         }
-        else if (Math.abs(v) > 2 * scale) {
-            lscale = Math.floor(Math.log10(Math.abs(v) / 2) / 3);
+        else if (vabs > 2 * scale) {
+            lscale = Math.floor(Math.log10(vabs / 2) / 3);
             if (lscale * 3 > maxScale)
                 lscale = Math.floor((maxScale + 0.5) / 3);
             scale = 10**(lscale * 3);
@@ -191,9 +194,10 @@ export default class NumberField extends SingleField {
     unit_selected = (e) => {
         // Change the display without changing the value
         // (as much as possible, to within rounding error)
+        let { scale: vscale = 1 } = this.props;
         let disp_value = [value_from_state(this.state), scale_from_state(this.state)];
         let value = this.disp2raw(disp_value);
-        this.set_display_value(this.raw2disp_scale(value,
+        this.set_display_value(this.raw2disp_scale(value * vscale,
                                                    Number(e.target.getAttribute('scalevalue'))));
     }
     value_input_changed = (e) => {
