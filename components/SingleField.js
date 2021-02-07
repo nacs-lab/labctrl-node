@@ -24,19 +24,19 @@ import { array_equal, getfield_recursive, setfield_recursive } from '../lib/util
 import React from 'react';
 
 export default class SingleField extends React.Component {
-    _path
-    _ovr_path
-    _watch_id
+    #path
+    #ovr_path
+    #watch_id
+    // Changes to `this.state` may be queued and it may not reflect
+    // the latest state we **want**.
+    // Use custom fields to store some of the latest states
+    // so that we can accurately calculate `this.changed()`
+    // for the **next** update.
+    #ovr_changed = false
+    #value_changed = false
+    #value = ''
     constructor(props) {
         super(props);
-        // Changes to `this.state` may be queued and it may not reflect
-        // the latest state we **want**.
-        // Use custom fields to store some of the latest states
-        // so that we can accurately calculate `this.changed()`
-        // for the **next** update.
-        this._ovr_changed = false;
-        this._value_changed = false;
-        this._value = '';
         // Manually bind to allow subclass to overwrite.
         // Using the `() => {}` syntax to define the field
         // throws an error when I try to call `super`.
@@ -56,18 +56,18 @@ export default class SingleField extends React.Component {
 
         this._set_paths();
         let values = socket.get_cached(this._get_watch_params());
-        let value = getfield_recursive(values, this._path);
+        let value = getfield_recursive(values, this.#path);
         if (value !== undefined)
-            this._value = value;
-        let ovr = this._ovr_path ? !!getfield_recursive(values, this._ovr_path) : false;
-        this.state.value = this._value;
-        this.state.display_value = this.raw2disp(this._value);
+            this.#value = value;
+        let ovr = this.#ovr_path ? !!getfield_recursive(values, this.#ovr_path) : false;
+        this.state.value = this.#value;
+        this.state.display_value = this.raw2disp(this.#value);
         this.state.ovr = ovr;
     }
 
     // Called by parent
     changed() {
-        return this._value_changed || this._ovr_changed
+        return this.#value_changed || this.#ovr_changed
     }
 
     // May be overriden by subclass to have a more flexible mapping
@@ -92,9 +92,9 @@ export default class SingleField extends React.Component {
     _setvalues = (values) => {
         if (!values)
             return;
-        let value = getfield_recursive(values, this._path);
+        let value = getfield_recursive(values, this.#path);
         if (value !== undefined)
-            this._value = value;
+            this.#value = value;
         this.setState((state) => {
             let new_state = {};
             if (value !== undefined) {
@@ -102,8 +102,8 @@ export default class SingleField extends React.Component {
                 new_state.display_value = (state.value_changed || state.value_focused) ?
                                           state.display_value : this.raw2disp(value);
             }
-            if (this._ovr_path) {
-                let ovr = getfield_recursive(values, this._ovr_path);
+            if (this.#ovr_path) {
+                let ovr = getfield_recursive(values, this.#ovr_path);
                 if (ovr !== undefined) {
                     new_state.ovr = ovr;
                     new_state.display_ovr = ovr;
@@ -114,32 +114,32 @@ export default class SingleField extends React.Component {
     }
 
     _set_paths() {
-        if (array_equal(this._path, this.props.path) &&
-            array_equal(this._ovr_path, this.props.ovr_path))
+        if (array_equal(this.#path, this.props.path) &&
+            array_equal(this.#ovr_path, this.props.ovr_path))
             return false;
-        this._path = [ ...this.props.path ];
-        this._ovr_path = this.props.ovr_path ? [ ...this.props.ovr_path ] : undefined;
+        this.#path = [ ...this.props.path ];
+        this.#ovr_path = this.props.ovr_path ? [ ...this.props.ovr_path ] : undefined;
         return true;
     }
     _get_watch_params() {
         let watch = Object.create(null);
-        setfield_recursive(watch, this._path, 0);
-        if (this._ovr_path)
-            setfield_recursive(watch, this._ovr_path, 0);
+        setfield_recursive(watch, this.#path, 0);
+        if (this.#ovr_path)
+            setfield_recursive(watch, this.#ovr_path, 0);
         return watch;
     }
 
     _refresh = () => {
         if (!socket.connected) {
-            this._watch_id = undefined;
+            this.#watch_id = undefined;
             return;
         }
-        if (this._watch_id !== undefined && !this._set_paths())
+        if (this.#watch_id !== undefined && !this._set_paths())
             return;
         let watch = this._get_watch_params();
-        if (this._watch_id !== undefined)
-            socket.unwatch(this._watch_id);
-        this._watch_id = socket.watch(watch, this._setvalues);
+        if (this.#watch_id !== undefined)
+            socket.unwatch(this.#watch_id);
+        this.#watch_id = socket.watch(watch, this._setvalues);
         this._setvalues(socket.get_cached(watch));
     }
     componentDidMount() {
@@ -151,24 +151,24 @@ export default class SingleField extends React.Component {
         this._refresh();
     }
     componentWillUnmount() {
-        if (this._watch_id !== undefined) {
-            socket.unwatch(this._watch_id);
+        if (this.#watch_id !== undefined) {
+            socket.unwatch(this.#watch_id);
         }
     }
 
     set_display_value(value) {
         let raw_value = this.disp2raw(value);
-        let changed = this._value != raw_value;
+        let changed = this.#value != raw_value;
         if (this.props.immediate) {
-            this._value = raw_value;
+            this.#value = raw_value;
             if (changed) {
                 let params = Object.create(null);
-                setfield_recursive(params, this._path, raw_value);
+                setfield_recursive(params, this.#path, raw_value);
                 socket.set(params);
             }
-            this._value_changed = false;
+            this.#value_changed = false;
             if (this.props.onChange)
-                this.props.onChange(this._ovr_changed);
+                this.props.onChange(this.#ovr_changed);
             this.setState({
                 display_value: value,
                 value: raw_value,
@@ -177,12 +177,12 @@ export default class SingleField extends React.Component {
         }
         else {
             if (changed)
-                this._value_changed = true;
+                this.#value_changed = true;
             if (this.props.onChange)
-                this.props.onChange(this._value_changed);
+                this.props.onChange(this.#value_changed);
             this.setState({
                 display_value: value,
-                value_changed: this._value_changed
+                value_changed: this.#value_changed
             });
         }
     }
@@ -205,14 +205,14 @@ export default class SingleField extends React.Component {
             if (this.props.immediate) {
                 let new_value = !state.display_ovr;
                 // This should always be true but let's be safe.
-                if (this._ovr_path !== undefined) {
+                if (this.#ovr_path !== undefined) {
                     let params = Object.create(null);
-                    setfield_recursive(params, this._ovr_path, new_value);
+                    setfield_recursive(params, this.#ovr_path, new_value);
                     socket.set(params);
                 }
-                this._ovr_changed = false;
+                this.#ovr_changed = false;
                 if (this.props.onChange)
-                    this.props.onChange(this._value_changed);
+                    this.props.onChange(this.#value_changed);
                 return {
                     ovr: new_value,
                     display_ovr: new_value,
@@ -220,7 +220,7 @@ export default class SingleField extends React.Component {
                 };
             }
             else {
-                this._ovr_changed = true;
+                this.#ovr_changed = true;
                 if (this.props.onChange)
                     this.props.onChange(true);
                 return {
@@ -249,22 +249,22 @@ export default class SingleField extends React.Component {
     }
 
     submit() {
-        if (!this._ovr_changed && !this._value_changed)
+        if (!this.#ovr_changed && !this.#value_changed)
             return;
         let params = Object.create(null);
         let value = this.disp2raw(this.state.display_value);
-        setfield_recursive(params, this._path, value);
+        setfield_recursive(params, this.#path, value);
         let ovr = false;
-        if (this._ovr_path !== undefined) {
+        if (this.#ovr_path !== undefined) {
             ovr = this.state.display_ovr;
-            setfield_recursive(params, this._ovr_path, ovr);
+            setfield_recursive(params, this.#ovr_path, ovr);
         }
         socket.set(params);
-        this._ovr_changed = false;
-        this._value_changed = false;
+        this.#ovr_changed = false;
+        this.#value_changed = false;
         if (this.props.onChange)
             this.props.onChange();
-        this._value = value;
+        this.#value = value;
         this.setState({
             display_value: this.raw2disp(value), // Normalize value
             value: value,
@@ -275,12 +275,12 @@ export default class SingleField extends React.Component {
     }
 
     cancel() {
-        this._ovr_changed = false;
-        this._value_changed = false;
+        this.#ovr_changed = false;
+        this.#value_changed = false;
         if (this.props.onChange)
             this.props.onChange();
         this.setState({
-            display_value: this.raw2disp(this._value),
+            display_value: this.raw2disp(this.#value),
             value_changed: false,
             display_ovr: this.state.ovr,
             ovr_changed: false,
