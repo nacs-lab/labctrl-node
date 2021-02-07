@@ -159,8 +159,8 @@ export default class SingleField extends React.Component {
     set_display_value(value) {
         let raw_value = this.disp2raw(value);
         let changed = this._value != raw_value;
-        this._value = raw_value;
         if (this.props.immediate) {
+            this._value = raw_value;
             if (changed) {
                 let params = Object.create(null);
                 setfield_recursive(params, this._path, raw_value);
