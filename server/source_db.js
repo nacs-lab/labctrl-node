@@ -62,6 +62,10 @@ class SourceDB extends DB.Model {
         }
     }
 
+    static check_type(type) {
+        return !!source_types[type];
+    }
+
     static async add_source(type, name, params, sock_mgr) {
         let entry = await db.transaction(async () => {
             return await this.create({ type, name, params });
