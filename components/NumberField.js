@@ -189,6 +189,33 @@ export default class NumberField extends SingleField {
             input.addEventListener("wheel", this.value_scrolled);
         }
     }
+    increment_value(delta) {
+        let { step = 0, minScroll = 0, minValue = -Infinity, maxValue = Infinity } = this.props;
+        if (!minScroll) {
+            if (step > 0) {
+                minScroll = step;
+            }
+            else if (Number.isFinite(maxValue - minValue) && maxValue > minValue) {
+                minScroll = (maxValue - minValue) * 3e-4;
+            }
+            else {
+                minScroll = 1e-4;
+            }
+        }
+        let disp_value = [value_from_state(this.state), scale_from_state(this.state)];
+        let value = this.disp2raw(disp_value);
+        let scroll = Math.abs(value) * 0.01 * delta;
+        if (delta > 0 && scroll < minScroll) {
+            scroll = minScroll;
+        }
+        else if (delta < 0 && scroll > -minScroll) {
+            scroll = -minScroll;
+        }
+        let new_value = this._normalize_value(value + scroll);
+        if (new_value != value) {
+            this.set_display_value(this.raw2disp(new_value));
+        }
+    }
 
     // TODO multiple units
     unit_selected = (e) => {
@@ -214,35 +241,28 @@ export default class NumberField extends SingleField {
             return;
         e.preventDefault();
         e.stopPropagation();
-        let { step = 0, minScroll = 0, minValue = -Infinity, maxValue = Infinity } = this.props;
-        if (!minScroll) {
-            if (step > 0) {
-                minScroll = step;
-            }
-            else if (Number.isFinite(maxValue - minValue) && maxValue > minValue) {
-                minScroll = (maxValue - minValue) * 3e-4;
-            }
-            else {
-                minScroll = 1e-4;
-            }
-        }
-        let disp_value = [value_from_state(this.state), scale_from_state(this.state)];
-        let value = this.disp2raw(disp_value);
-        let scroll = Math.abs(value) * 0.01 * -e.deltaY;
-        if (e.deltaY < 0 && scroll < minScroll) {
-            scroll = minScroll;
-        }
-        else if (e.deltaY > 0 && scroll > -minScroll) {
-            scroll = -minScroll;
-        }
-        let new_value = this._normalize_value(value + scroll);
-        if (new_value != value) {
-            this.set_display_value(this.raw2disp(new_value));
-        }
+        this.increment_value(-e.deltaY);
     }
     componentDidMount() {
         super.componentDidMount();
         ScrollWatcher.enable();
+    }
+    key_press(e) {
+        if (e.keyCode == 40) {
+            // Down
+            e.preventDefault();
+            e.stopPropagation();
+            this.increment_value(-1);
+            return;
+        }
+        else if (e.keyCode == 38) {
+            // Up
+            e.preventDefault();
+            e.stopPropagation();
+            this.increment_value(1);
+            return;
+        }
+        super.key_press(e);
     }
 
     // TODO increment buttons

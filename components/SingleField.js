@@ -42,6 +42,7 @@ export default class SingleField extends React.Component {
         // throws an error when I try to call `super`.
         this.submit = this.submit.bind(this);
         this.cancel = this.cancel.bind(this);
+        this.key_press = this.key_press.bind(this);
         this.state = {
             value: this.defaultraw(),
             value_changed: false,
@@ -230,7 +231,7 @@ export default class SingleField extends React.Component {
         });
     }
 
-    key_press = (e) => {
+    key_press(e) {
         if (e.keyCode == 13) {
             // Enter
             e.preventDefault();
