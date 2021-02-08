@@ -44,11 +44,12 @@ export default class NameField extends SingleField {
 
     render() {
         let { className = '', standalone = false } = this.props;
+        let border = standalone ? "border-right-0" : "border-right-0 border-left-0";
         // Editing name should not be very common so we disable editing by default.
         // Because of this, I don't really want to deal with the focus in/out event
         // to decide if we should accept server update.
         // Fortunately, this shouldn't happen often so it shouldn't matter...
-        let input = <input className="form-control bg-white border-right-0 px-1"
+        let input = <input className={`form-control bg-white ${border} px-1`}
                       value={this.state.display_value} readOnly={!this.state.editing}
                       onChange={this.value_change}
                       onKeyDown={this.state.editing ? this.key_press : undefined}/>;

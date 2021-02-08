@@ -28,7 +28,8 @@ export default class DDSNameField extends React.Component {
         let path = this.#path.get([source_id, 'dds', `name${dds_id}`])[0];
         return <div className={`input-group input-group-sm mb-1 ${className}`}>
           <div className="input-group-prepend">
-            <span className="input-group-text bg-white px-1" style={{ fontSize: "0.75rem" }}>
+            <span className="input-group-text bg-white pl-1 pr-0"
+              style={{ fontSize: "0.75rem" }}>
               <b style={{minWidth: '2ch'}}>{dds_id}</b>
             </span>
           </div>

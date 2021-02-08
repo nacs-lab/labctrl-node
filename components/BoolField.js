@@ -34,14 +34,14 @@ export default class BoolField extends SingleField {
         let { className = '', children } = this.props;
         return <div className={`input-group input-group-sm mb-1 ${className}`}>
           <div className="input-group-prepend">
-            <div className="input-group-text">
+            <div className="input-group-text px-1 border-right-0">
               <input type="checkbox" checked={this.state.display_value}
                 onChange={this.value_change}/>
             </div>
             {
                 this.has_ovr() ?
-                <div className={"input-group-text" + (this.state.display_ovr ?
-                                                      " bg-info" : "")}
+                <div className={"input-group-text px-1 border-left-0"
+                              + (this.state.display_ovr ? " bg-info" : "")}
                   onClick={this.ovr_toggle} style={{cursor: "pointer"}}
                   title={this.state.display_ovr ? "Disable override" : "Enable override"}>
                   <span
@@ -52,13 +52,13 @@ export default class BoolField extends SingleField {
             {
                 this.state.value_changed || this.state.ovr_changed ?
                 <React.Fragment>
-                  <div className="input-group-text border-right-0"
+                  <div className="input-group-text px-1 border-right-0"
                     onClick={this.submit} style={{cursor: "pointer"}} title="Submit">
                     <span className='fas fa-check text-success'/>
                   </div>
-                  <div className="input-group-text border-left-0"
+                  <div className="input-group-text px-1 border-left-0"
                     onClick={this.cancel} style={{cursor: "pointer"}} title="Cancel">
-                    <span className='fas fa-times text-danger'/>
+                    <span className='fas fa-fw fa-times text-danger'/>
                   </div>
                 </React.Fragment> : <React.Fragment/>
             }
