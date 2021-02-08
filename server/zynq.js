@@ -618,7 +618,7 @@ class Zynq extends SocketManager.Source {
         updates.ttl = Object.create(null);
         for (let i = 0; i < 32; i++)
             updates.ttl[`name${i}`] = '';
-        let ttl_name_res = this.#sock.get_ttl_names.then((names) => {
+        let ttl_name_res = this.#sock.get_ttl_names().then((names) => {
             for (let [chn, name] of names) {
                 updates.ttl[`name${chn}`] = name;
             }
@@ -626,7 +626,7 @@ class Zynq extends SocketManager.Source {
         updates.dds = Object.create(null);
         for (let i = 0; i < 22; i++)
             updates.dds[`name${i}`] = '';
-        let dds_name_res = this.#sock.get_dds_names.then((names) => {
+        let dds_name_res = this.#sock.get_dds_names().then((names) => {
             for (let [chn, name] of names) {
                 updates.dds[`name${chn}`] = name;
             }
