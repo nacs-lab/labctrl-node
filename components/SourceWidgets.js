@@ -31,6 +31,11 @@ const Pages = {
             name: "TTL",
             data: { ttl: 0 },
             widget: dynamic(() => import('./zynq/TTL'))
+        },
+        clock: {
+            name: "Clock",
+            data: { clock: 0 },
+            widget: dynamic(() => import('./zynq/Clock'))
         }
     }
 };
@@ -61,6 +66,11 @@ const Widgets = {
             name: "TTL",
             data: (id) => { return { ttl: { [`val$id`]: 0, [`ovr$id`]: 0, [`name$id`]: 0 }}; },
             widget: dynamic(() => import('./zynq/TTLField'))
+        },
+        clock: {
+            name: "Clock",
+            data: (id) => { return { clock: 0 }; },
+            widget: dynamic(() => import('./zynq/ClockField'))
         }
     }
 };
