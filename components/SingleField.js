@@ -160,15 +160,18 @@ export default class SingleField extends React.Component {
         let raw_value = this.disp2raw(value);
         let changed = this.#value != raw_value;
         if (this.props.immediate) {
-            this.#value = raw_value;
             if (changed) {
+                this.#value = raw_value;
                 let params = Object.create(null);
                 setfield_recursive(params, this.#path, raw_value);
                 socket.set(params);
             }
-            this.#value_changed = false;
-            if (this.props.onChange)
-                this.props.onChange(this.#ovr_changed);
+            if (changed || this.#value_changed) {
+                this.#value_changed = false;
+                if (this.props.onChange) {
+                    this.props.onChange(this.#ovr_changed);
+                }
+            }
             this.setState({
                 display_value: value,
                 value: raw_value,
@@ -176,10 +179,12 @@ export default class SingleField extends React.Component {
             });
         }
         else {
-            if (changed)
+            if (changed && !this.#value_changed) {
                 this.#value_changed = true;
-            if (this.props.onChange)
-                this.props.onChange(this.#value_changed);
+                if (this.props.onChange) {
+                    this.props.onChange(this.#value_changed);
+                }
+            }
             this.setState({
                 display_value: value,
                 value_changed: this.#value_changed
