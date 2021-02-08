@@ -133,7 +133,8 @@ export default class DDSWidget extends DataWidget {
         let first = true;
         for (let i of this.state.dds_ids) {
             if (!first)
-                rows.push(<hr className={`row my-1 d-flex d-${col_break}-none`} key={-1}/>);
+                rows.push(<hr className={`row my-1 d-flex d-${col_break}-none`}
+                            key={2 * i - 1}/>);
             first = false;
             let extra;
             if (this.state.show_extra) {
