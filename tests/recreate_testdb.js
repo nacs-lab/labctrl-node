@@ -19,7 +19,7 @@
 "use strict";
 
 const assert = require('assert');
-const fs = require('fs');
+const fs = require('fs/promises');
 const path = require('path');
 
 // Do not use this script to create the production database.
@@ -27,19 +27,9 @@ assert(process.env.NODE_ENV == 'development');
 
 const config = require('../server/config');
 
-function unlink(path) {
-    return new Promise((resolve, reject) => {
-        fs.unlink(path, (err) => {
-            if (err)
-                return reject(err);
-            resolve();
-        });
-    });
-}
-
 async function create_user() {
     try {
-        await unlink(path.join(config.db.dir, 'user.db'));
+        await fs.unlink(path.join(config.db.dir, 'user.db'));
     }
     catch {
     }
@@ -80,7 +70,7 @@ async function create_user() {
 
 async function create_source() {
     try {
-        await unlink(path.join(config.db.dir, 'sources.db'));
+        await fs.unlink(path.join(config.db.dir, 'sources.db'));
     }
     catch {
     }
