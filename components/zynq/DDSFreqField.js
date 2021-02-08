@@ -47,7 +47,7 @@ export default class DDSFreqField extends React.Component {
     render() {
         let { source_id, dds_id, ...props } = this.props;
         let path = this.#path.get([source_id, 'dds', `freq${dds_id}`])[0];
-        let ovr_path = this.#path.get([source_id, 'dds', `ovr_freq${dds_id}`])[0];
+        let ovr_path = this.#ovr_path.get([source_id, 'dds', `ovr_freq${dds_id}`])[0];
         return <NumberField {...props} path={path} ovr_path={ovr_path}
                  minScale={0} maxScale={9} minValue={0} maxValue={2**31} unit="Hz"
                  step={1} scale={3.5e9 / 2**32} minScroll={1} ref={this.#field}/>;
