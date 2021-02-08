@@ -116,7 +116,7 @@ export default class DDSWidget extends DataWidget {
             </React.Fragment>;
         }
         rows.push(
-            <div className="row" key={-1}>
+            <div className={`row d-none d-${col_break}-flex`} key={-2}>
               <div className={`col-${col_break} text-center`}>
                 <b>Name</b>
               </div>
@@ -129,16 +129,28 @@ export default class DDSWidget extends DataWidget {
               {extra_title}
             </div>
         );
+        rows.push(<hr className={`row my-1 d-none d-${col_break}-flex`} key={-1}/>);
+        let first = true;
         for (let i of this.state.dds_ids) {
+            if (!first)
+                rows.push(<hr className={`row my-1 d-flex d-${col_break}-none`} key={-1}/>);
+            first = false;
             let extra;
             if (this.state.show_extra) {
                 extra = <React.Fragment>
-                  <DDSPhaseField className={`col-${col_break}`}
+                  <div className={`w-100 d-flex d-${col_break}-none`}>
+                  </div>
+                  <div className={`col-4 d-flex d-${col_break}-none`}>
+                    <b>Phase</b>
+                  </div>
+                  <DDSPhaseField className={`col-8 col-${col_break}`}
                     source_id={this.props.source_id} dds_id={i}
                     immediate={this.state.immediate}
                     ref={this.get_register_func(`phase${i}`)}
                     onChange={this.refresh_changed_state}/>
-                  <div className={`col-${col_break}-1 text-center`}>
+                  <div className={`w-100 d-flex d-${col_break}-none`}>
+                  </div>
+                  <div className={`col-12 col-${col_break}-1 text-center`}>
                     <button className="btn btn-xs btn-warning" dds_id={i}
                       onClick={this._reset_dds}>
                       <b>Reset</b>
@@ -147,15 +159,28 @@ export default class DDSWidget extends DataWidget {
                 </React.Fragment>;
             }
             rows.push(
-                <div className="row" key={i} title={`DDS ${i}`}>
-                  <DDSNameField className={`col-${col_break}`}
+                <div className="row" key={i * 2} title={`DDS ${i}`}>
+                  <div className={`col-4 d-flex d-${col_break}-none`}>
+                    <b>Name</b>
+                  </div>
+                  <DDSNameField className={`col-8 col-${col_break}`}
                     source_id={this.props.source_id} dds_id={i}/>
-                  <DDSFreqField className={`col-${col_break}`}
+                  <div className={`w-100 d-flex d-${col_break}-none`}>
+                  </div>
+                  <div className={`col-4 d-flex d-${col_break}-none`}>
+                    <b>Frequency</b>
+                  </div>
+                  <DDSFreqField className={`col-8 col-${col_break}`}
                     source_id={this.props.source_id} dds_id={i}
                     immediate={this.state.immediate}
                     ref={this.get_register_func(`freq${i}`)}
                     onChange={this.refresh_changed_state}/>
-                  <DDSAmpField className={`col-${col_break}`}
+                  <div className={`w-100 d-flex d-${col_break}-none`}>
+                  </div>
+                  <div className={`col-4 d-flex d-${col_break}-none`}>
+                    <b>Amplitude</b>
+                  </div>
+                  <DDSAmpField className={`col-8 col-${col_break}`}
                     source_id={this.props.source_id} dds_id={i}
                     immediate={this.state.immediate}
                     ref={this.get_register_func(`amp${i}`)}
