@@ -5,3 +5,11 @@
   line-height: 1rem;
   vertical-align: text-top;
 }
+@media screen and (max-width: 415px) {
+  .nacs-d-xxs-none {
+    display: none !important;
+  }
+  .nacs-d-xxs-flex {
+    display: flex !important;
+  }
+}
