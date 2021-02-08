@@ -442,7 +442,7 @@ class Zynq extends SocketManager.Source {
         let cmd = [];
         let ovr_cmd = [];
 
-        for (let type_id = 0; type_id < 2; type_id++) {
+        for (let type_id = 0; type_id < 3; type_id++) {
             let type_name = dds_type_names[type_id];
             let type_values = values[type_name];
             let type_ovrs = ovrs[type_name];
