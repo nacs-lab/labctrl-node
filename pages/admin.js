@@ -226,7 +226,7 @@ export default class Admin extends React.Component {
               <td>{ad}</td>
             </tr>);
         }
-        return <div className="span8 offset2" style={{width: "100%"}}>
+        return <div style={{width: "100%"}}>
           <legend className="text-center">Manage Users</legend>
           <label className="text-center checkbox-inline" style={{width: "100%"}}>
             <input type="checkbox" checked={this.state.request_only}

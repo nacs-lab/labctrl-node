@@ -103,7 +103,7 @@ export default class LostPassword extends React.Component {
               </div>)}
             </RedirectIn>;
         }
-        return <div className="span8 offset2" style={{width: "100%"}}>
+        return <div style={{width: "100%"}}>
           <legend className="text-center">Password Reset</legend>
           <div className="container">
             <form>

@@ -28,8 +28,7 @@ import React from 'react';
 
 export default class DemoWidget extends DataWidget {
     render() {
-        return <div className="span8 offset2" style={{width: "100%"}}
-                 onWheel={this.on_wheel_cb}>
+        return <div style={{width: "100%"}} onWheel={this.on_wheel_cb}>
           <legend className="text-center">Demo</legend>
           <div className="container">
             <BoolField path={['demo0', 'bool1']} ovr_path={['demo0', 'ovr_bool1']}

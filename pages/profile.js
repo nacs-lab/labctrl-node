@@ -47,7 +47,7 @@ export default class Profile extends React.Component {
     }
     render_real(notify) {
         let user = this.context.user;
-        return <div className="span8 offset2" style={{width: "100%"}}>
+        return <div style={{width: "100%"}}>
           <legend className="text-center">Profile</legend>
           <div className="container">
             <form>

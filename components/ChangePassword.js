@@ -113,7 +113,7 @@ export default class ChangePassword extends React.Component {
               </div>)}
             </RedirectIn>;
         }
-        return <div className="span8 offset2" style={{width: "100%"}}>
+        return <div style={{width: "100%"}}>
           <legend className="text-center">{this.props.title}</legend>
           <div className="container">
             <form>
