@@ -195,8 +195,12 @@ export default class Wrapper extends React.Component {
 
           {/* Main Footer */}
           <footer className="main-footer">
-            <strong>Powered by <a href="https://nodejs.org" target="_blank">Node.js</a> and
-              <a href="https://adminlte.io/" target="_blank">AdminLTE</a>.</strong>
+            <strong>Powered by <a href="https://nodejs.org" target="_blank">Node.js</a>{','}
+              <span> </span><a href="https://nextjs.org" target="_blank">Next.js</a>{','}
+              <span> </span><a href="https://getbootstrap.com" target="_blank">Bootstrap</a>
+              <span> </span>and<span> </span>
+              <a href="https://adminlte.io" target="_blank">AdminLTE</a>.
+            </strong>
           </footer>
           {/* Manually add the sidebar overlay to make React aware of this.
             * This makes sure that the overlay can stay up when we switch page
