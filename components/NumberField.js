@@ -219,6 +219,8 @@ export default class NumberField extends SingleField {
 
     // TODO multiple units
     unit_selected = (e) => {
+        // This stops the page from scrolling all the way to the top when selecting the unit.
+        e.preventDefault();
         // Change the display without changing the value
         // (as much as possible, to within rounding error)
         let { scale: vscale = 1 } = this.props;
