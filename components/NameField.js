@@ -48,7 +48,7 @@ export default class NameField extends SingleField {
         // Because of this, I don't really want to deal with the focus in/out event
         // to decide if we should accept server update.
         // Fortunately, this shouldn't happen often so it shouldn't matter...
-        let input = <input className="form-control bg-white border-right-0"
+        let input = <input className="form-control bg-white border-right-0 px-1"
                       value={this.state.display_value} readOnly={!this.state.editing}
                       onChange={this.value_change}
                       onKeyDown={this.state.editing ? this.key_press : undefined}/>;
@@ -57,15 +57,16 @@ export default class NameField extends SingleField {
             btns.push(<div className="input-group-append" key="submit-name"
                         onClick={this.submit} style={{cursor: "pointer"}}
                         title="Change Name">
-              <span className="input-group-text bg-white">
+              <span className="input-group-text bg-white px-1" style={{ fontSize: "0.75rem" }}>
                 <i className="fas fa-check text-success"/>
               </span>
             </div>);
             btns.push(<div className="input-group-append border-left-0" key="cancel-name"
                         onClick={this.cancel} style={{cursor: "pointer"}}
                         title="Restore Name">
-              <span className="input-group-text bg-white border-left-0">
-                <i className="fas fa-times text-danger"/>
+              <span className="input-group-text bg-white border-left-0 px-1"
+                style={{ fontSize: "0.75rem" }}>
+                <i className="fas fa-fw fa-times text-danger"/>
               </span>
             </div>);
         }
@@ -73,7 +74,7 @@ export default class NameField extends SingleField {
             btns.push(<div className="input-group-append" key="edit-name"
                         onClick={this.edit} style={{cursor: "pointer"}}
                         title="Edit Name">
-              <span className="input-group-text bg-white">
+              <span className="input-group-text bg-white px-1" style={{ fontSize: "0.75rem" }}>
                 <i className="fas fa-edit"/>
               </span>
             </div>);

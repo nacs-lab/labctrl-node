@@ -291,10 +291,12 @@ export default class NumberField extends SingleField {
         let unit_dropdown;
         if (dropdown.length > 1) {
             unit_dropdown = <div className="input-group-append" style={{cursor: "pointer"}}>
-              <span className="input-group-text bg-white" data-toggle="dropdown">
+              <span className="input-group-text bg-white px-1" style={{ fontSize: '0.75rem',
+                                                                        minWidth: '2.5ch'}}
+                data-toggle="dropdown">
                 {full_unit}
               </span>
-              <div className="dropdown-menu dropdown-menu-right" style={{minWidth: '1rem'}}>
+              <div className="dropdown-menu dropdown-menu-right" style={{ minWidth: '1rem' }}>
                 {dropdown}
               </div>
             </div>;
@@ -304,7 +306,7 @@ export default class NumberField extends SingleField {
         }
         else {
             unit_dropdown = <div className="input-group-append">
-              <span className="input-group-text bg-white">
+              <span className="input-group-text bg-white px-1" style={{ fontSize: '0.75rem' }}>
                 {full_unit}
               </span>
             </div>;
@@ -313,8 +315,8 @@ export default class NumberField extends SingleField {
           <div className="input-group-prepend">
             {
                 this.has_ovr() ?
-                <div className={"input-group-text" + (this.state.display_ovr ?
-                                                      " bg-info" : "")}
+                <div className={"input-group-text px-1" + (this.state.display_ovr ?
+                                                           " bg-info" : "")}
                   onClick={this.ovr_toggle} style={{cursor: "pointer"}}
                   title={this.state.display_ovr ? "Disable override" : "Enable override"}>
                   <span
@@ -325,18 +327,18 @@ export default class NumberField extends SingleField {
             {
                 this.state.value_changed || this.state.ovr_changed ?
                 <React.Fragment>
-                  <div className="input-group-text border-right-0"
+                  <div className="input-group-text px-1 border-right-0"
                     onClick={this.submit} style={{cursor: "pointer"}} title="Submit">
                     <span className='fas fa-check text-success'/>
                   </div>
-                  <div className="input-group-text border-left-0"
+                  <div className="input-group-text px-1 border-left-0"
                     onClick={this.cancel} style={{cursor: "pointer"}} title="Cancel">
-                    <span className='fas fa-times text-danger'/>
+                    <span className='fas fa-fw fa-times text-danger'/>
                   </div>
                 </React.Fragment> : <React.Fragment/>
             }
           </div>
-          <input type="text" className="form-control text-right"
+          <input type="text" className="form-control text-right px-1"
             value={cur_value} ref={this.set_value_input} onChange={this.value_input_changed}
             onKeyDown={this.key_press} onWheel={this.value_scrolled}
             onFocus={this.input_focus} onBlur={this.input_blur}/>
