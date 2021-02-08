@@ -104,29 +104,52 @@ export default class DDSWidget extends DataWidget {
     }
     render() {
         let rows = [];
-        let col_break = this.state.show_extra ? "md" : "sm";
+        let show_extra = this.state.show_extra;
+        let col_break = show_extra ? "md" : "sm";
+        let container = show_extra ? "container-lg" : "container-md";
+
+        let subcol1_w = show_extra ? 7 : 9;
+        let subcol2_w = show_extra ? 5 : 3;
+
+        let col_w_name = show_extra ? 7 : 7;
+        let col_w_freq = show_extra ? 5 : 5;
+        let col_w_amp = show_extra ? 5 : 12;
+        let col_w_phase = 6;
+        let col_w_reset = 1;
+
+        let col_name = show_extra ? 'col-2 col-sm-3' : 'col-2';
+        let col_value = show_extra ? 'col-10 col-sm-9' : 'col-10';
+
         let extra_title;
-        if (this.state.show_extra) {
+        if (show_extra) {
             extra_title = <React.Fragment>
-              <div className={`col-${col_break} text-center`}>
+              <div className={`col-${col_w_phase} px-1 text-center`}>
                 <b>Phase</b>
               </div>
-              <div className={`col-${col_break}-1`}>
+              <div className={`col-${col_w_reset} px-1`}>
               </div>
             </React.Fragment>;
         }
         rows.push(
             <div className={`row d-none d-${col_break}-flex`} key={-2}>
-              <div className={`col-${col_break} text-center`}>
-                <b>Name</b>
+              <div className={`col-${subcol1_w}`}>
+                <div className="row">
+                  <div className={`col-${col_w_name} px-1 text-center`}>
+                    <b>Name</b>
+                  </div>
+                  <div className={`col-${col_w_freq} px-1 text-center`}>
+                    <b>Frequency</b>
+                  </div>
+                </div>
               </div>
-              <div className={`col-${col_break} text-center`}>
-                <b>Frequency</b>
+              <div className={`col-${subcol2_w}`}>
+                <div className="row">
+                  <div className={`col-${col_w_amp} px-1 text-center`}>
+                    <b>Amplitude</b>
+                  </div>
+                  {extra_title}
+                </div>
               </div>
-              <div className={`col-${col_break} text-center`}>
-                <b>Amplitude</b>
-              </div>
-              {extra_title}
             </div>
         );
         rows.push(<hr className={`row my-1 d-none d-${col_break}-flex`} key={-1}/>);
@@ -137,62 +160,79 @@ export default class DDSWidget extends DataWidget {
                             key={2 * i - 1}/>);
             first = false;
             let extra;
-            if (this.state.show_extra) {
+            if (show_extra) {
                 extra = <React.Fragment>
                   <div className={`w-100 d-flex d-${col_break}-none`}>
                   </div>
-                  <div className={`col-2 d-flex d-${col_break}-none`}>
+                  <div className={`${col_name} d-flex d-${col_break}-none`}>
                     <b>Phase</b>
                   </div>
-                  <DDSPhaseField className={`col-10 col-${col_break}`}
+                  <DDSPhaseField
+                    className={`${col_value} col-${col_break}-${col_w_phase} px-1`}
                     source_id={this.props.source_id} dds_id={i}
                     immediate={this.state.immediate}
                     ref={this.get_register_func(`phase${i}`)}
                     onChange={this.refresh_changed_state}/>
                   <div className={`w-100 d-flex d-${col_break}-none`}>
                   </div>
-                  <div className={`col-12 col-${col_break}-1 text-center`}>
+                  <div className={`col-12 col-${col_break}-${col_w_reset} px-1 text-center`}>
                     <button className="btn btn-xs btn-warning" dds_id={i}
                       onClick={this._reset_dds}>
-                      <b>Reset</b>
+                      <span>
+                        <i className="fas fa-recycle"></i>
+                        <b className={`ml-1 d-inline-block d-${col_break}-none`}>
+                          Reset
+                        </b>
+                      </span>
                     </button>
                   </div>
                 </React.Fragment>;
             }
             rows.push(
                 <div className="row" key={i * 2} title={`DDS ${i}`}>
-                  <div className={`col-2 d-flex d-${col_break}-none`}>
-                    <b>Name</b>
+                  <div className={`col-${col_break}-${subcol1_w}`}>
+                    <div className="row">
+                      <div className={`${col_name} d-flex d-${col_break}-none`}>
+                        <b>Name</b>
+                      </div>
+                      <DDSNameField
+                        className={`${col_value} col-${col_break}-${col_w_name} px-1`}
+                        source_id={this.props.source_id} dds_id={i}/>
+                      <div className={`w-100 d-flex d-${col_break}-none`}>
+                      </div>
+                      <div className={`${col_name} d-flex d-${col_break}-none`}>
+                        <b className="nacs-d-xxs-none">Frequency</b>
+                        <b className="nacs-d-xxs-flex d-none">Freq</b>
+                      </div>
+                      <DDSFreqField
+                        className={`${col_value} col-${col_break}-${col_w_freq} px-1`}
+                        source_id={this.props.source_id} dds_id={i}
+                        immediate={this.state.immediate}
+                        ref={this.get_register_func(`freq${i}`)}
+                        onChange={this.refresh_changed_state}/>
+                    </div>
                   </div>
-                  <DDSNameField className={`col-10 col-${col_break}`}
-                    source_id={this.props.source_id} dds_id={i}/>
                   <div className={`w-100 d-flex d-${col_break}-none`}>
                   </div>
-                  <div className={`col-2 d-flex d-${col_break}-none`}>
-                    <b className="nacs-d-xxs-none">Frequency</b>
-                    <b className="nacs-d-xxs-flex d-none">Freq</b>
+                  <div className={`col-${col_break}-${subcol2_w}`}>
+                    <div className="row">
+                      <div className={`${col_name} d-flex d-${col_break}-none`}>
+                        <b className="nacs-d-xxs-none">Amplitude</b>
+                        <b className="nacs-d-xxs-flex d-none">Amp</b>
+                      </div>
+                      <DDSAmpField
+                        className={`${col_value} col-${col_break}-${col_w_amp} px-1`}
+                        source_id={this.props.source_id} dds_id={i}
+                        immediate={this.state.immediate}
+                        ref={this.get_register_func(`amp${i}`)}
+                        onChange={this.refresh_changed_state}/>
+                      {extra}
+                    </div>
                   </div>
-                  <DDSFreqField className={`col-10 col-${col_break}`}
-                    source_id={this.props.source_id} dds_id={i}
-                    immediate={this.state.immediate}
-                    ref={this.get_register_func(`freq${i}`)}
-                    onChange={this.refresh_changed_state}/>
-                  <div className={`w-100 d-flex d-${col_break}-none`}>
-                  </div>
-                  <div className={`col-2 d-flex d-${col_break}-none`}>
-                    <b className="nacs-d-xxs-none">Amplitude</b>
-                    <b className="nacs-d-xxs-flex d-none">Amp</b>
-                  </div>
-                  <DDSAmpField className={`col-10 col-${col_break}`}
-                    source_id={this.props.source_id} dds_id={i}
-                    immediate={this.state.immediate}
-                    ref={this.get_register_func(`amp${i}`)}
-                    onChange={this.refresh_changed_state}/>
-                  {extra}
                 </div>
             );
         }
-        return <div className="container" onWheel={this.on_wheel_cb}>
+        return <div className={`${container}`} onWheel={this.on_wheel_cb}>
           <div className="row">
             <legend className="text-center">DDS</legend>
           </div>
@@ -207,7 +247,7 @@ export default class DDSWidget extends DataWidget {
               <span className="mx-1"></span>
               <div className="form-check-inline">
                 <input type="checkbox" className="form-check-input"
-                  checked={this.state.show_extra} onChange={this._show_extra_change}/>
+                  checked={show_extra} onChange={this._show_extra_change}/>
                 <label className="form-check-label">Show Extra</label>
               </div>
             </div>
