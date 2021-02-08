@@ -43,6 +43,7 @@ export default class NameField extends SingleField {
     }
 
     render() {
+        let { className = '', standalone = false } = this.props;
         // Editing name should not be very common so we disable editing by default.
         // Because of this, I don't really want to deal with the focus in/out event
         // to decide if we should accept server update.
@@ -81,8 +82,8 @@ export default class NameField extends SingleField {
           { input }
           { btns }
         </React.Fragment>;
-        if (this.props.standalone)
-            return <div className="input-group input-group-sm mb-1">
+        if (standalone)
+            return <div className={`input-group input-group-sm mb-1 ${className}`}>
               {frag}
             </div>;
         return frag;
