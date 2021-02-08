@@ -34,10 +34,16 @@ export default class DemoWidget extends DataWidget {
             <BoolField path={['demo0', 'bool1']} ovr_path={['demo0', 'ovr_bool1']}
               immediate={this.state.immediate} ref={this.get_register_func('bool1')}
               onChange={this.refresh_changed_state}>
+              <div className="input-group-prepend">
+                <span className="input-group-text bg-white px-0"/>
+              </div>
               <NameField path={['demo0', 'name_bool1']}/>
             </BoolField>
             <BoolField path={['demo0', 'bool2']} immediate={this.state.immediate}
               ref={this.get_register_func('bool2')} onChange={this.refresh_changed_state}>
+              <div className="input-group-prepend">
+                <span className="input-group-text bg-white px-0"/>
+              </div>
               <NameField path={['demo0', 'name_bool2']}/>
             </BoolField>
 
