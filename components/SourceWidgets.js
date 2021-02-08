@@ -26,6 +26,11 @@ const Pages = {
             name: "DDS",
             data: { dds: 0 },
             widget: dynamic(() => import('./zynq/DDS'))
+        },
+        ttl: {
+            name: "TTL",
+            data: { ttl: 0 },
+            widget: dynamic(() => import('./zynq/TTL'))
         }
     }
 };
@@ -51,6 +56,11 @@ const Widgets = {
             name: "DDS Phase",
             data: (id) => { return { dds: { [`phase$id`]: 0, [`ovr_phase$id`]: 0 }}; },
             widget: dynamic(() => import('./zynq/DDSPhaseField'))
+        },
+        ttl: {
+            name: "TTL",
+            data: (id) => { return { ttl: { [`val$id`]: 0, [`ovr$id`]: 0, [`name$id`]: 0 }}; },
+            widget: dynamic(() => import('./zynq/TTLField'))
         }
     }
 };
