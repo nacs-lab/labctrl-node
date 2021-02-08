@@ -1,2 +1,4 @@
 db:
   dir: @BUILD_DIR@/db/
+data:
+  dir: @BUILD_DIR@/test_data/

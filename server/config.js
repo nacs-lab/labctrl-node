@@ -27,9 +27,14 @@ const fs = require('fs');
 const db = {
     dir: config.get('db.dir')
 };
-fs.mkdirSync(db.dir, {recursive: true,
-                      mode: 0o755});
+fs.mkdirSync(db.dir, {recursive: true, mode: 0o755});
 exports.db = db;
+
+const data = {
+    dir: config.get('data.dir')
+};
+fs.mkdirSync(data.dir, {recursive: true, mode: 0o755});
+exports.data = data;
 
 if (dev && !config.has('email.account')) {
     exports.email = { test: true };
