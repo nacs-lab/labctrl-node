@@ -179,7 +179,7 @@ export default class DDSWidget extends DataWidget {
                     <button className="btn btn-xs btn-warning" dds_id={i}
                       onClick={this._reset_dds}>
                       <span>
-                        <i className="fas fa-recycle"></i>
+                        <i className="fas fa-redo"></i>
                         <b className={`ml-1 d-inline-block d-${col_break}-none`}>
                           Reset
                         </b>
