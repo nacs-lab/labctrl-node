@@ -43,8 +43,9 @@ export default class SingleField extends React.Component {
         this.submit = this.submit.bind(this);
         this.cancel = this.cancel.bind(this);
         this.key_press = this.key_press.bind(this);
+        this.#value = this.defaultraw();
         this.state = {
-            value: this.defaultraw(),
+            value: this.#value,
             value_changed: false,
             display_value: this.defaultdisp(),
             value_focused: false,
