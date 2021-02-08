@@ -38,7 +38,11 @@ function unlink(path) {
 }
 
 async function create_user() {
-    await unlink(path.join(config.db.dir, 'user.db'));
+    try {
+        await unlink(path.join(config.db.dir, 'user.db'));
+    }
+    catch {
+    }
 
     // Import after the DB file has been deleted.
     const User = require('../server/user');
@@ -75,7 +79,11 @@ async function create_user() {
 }
 
 async function create_source() {
-    await unlink(path.join(config.db.dir, 'sources.db'));
+    try {
+        await unlink(path.join(config.db.dir, 'sources.db'));
+    }
+    catch {
+    }
 
     // Import after the DB file has been deleted.
     const SourceDB = require('../server/source_db');
