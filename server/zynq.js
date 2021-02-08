@@ -16,11 +16,15 @@
  *   see <http://www.gnu.org/licenses/>.                                 *
  *************************************************************************/
 
+const config = require('./config');
 const SocketManager = require('./socket_manager');
 const { BufferReader, Dealer } = require('./zmq_utils');
 const sleep = require('../lib/sleep');
 const { is_object, array_equal } = require('../lib/utils');
 const { parse_cmdlist } = require(process.env.LABCTRL_LIB_DIR + '/labctrl');
+
+const fs = require('fs/promises');
+const path = require('path');
 
 class ParseError {
     constructor(msg, line, lineno, colnum, colstart, colend) {
@@ -763,7 +767,122 @@ class Zynq extends SocketManager.Source {
         else if (name == 'cancel_seq') {
             return this.#sock.cancel_seq(params);
         }
+        else if (name == 'get_seq_names') {
+            return this.#get_seq_names();
+        }
+        else if (name == 'read_seq') {
+            let { name } = params;
+            return this.#read_seq(name);
+        }
+        else if (name == 'write_seq') {
+            let { name, seq, ovr = false } = params;
+            return this.#write_seq(name, seq, ovr);
+        }
+        else if (name == 'delete_seq') {
+            let { name } = params;
+            return this.#delete_seq(name);
+        }
         return;
+    }
+
+    // Sequence manager
+    async #get_seq_dir() {
+        let p = path.join(config.data.dir, 'zynq', this.id, 'seq');
+        try {
+            await fs.mkdir(p, { recursive: true, mode: 0o755 });
+        }
+        catch (e) {
+            console.error(`Error creating sequence directory ${p}: `, e);
+            return;
+        }
+        return p;
+    }
+
+    async #get_seq_names() {
+        let p = await this.#get_seq_dir();
+        if (p === undefined)
+            return [];
+        let files;
+        try {
+            files = await fs.readdir(p, { withFileTypes: true });
+        }
+        catch (e) {
+            console.error(`Error reading sequence directory ${p}: `, e);
+            return [];
+        }
+        let seqs = [];
+        for (let f of files) {
+            if (!f.isFile())
+                continue;
+            let m;
+            if (m = f.name.match(/^(.+)\.cmdlist/)) {
+                seqs.push(m[1]);
+            }
+        }
+        return seqs;
+    }
+
+    #check_name(name) {
+        let p = path.parse(name);
+        if (p.root || p.dir || !name)
+            return false;
+        return true;
+    }
+
+    async #read_seq(name) {
+        if (!this.#check_name(name))
+            return '';
+        let p = await this.#get_seq_dir();
+        if (p === undefined)
+            return '';
+        p = path.join(p, `${name}.cmdlist`);
+        let seq;
+        try {
+            seq = await fs.readFile(p, 'utf8');
+        }
+        catch (e) {
+            if (e.code !== 'ENOENT')
+                console.error(`Error reading sequence file ${p}: `, e);
+            return '';
+        }
+        return seq;
+    }
+
+    async #write_seq(name, seq, ovr) {
+        if (!this.#check_name(name))
+            return false;
+        let p = await this.#get_seq_dir();
+        if (p === undefined)
+            return false;
+        p = path.join(p, `${name}.cmdlist`);
+        try {
+            await fs.writeFile(p, seq, { mode: 0o644, flag: ovr ? 'w' : 'wx' });
+        }
+        catch (e) {
+            console.error(`Error writing sequence file ${p}: `, e);
+            return false;
+        }
+        return true;
+    }
+
+    async #delete_seq(name) {
+        if (!this.#check_name(name))
+            return true;
+        let p = await this.#get_seq_dir();
+        if (p === undefined)
+            return true;
+        p = path.join(p, `${name}.cmdlist`);
+        let seq;
+        try {
+            seq = await fs.unlink(p);
+        }
+        catch (e) {
+            if (e.code !== 'ENOENT')
+                return true;
+            console.error(`Error deleting sequence file ${p}: `, e);
+            return false;
+        }
+        return true;
     }
 };
 module.exports = Zynq;
