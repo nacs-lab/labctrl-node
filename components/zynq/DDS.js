@@ -162,8 +162,7 @@ export default class DDSWidget extends DataWidget {
             let extra;
             if (show_extra) {
                 extra = <React.Fragment>
-                  <div className={`w-100 d-flex d-${col_break}-none`}>
-                  </div>
+                  <div className={`w-100 d-flex d-${col_break}-none`}/>
                   <div className={`${col_name} d-flex d-${col_break}-none`}>
                     <b>Phase</b>
                   </div>
@@ -173,8 +172,7 @@ export default class DDSWidget extends DataWidget {
                     immediate={this.state.immediate}
                     ref={this.get_register_func(`phase${i}`)}
                     onChange={this.refresh_changed_state}/>
-                  <div className={`w-100 d-flex d-${col_break}-none`}>
-                  </div>
+                  <div className={`w-100 d-flex d-${col_break}-none`}/>
                   <div className={`col-12 col-${col_break}-${col_w_reset} px-1 text-center`}>
                     <button className="btn btn-xs btn-warning" dds_id={i}
                       onClick={this._reset_dds}>
@@ -198,8 +196,7 @@ export default class DDSWidget extends DataWidget {
                       <DDSNameField
                         className={`${col_value} col-${col_break}-${col_w_name} px-1`}
                         source_id={this.props.source_id} dds_id={i}/>
-                      <div className={`w-100 d-flex d-${col_break}-none`}>
-                      </div>
+                      <div className={`w-100 d-flex d-${col_break}-none`}/>
                       <div className={`${col_name} d-flex d-${col_break}-none`}>
                         <b className="nacs-d-xxs-none">Frequency</b>
                         <b className="nacs-d-xxs-flex d-none">Freq</b>
@@ -212,8 +209,7 @@ export default class DDSWidget extends DataWidget {
                         onChange={this.refresh_changed_state}/>
                     </div>
                   </div>
-                  <div className={`w-100 d-flex d-${col_break}-none`}>
-                  </div>
+                  <div className={`w-100 d-flex d-${col_break}-none`}/>
                   <div className={`col-${col_break}-${subcol2_w}`}>
                     <div className="row">
                       <div className={`${col_name} d-flex d-${col_break}-none`}>
