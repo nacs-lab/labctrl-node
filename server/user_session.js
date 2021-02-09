@@ -26,7 +26,7 @@ async function try_set_user(req, res) {
         return;
     let token = await User.find_token(user_cookie);
     if (!token || token.type != User.Token.LoginSession) {
-        if (res) {
+        if (res && res.clearCookie) {
             // TODO secure
             res.clearCookie('nacs_user', { httpOnly: true });
         }
@@ -39,7 +39,7 @@ async function try_set_user(req, res) {
         // If we are setting user token on a socket.io socket, we won't
         // have the reply available or be able to extend the expiration time of
         // the socket.
-        if (res) {
+        if (res && res.cookie) {
             // TODO secure
             res.cookie('nacs_user', user_cookie,
                        { expires: new_expire, httpOnly: true });
