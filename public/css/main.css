@@ -13,3 +13,14 @@
     display: flex !important;
   }
 }
+.nacs-code-line:before {
+  content: attr(data-line-number);
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.nacs-code-line {
+  margin-right: 7px;
+  margin-left: -4px;
+  position: relative;
+}
