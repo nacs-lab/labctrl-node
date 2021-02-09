@@ -18,6 +18,8 @@
 
 "use strict";
 
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 import api from '../lib/api';
 import socket from '../lib/socket';
 import GlobalContext from '../components/Global';
