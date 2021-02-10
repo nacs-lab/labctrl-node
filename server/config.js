@@ -36,7 +36,7 @@ const data = {
 fs.mkdirSync(data.dir, {recursive: true, mode: 0o755});
 exports.data = data;
 
-if (dev && !config.has('email.account')) {
+if ((dev || process.env.NODE_COMPILING == '1') && !config.has('email.account')) {
     exports.email = { test: true };
 }
 else {

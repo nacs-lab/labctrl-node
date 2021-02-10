@@ -37,7 +37,10 @@ add_subdirectory(tests)
 
 file(RELATIVE_PATH BIN_DIR_REL "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
 add_custom_target(deploy
-  COMMAND "${PROJECT_SOURCE_DIR}/cmake/deploy_next.sh" "${BIN_DIR_REL}"
+  COMMAND "NODE_CONFIG_DIR=${PROJECT_SOURCE_DIR}/conf"
+  "NODE_COMPILING=1"
+  "LABCTRL_LIB_DIR=${PROJECT_BINARY_DIR}/addon"
+  "${PROJECT_SOURCE_DIR}/cmake/deploy_next.sh" "${BIN_DIR_REL}"
   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
   DEPENDS compile-all)
 
