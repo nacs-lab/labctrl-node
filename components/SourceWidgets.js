@@ -36,6 +36,10 @@ const Pages = {
             name: "Clock",
             data: { clock: 0 },
             widget: dynamic(() => import('./zynq/Clock'))
+        },
+        seq: {
+            name: "Sequence",
+            widget: dynamic(() => import('./zynq/Seq'))
         }
     }
 };
