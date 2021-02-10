@@ -49,6 +49,7 @@ class User extends DB.Model {
     static Token = account.Token;
     // Minimum three days login time.
     static min_login_time = 3 * 24 * 60 * 60 * 1000;
+    static min_login_time_long = 3 * 30 * 24 * 60 * 60 * 1000; // 3 months
     // Hijack the init function ;-p
     // The importer should wait for `User.init()` before continuing.
     static init(...args) {

@@ -25,14 +25,17 @@ async function try_set_user(req, res) {
     if (!user_cookie)
         return;
     let token = await User.find_token(user_cookie);
-    if (!token || token.type != User.Token.LoginSession) {
+    if (!token || (token.type != User.Token.LoginSession &&
+                   token.type != User.Token.LoginSessionLong)) {
         if (res && res.clearCookie) {
             // TODO secure
             res.clearCookie('nacs_user', { httpOnly: true });
         }
         return;
     }
-    let min_time = Date.now() + User.min_login_time;
+    let min_login_time = token.type == User.Token.LoginSessionLong ?
+                         User.min_login_time_long : User.min_login_time;
+    let min_time = Date.now() + min_login_time;
     if (token.expires < min_time) {
         let new_expire = new Date(min_time);
         await token.update_expire(new_expire);

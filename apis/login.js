@@ -26,9 +26,10 @@ module.exports = async ({ req, res }, params) => {
     let user = await User.login(params.email, params.password);
     if (!user)
         return user;
-    let maxage = params.remember ? 3 * 30 * 24 * 60 * 60 * 1000 : User.min_login_time;
+    let maxage = (params.remember ? User.min_login_time_long : User.min_login_time) * 1.5;
+    let token_type = params.remember ? User.Token.LoginSessionLong : User.Token.LoginSession;
     let expires = new Date(Date.now() + maxage);
-    let token = await user.new_token(User.Token.LoginSession, expires);
+    let token = await user.new_token(token_type, expires);
     if (token)
         // TODO secure
         res.cookie('nacs_user', token, { expires, httpOnly: true });
