@@ -83,7 +83,7 @@ class Server {
         this.io.use(midware_express2io(setup_ns));
         this.io.use(function (socket, next) {
             let req = socket.request;
-            if (!req.nacs_user)
+            if (!req.nacs_user || !req.nacs_user.approved)
                 return next(new Error('Not authorized.'));
             next();
         });

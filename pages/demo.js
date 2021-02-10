@@ -39,7 +39,7 @@ export default class DemoPage extends React.Component {
     }
     render() {
         return <Wrapper>
-          <CheckLogin>
+          <CheckLogin approved={true}>
             <DemoWidget/>
           </CheckLogin>
         </Wrapper>;

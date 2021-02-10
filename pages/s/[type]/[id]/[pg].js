@@ -73,7 +73,7 @@ export default class Page extends React.Component {
     }
     render() {
         return <Wrapper>
-          <CheckLogin>
+          <CheckLogin approved={true}>
             {this._render_real()}
           </CheckLogin>
         </Wrapper>;
