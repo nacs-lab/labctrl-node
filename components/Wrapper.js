@@ -171,9 +171,9 @@ export default class Wrapper extends React.Component {
           </aside>
 
           {/* Content Wrapper. Contains page content */}
-          <div className="content-wrapper">
+          <div className="content-wrapper" style={{ overflow: 'auto' }}>
             {/* Main content */}
-            <div className="content">
+            <div className="content h-100">
               <div className="container-fluid">
                 <div className="row">
                   {this.props.children}
