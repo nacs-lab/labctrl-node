@@ -30,6 +30,8 @@ import App from 'next/app'
 export default class NaCsApp extends App {
     constructor(props) {
         super(props);
+        if (props.init_meta_values)
+            socket.put(...props.init_meta_values);
         this.state = {
             user: props.user,
             set_user: (user) => { this.setState({ user }); }
@@ -58,7 +60,8 @@ export default class NaCsApp extends App {
         // calls page's `getInitialProps` and fills `appProps.pageProps`
         const appProps = await App.getInitialProps(appContext);
         let user = (await api({'user': 'user'}, appContext.ctx)).user;
-        return { user, ...appProps };
+        let init_meta_values = await socket.get({'meta': 0}, true, appContext.ctx);
+        return { user, init_meta_values, ...appProps };
     }
     render() {
         const { Component, pageProps } = this.props;

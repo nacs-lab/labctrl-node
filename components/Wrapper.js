@@ -1,5 +1,5 @@
 /*************************************************************************
- *   Copyright (c) 2019 - 2019 Yichao Yu <yyc1992@gmail.com>             *
+ *   Copyright (c) 2019 - 2021 Yichao Yu <yyc1992@gmail.com>             *
  *                                                                       *
  *   This library is free software; you can redistribute it and/or       *
  *   modify it under the terms of the GNU Lesser General Public          *
@@ -20,6 +20,7 @@
 
 import api from '../lib/api';
 import GlobalContext from './Global';
+import MainSidebar from './MainSidebar';
 import { NotifyMenu, NotifyProvider } from './NotifyMenu';
 import { hash_md5 } from '../lib/crypto';
 
@@ -160,11 +161,7 @@ export default class Wrapper extends React.Component {
             {/* Sidebar */}
             <div className="sidebar">
               {/* Sidebar Menu */}
-              <nav className="mt-2">
-                <ul className="nav nav-flat nav-pills nav-sidebar flex-column"
-                  data-widget="treeview" role="menu" data-accordion="false">
-                </ul>
-              </nav>
+              <MainSidebar/>
               {/* /.sidebar-menu */}
             </div>
             {/* /.sidebar */}
