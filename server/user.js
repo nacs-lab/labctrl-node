@@ -43,7 +43,7 @@ async function secure_hash(input) {
 
 // Do not include `requested` so that normal user won't
 // know when an admin ignored the request.
-const info_attrs = ['email', 'verified', 'approved', 'admin'];
+const info_attrs = ['email', 'verified', 'approved', 'admin', 'preferences'];
 
 class User extends DB.Model {
     static Token = account.Token;
@@ -209,7 +209,12 @@ User.init({
         defaultValue: false
     },
     password_hash: DB.STRING,
-    last_failed: DB.DATE
+    last_failed: DB.DATE,
+    preferences: {
+        type: DB.JSON,
+        allowNull: false,
+        defaultValue: {}
+    }
 }, {
     sequelize: db,
     modelName: 'user'
