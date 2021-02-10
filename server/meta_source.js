@@ -26,9 +26,11 @@ class MetaSource extends SocketManager.Source {
         super(name);
         this.#refresh();
         SourceDB.afterCreate(this.#refresh);
+        SourceDB.afterUpdate(this.#refresh);
         SourceDB.afterSave(this.#refresh);
         SourceDB.afterDestroy(this.#refresh);
         SourceDB.afterBulkCreate(this.#refresh);
+        SourceDB.afterBulkUpdate(this.#refresh);
         SourceDB.afterBulkDestroy(this.#refresh);
     }
 
@@ -49,7 +51,8 @@ class MetaSource extends SocketManager.Source {
         for (let entry of await SourceDB.findAll()) {
             values.sources[entry.id] = {
                 type: entry.type,
-                name: entry.name
+                name: entry.name,
+                params: entry.params
             };
         }
         return values;
@@ -72,10 +75,31 @@ class MetaSource extends SocketManager.Source {
         return src.id;
     }
 
+    async #config_source(id, name, src_params) {
+        if (!id)
+            return { error: "Missing required source parameter." };
+        if (!name && !src_params)
+            return false;
+        let src = await SourceDB.findOne({ where: { id }});
+        if (!src)
+            return { error: `Source ${id} does not exist.` };
+        if (src.name == name)
+            name = undefined;
+        if (name && await SourceDB.findOne({ where: { name }}))
+            return { error: `Source name ${name} already exist.` };
+        if (!(await src.reconfig(name, src_params, this.sock_mgr)))
+            return { error: "Unknown error." };
+        return true;
+    }
+
     call_method(name, params) {
         if (name === 'add_source') {
-            let { type, name, src_params } = params;
+            let { type, name, params: src_params } = params;
             return this.#add_source(type, name, src_params);
+        }
+        else if (name === 'config_source') {
+            let { id, name, params: src_params } = params;
+            return this.#config_source(id, name, src_params);
         }
         return;
     }

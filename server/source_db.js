@@ -45,6 +45,25 @@ class SourceDB extends DB.Model {
             console.error(`Error adding source: ${this.name} of type ${this.type} `, e);
         }
     }
+    async reconfig(name, params, sock_mgr) {
+        let src_ent = await db.transaction(async () => {
+            let update = {};
+            if (name)
+                update.name = name;
+            if (params)
+                update.params = params;
+            return await this.update(update);
+        }).catch(db.err_handler(false));
+        if (!src_ent)
+            return false;
+        if (src_ent && sock_mgr) {
+            let src = sock_mgr.find_source(src_ent.id);
+            if (src) {
+                src.reconfig(src_ent.params);
+            }
+        }
+        return true;
+    }
 
     // Hijack the init function ;-p
     // The importer should wait for `SourceDB.init()`

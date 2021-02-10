@@ -463,6 +463,9 @@ class SocketManager {
         source.clear();
         this.#sources.delete(source.id);
     }
+    find_source(id) {
+        return this.#sources.get(id);
+    }
 };
 
 module.exports = SocketManager;
