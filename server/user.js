@@ -150,6 +150,14 @@ class User extends DB.Model {
             return await this.update({ verified: true, requested: true });
         }).catch(db.err_handler(null));
     }
+    async isapproved() {
+        return await db.transaction(async () => {
+            if ((await User.count({ where: { id: this.id }})) == 0)
+                return false;
+            await this.reload();
+            return this.approved;
+        }).catch(db.err_handler(false));
+    }
 
     // Token
     async new_token(type, expires) {

@@ -25,7 +25,7 @@ const { is_object, object_empty, update_object, copy_object } = require('../lib/
 class socket {
     static async #get_sock_mgr(ctx) {
         let server = Server.current();
-        if (!server || !ctx || !(await server.request_loggedin(ctx.req)))
+        if (!server || !ctx || !(await server.request_approved(ctx.req)))
             return;
         return server.sock_mgr;
     }

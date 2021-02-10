@@ -55,6 +55,25 @@ export default class Wrapper extends React.Component {
                 admin: this.context.user.admin
             };
         }
+
+        let approved = this.context.trusted || (this.context.user && this.context.user.approved);
+        let approved_widgets;
+        if (approved)
+            approved_widgets = <>
+              <Link href="/config">
+                <a className="dropdown-item">
+                  <i className="fas fa-edit mr-2"></i> Device Config
+                </a>
+              </Link>
+              <Link href="/demo">
+                <a className="dropdown-item">
+                  <i className="fas fa-code mr-2"></i> Demo
+                </a>
+              </Link>
+              <div className="dropdown-divider"></div>
+            </>;
+
+
         let user_dropdown;
         if (user.anonymous) {
             // Use a different fallback for anonymous so that people
@@ -69,6 +88,7 @@ export default class Wrapper extends React.Component {
             // would be that useful when the link is directly available on the page
             // so I don't think it'll be worth the effort....
             user_dropdown = <div className="dropdown-menu dropdown-menu-right">
+              {approved_widgets}
               <Link href="/login">
                 <a className="dropdown-item">
                   <i className="fas fa-sign-in-alt mr-2"></i> Login
@@ -93,19 +113,10 @@ export default class Wrapper extends React.Component {
                 {user.name}
               </span>
               <div className="dropdown-divider"></div>
+              {approved_widgets}
               <Link href="/profile">
                 <a className="dropdown-item">
                   <i className="fas fa-id-card mr-2"></i> Profile
-                </a>
-              </Link>
-              <Link href="/config">
-                <a className="dropdown-item">
-                  <i className="fas fa-edit mr-2"></i> Device Config
-                </a>
-              </Link>
-              <Link href="/demo">
-                <a className="dropdown-item">
-                  <i className="fas fa-code mr-2"></i> Demo
                 </a>
               </Link>
               {

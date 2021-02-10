@@ -25,17 +25,22 @@ import RedirectIn from './RedirectIn';
 import Link from 'next/link';
 import React from 'react';
 
-export default class RequireLogin extends React.Component {
+export default class CheckLogin extends React.Component {
     static contextType = GlobalContext;
     static defaultProps = {
         approved: false,
         admin: false
     };
     render() {
+        let { approved, admin, children } = this.props;
+        if (approved && this.context.trusted)
+            return <React.Fragment>
+              {children}
+            </React.Fragment>;
         let user = this.context.user;
         if (!user)
             return <Login/>;
-        if (this.props.approved && !user.approved)
+        if (approved && !user.approved)
             return <RedirectIn href="/profile">
               {(timeout, props) => (<div>
                 Account not approved.<br/>
@@ -43,7 +48,7 @@ export default class RequireLogin extends React.Component {
                 Redirecting in {timeout} seconds.
               </div>)}
             </RedirectIn>;
-        if (this.props.admin && !user.admin)
+        if (admin && !user.admin)
             return <RedirectIn href="/">
               {(timeout, props) => (<div>
                 You are not an admin.<br/>
@@ -51,7 +56,7 @@ export default class RequireLogin extends React.Component {
               </div>)}
             </RedirectIn>;
         return <React.Fragment>
-          {this.props.children}
+          {children}
         </React.Fragment>;
     }
 }

@@ -95,7 +95,7 @@ export default class Main extends React.Component {
 
     render() {
         return <Wrapper>
-          <CheckLogin>
+          <CheckLogin approved={true}>
             {this._render_real()}
           </CheckLogin>
         </Wrapper>;

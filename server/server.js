@@ -80,7 +80,7 @@ class Server {
         this.next = next({ dev: process.env.NODE_ENV == 'development' });
         this.handle = this.next.getRequestHandler();
         this.sock_mgr = new SocketManager();
-        this.sock_mgr.set_auth_handler((sock) => this.request_loggedin(sock.request));
+        this.sock_mgr.set_auth_handler((sock) => this.request_approved(sock.request));
         this.sock_mgr.add_source(new DemoSource('demo0'));
         this.sock_mgr.add_source(new MetaSource('meta'));
         this.prepare = Promise.all([this.next.prepare(),
@@ -89,9 +89,13 @@ class Server {
                                         this.init();
                                     });
     }
-    async request_loggedin(req) {
-        return (req && req.nacs_user && req.nacs_user_token &&
-                await req.nacs_user_token.isvalid());
+    async request_approved(req) {
+        if (!req)
+            return false;
+        if (req.nacs_trusted)
+            return true;
+        return (req.nacs_user && await req.nacs_user.isapproved() &&
+                req.nacs_user_token && await req.nacs_user_token.isvalid());
     }
     init() {
         this.express = express();
@@ -113,7 +117,7 @@ class Server {
         this.io.use(midware_express2io(setup_ns));
         this.io.use(function (socket, next) {
             let req = socket.request;
-            if (!req.nacs_user || !req.nacs_user.approved)
+            if (!req.nacs_trusted && (!req.nacs_user || !req.nacs_user.approved))
                 return next(new Error('Not authorized.'));
             next();
         });

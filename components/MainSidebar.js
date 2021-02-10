@@ -75,21 +75,25 @@ class MainSidebar extends React.Component {
     }
 
     _render_items() {
-        if (!this.context.user)
-            return <li className="nav-item">
-              <span className="nav-link">
-                <Link href="/login">
-                  <a> Login </a>
-                </Link> to see more options
-              </span>
-            </li>;
+        if (!this.context.trusted) {
+            if (!this.context.user) {
+                return <li className="nav-item">
+                  <span className="nav-link">
+                    <Link href="/login">
+                      <a> Login </a>
+                    </Link> to see more options
+                  </span>
+                </li>;
+            }
 
-        if (!this.context.user.approved)
-            return <li className="nav-item">
-              <span className="nav-link">
-                Waiting for approval
-              </span>
-            </li>;
+            if (!this.context.user.approved) {
+                return <li className="nav-item">
+                  <span className="nav-link">
+                    Waiting for approval
+                  </span>
+                </li>;
+            }
+        }
 
         let router = this.props.router;
         let { type: active_type, id: active_id, pg: active_pg } = router.query;
