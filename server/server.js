@@ -22,6 +22,7 @@ const api = require('./api');
 const SocketManager = require('./socket_manager');
 const SourceDB = require('./source_db');
 const DemoSource = require('./demo_source');
+const MetaSource = require('./meta_source');
 const User = require('./user');
 const user_session = require('./user_session');
 
@@ -54,6 +55,7 @@ class Server {
         this.sock_mgr = new SocketManager();
         this.sock_mgr.set_auth_handler((sock) => this.request_loggedin(sock.request));
         this.sock_mgr.add_source(new DemoSource('demo0'));
+        this.sock_mgr.add_source(new MetaSource('meta'));
         this.prepare = Promise.all([this.next.prepare(),
                                     SourceDB.register_all(this.sock_mgr),
                                     User.init()]).then(() => {
