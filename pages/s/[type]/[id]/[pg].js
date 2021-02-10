@@ -45,7 +45,7 @@ export default class Page extends React.Component {
         return props;
     }
     constructor(props) {
-        super(props)
+        super(props);
         if (props.initvalues) {
             socket.put(...props.initvalues);
         }
