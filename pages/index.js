@@ -21,12 +21,83 @@
 import Wrapper from '../components/Wrapper';
 import CheckLogin from '../components/CheckLogin';
 
-export default function Default() {
-    return (
-        <Wrapper>
+import socket from '../lib/socket';
+import { getfield_recursive } from '../lib/utils';
+
+import Link from 'next/link';
+import React from 'react';
+
+const meta_params = { meta: 0 };
+const source_path = ['meta', 'sources'];
+
+export default class Main extends React.Component {
+    #watch_id
+    constructor(props) {
+        super(props);
+        this.state = this._source_state();
+    }
+
+    _source_state() {
+        let sources = getfield_recursive(socket.get_cached(meta_params), source_path);
+        let ary = [];
+        if (sources) {
+            for (let id of Object.getOwnPropertyNames(sources)) {
+                ary.push({ id, ...sources[id] });
+            }
+        }
+        return { sources: ary };
+    }
+    _update = () => {
+        this.setState(this._source_state());
+    }
+
+    _refresh = () => {
+        if (!socket.connected) {
+            this.#watch_id = undefined;
+            return;
+        }
+        if (this.#watch_id !== undefined)
+            return;
+        this.#watch_id = socket.watch(meta_params, this._update);
+        this._update();
+    }
+    componentDidMount() {
+        socket.on('connect', this._refresh);
+        socket.on('disconnect', this._refresh);
+        this._refresh();
+    }
+    componentWillUnmount() {
+        if (this.#watch_id !== undefined) {
+            socket.unwatch(this.#watch_id);
+        }
+    }
+
+    _render_real() {
+        let { sources } = this.state;
+        let src_btns = [];
+        for (let { type, id, name } of sources)
+            src_btns.push(
+                <Link href={`/s/${type}/${id}/`} key={id}>
+                  <a className="list-group-item list-group-item-action">
+                    {name}
+                  </a>
+                </Link>);
+
+        return <div className="container">
+          <div className="row">
+            <legend className="text-center">Devices</legend>
+          </div>
+          <div className="list-group">
+            {src_btns}
+          </div>
+        </div>;
+    }
+
+    render() {
+        return <Wrapper>
           <CheckLogin>
-            Home
+            {this._render_real()}
           </CheckLogin>
-        </Wrapper>
-    );
+        </Wrapper>;
+    }
 }
