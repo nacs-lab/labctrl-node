@@ -98,6 +98,8 @@ class MainSidebar extends React.Component {
             on_src_page = active_type && active_id && active_pg;
         if (router.pathname == '/s/[type]/[id]')
             on_src_page = active_type && active_id;
+        if (router.pathname == '/s/[type]/[id]/config')
+            on_src_page = active_type && active_id;
 
         let is_active = (type, id, pg) => {
             if (!on_src_page)
@@ -132,9 +134,14 @@ class MainSidebar extends React.Component {
             items.push(<li className="nav-item menu-open" key={`${type}-${id}`}>
               <span className={`nav-link ${active ? 'active' : ''}`}>
                 <Link href={`/s/${type}/${id}`}>
-                  <a><i className="fas fa-th nav-icon"></i></a>
+                  <a><i className={`fas fa-th nav-icon ${active ? 'text-light' : ''}`}/></a>
                 </Link>
-                <p>{name} <i className="right fas fa-angle-left"/></p>
+                <p>{name}
+                  <Link href={`/s/${type}/${id}/config`}>
+                    <a><i className={`fas fa-edit ml-2 ${active ? 'text-light' : ''}`}/></a>
+                  </Link>
+                  <i className="right fas fa-angle-left"/>
+                </p>
               </span>
               <ul className="nav nav-treeview">
                 {page_links}

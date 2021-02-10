@@ -1,5 +1,5 @@
 /*************************************************************************
- *   Copyright (c) 2019 - 2021 Yichao Yu <yyc1992@gmail.com>             *
+ *   Copyright (c) 2019 - 2019 Yichao Yu <yyc1992@gmail.com>             *
  *                                                                       *
  *   This library is free software; you can redistribute it and/or       *
  *   modify it under the terms of the GNU Lesser General Public          *
@@ -18,44 +18,39 @@
 
 "use strict";
 
-import Wrapper from '../../../components/Wrapper';
-import CheckLogin from '../../../components/CheckLogin';
-import RedirectIn from '../../../components/RedirectIn';
-import { Pages } from '../../../components/SourceWidgets';
+import Wrapper from '../components/Wrapper';
+import CheckLogin from '../components/CheckLogin';
 
-import socket from '../../../lib/socket';
-import { getfield_recursive } from '../../../lib/utils';
+import socket from '../lib/socket';
+import { getfield_recursive } from '../lib/utils';
 
 import Link from 'next/link';
 import React from 'react';
 
-export default class Page extends React.Component {
-    static async getInitialProps(ctx) {
-        let { type, id, pg } = ctx.query;
-        let props = { src_type: type, src_id: id, pages: [] };
-        let pages = Pages[type];
-        if (pages) {
-            for (let pg in pages) {
-                props.pages.push({ id: pg, name: pages[pg].name });
-            }
-        }
-        return props;
-    }
+const meta_params = { meta: 0 };
+const source_path = ['meta', 'sources'];
+
+export default class Main extends React.Component {
     #watch_id
-    #watch_param
-    #name_path
     constructor(props) {
         super(props);
-        this.#watch_param = { meta: { sources: { [props.src_id]: { name: 0 }}}};
-        this.#name_path = ['meta', 'sources', props.src_id, 'name'];
-        this.state = { name: this._get_name() };
+        this.state = this._source_state();
     }
-    _get_name() {
-        return getfield_recursive(socket.get_cached(this.#watch_param), this.#name_path);
+
+    _source_state() {
+        let sources = getfield_recursive(socket.get_cached(meta_params), source_path);
+        let ary = [];
+        if (sources) {
+            for (let id of Object.getOwnPropertyNames(sources)) {
+                ary.push({ id, ...sources[id] });
+            }
+        }
+        return { sources: ary };
     }
     _update = () => {
-        this.setState({ name: this._get_name() });
+        this.setState(this._source_state());
     }
+
     _refresh = () => {
         if (!socket.connected) {
             this.#watch_id = undefined;
@@ -63,7 +58,7 @@ export default class Page extends React.Component {
         }
         if (this.#watch_id !== undefined)
             return;
-        this.#watch_id = socket.watch(this.#watch_param, this._update);
+        this.#watch_id = socket.watch(meta_params, this._update);
         this._update();
     }
     componentDidMount() {
@@ -78,39 +73,29 @@ export default class Page extends React.Component {
     }
 
     _render_real() {
-        let { name = '' } = this.state;
-        let { pages, src_type, src_id } = this.props;
-        let page_btns = [];
-        for (let pg of pages)
-            page_btns.push(
-                <Link href={`/s/${src_type}/${src_id}/${pg.id}`} key={pg.id}>
+        let { sources } = this.state;
+        let src_btns = [];
+        for (let { type, id, name } of sources)
+            src_btns.push(
+                <Link href={`/s/${type}/${id}/config`} key={id}>
                   <a className="list-group-item list-group-item-action">
-                    {pg.name}
+                    {name}
                   </a>
                 </Link>);
 
         return <div className="container">
           <div className="row">
-            <legend className="text-center">{name}</legend>
+            <legend className="text-center">Device Configure</legend>
           </div>
           <div className="list-group">
-            {page_btns}
-          </div>
-          <hr/>
-          <div className="row">
-            <div className="col text-center">
-              <Link href={`/s/${src_type}/${src_id}/config`}>
-                <a className="btn btn-info">
-                  <i className="fas fa-edit mr-2"/>Configure
-                </a>
-              </Link>
-            </div>
+            {src_btns}
           </div>
         </div>;
     }
+
     render() {
         return <Wrapper>
-          <CheckLogin approved={true}>
+          <CheckLogin>
             {this._render_real()}
           </CheckLogin>
         </Wrapper>;

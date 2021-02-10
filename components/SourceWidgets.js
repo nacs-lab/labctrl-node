@@ -44,6 +44,10 @@ const Pages = {
     }
 };
 
+const Config = {
+    zynq: dynamic(() => import('./zynq/Config'))
+};
+
 const Widgets = {
     zynq: {
         dds_name: {
@@ -79,4 +83,4 @@ const Widgets = {
     }
 };
 
-export { Pages, Widgets };
+export { Pages, Widgets, Config };
