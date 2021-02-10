@@ -19,6 +19,7 @@
 "use strict";
 
 const api = require('./api');
+const config = require('./config');
 const SocketManager = require('./socket_manager');
 const SourceDB = require('./source_db');
 const DemoSource = require('./demo_source');
@@ -35,8 +36,34 @@ const http = require('http');
 const next = require('next');
 const path = require('path');
 const socketio = require('socket.io');
+const ip_filter = require("ip-filter");
 
 const data_dir = path.join(__dirname, '../public/');
+
+function trusted_ip(ip) {
+    if (!ip)
+        return false;
+    if (ip_filter(ip, config.untrust_ips))
+        return false;
+    return !!ip_filter(ip, config.trust_ips);
+}
+
+function check_ip(req, res, next) {
+    req.nacs_trusted = trusted_ip(req.ip);
+    next();
+}
+
+function check_ip_socket(socket, next) {
+    let ip = socket.request.connection.remoteAddress;
+    if (config.trust_proxy) {
+        let proxy = socket.handshake.headers['x-forwarded-for'];
+        if (proxy)
+            proxy = proxy.trim().split(' ')[0]
+        ip = proxy ? proxy : ip;
+    }
+    socket.request.nacs_trusted = trusted_ip(ip);
+    next();
+}
 
 function midware_express2io(mw) {
     return function (socket, next) {
@@ -68,6 +95,8 @@ class Server {
     }
     init() {
         this.express = express();
+        if (config.trust_proxy)
+            this.express.set('trust proxy', true);
         this.http = http.createServer(this.express);
         let setup_ns = (req, res, next) => {
             return Server.namespace.runAndReturn(() => {
@@ -79,6 +108,7 @@ class Server {
 
         this.io = socketio(this.http);
         this.io.use(midware_express2io(cp));
+        this.io.use(check_ip_socket);
         this.io.use(midware_express2io(user_session));
         this.io.use(midware_express2io(setup_ns));
         this.io.use(function (socket, next) {
@@ -96,6 +126,7 @@ class Server {
                          express.static(path.join(data_dir, 'img/favicon.ico')));
         this.express.use(body_parser.json());
         this.express.use(cp);
+        this.express.use(check_ip);
         this.express.use(user_session);
         this.express.use(setup_ns);
         this.express.post('/api', async (req, res, next) => {

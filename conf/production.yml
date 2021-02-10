@@ -2,3 +2,11 @@ db:
   dir: db/
 data:
   dir: data/
+# trust_proxy: false
+# trust_ips:
+#   - 127.0.0.1
+#   - 10.*.*.*
+#   - 192.168.*.*
+untrust_ips:
+  - 10.*.*.1
+  - 192.168.*.1

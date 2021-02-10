@@ -2,3 +2,10 @@ db:
   dir: @BUILD_DIR@/db/
 data:
   dir: @BUILD_DIR@/test_data/
+trust_ips:
+  - 127.0.0.1
+  - ::ffff:127.0.0.1
+  - ::1
+  - 192.168.*.*
+untrust_ips:
+  - 192.168.*.1
