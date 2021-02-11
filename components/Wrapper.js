@@ -62,17 +62,17 @@ export default class Wrapper extends React.Component {
             approved_widgets = <>
               <Link href="/add">
                 <a className="dropdown-item">
-                  <i className="fas fa-plus mr-2"></i> Add Device
+                  <i className="fas fa-fw fa-plus mr-2"></i> Add Device
                 </a>
               </Link>
               <Link href="/config">
                 <a className="dropdown-item">
-                  <i className="fas fa-edit mr-2"></i> Device Config
+                  <i className="fas fa-fw fa-edit mr-2"></i> Device Config
                 </a>
               </Link>
               <Link href="/demo">
                 <a className="dropdown-item">
-                  <i className="fas fa-code mr-2"></i> Demo
+                  <i className="fas fa-fw fa-code mr-2"></i> Demo
                 </a>
               </Link>
               <div className="dropdown-divider"></div>
@@ -96,13 +96,13 @@ export default class Wrapper extends React.Component {
               {approved_widgets}
               <Link href="/login">
                 <a className="dropdown-item">
-                  <i className="fas fa-sign-in-alt mr-2"></i> Login
+                  <i className="fas fa-fw fa-sign-in-alt mr-2"></i> Login
                 </a>
               </Link>
               <div className="dropdown-divider"></div>
               <Link href="/register">
                 <a className="dropdown-item">
-                  <i className="fas fa-user-plus mr-2"></i> Register
+                  <i className="fas fa-fw fa-user-plus mr-2"></i> Register
                 </a>
               </Link>
             </div>;
@@ -121,7 +121,7 @@ export default class Wrapper extends React.Component {
               {approved_widgets}
               <Link href="/profile">
                 <a className="dropdown-item">
-                  <i className="fas fa-id-card mr-2"></i> Profile
+                  <i className="fas fa-fw fa-id-card mr-2"></i> Profile
                 </a>
               </Link>
               {
@@ -129,14 +129,14 @@ export default class Wrapper extends React.Component {
                     <div className="dropdown-divider"></div>
                     <Link href="/admin">
                       <a className="dropdown-item">
-                        <i className="fas fa-users-cog mr-2"></i> Admin
+                        <i className="fas fa-fw fa-users-cog mr-2"></i> Admin
                       </a>
                     </Link>
                   </React.Fragment> : <React.Fragment/>
               }
               <div className="dropdown-divider"></div>
               <a href="#" className="dropdown-item" onClick={this.logout}>
-                <i className="fas fa-sign-out-alt mr-2"></i> Log out
+                <i className="fas fa-fw fa-sign-out-alt mr-2"></i> Log out
               </a>
             </div>;
         }
