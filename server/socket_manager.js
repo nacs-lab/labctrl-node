@@ -67,8 +67,11 @@ class Source {
         return this.#id;
     }
     #mgr
-    set socket_manager(mgr) {
+    set_sock_mgr(mgr) {
         this.#mgr = mgr;
+    }
+    get sock_mgr() {
+        return this.#mgr;
     }
     #values = Object.create(null)
     #sockets = new Map()
@@ -456,7 +459,7 @@ class SocketManager {
     }
 
     add_source(source) {
-        source.socket_manager = this;
+        source.set_sock_mgr(this);
         this.#sources.set(source.id, source);
     }
     remove_source(source) {
