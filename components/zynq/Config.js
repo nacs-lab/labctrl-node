@@ -19,7 +19,7 @@
 "use strict";
 
 import socket from '../../lib/socket';
-import { getfield_recursive } from '../../lib/utils';
+import { is_object, getfield_recursive } from '../../lib/utils';
 
 import Link from 'next/link';
 import Router from 'next/router';
@@ -34,7 +34,7 @@ export default class ZynqConfig extends React.Component {
         super(props);
         this.#watch_param = { meta: { sources: { [props.src_id]: 0 }}};
         this.#source_path = ['meta', 'sources', props.src_id];
-        this.state = { modal: false, ...this._get_state() };
+        this.state = { modal: null, ...this._get_state() };
     }
     _get_state() {
         let params = getfield_recursive(socket.get_cached(this.#watch_param),
@@ -89,7 +89,19 @@ export default class ZynqConfig extends React.Component {
         let { name, addr } = this.state;
         let res = await socket.call('meta', 'config_source', { id: src_id, name: name,
                                                                params: { addr: addr } });
-        console.log(res); // TODO error message
+        if (is_object(res)) {
+            let msg = res.error;
+            if (!msg)
+                msg = 'Unknown error';
+            this.setState({ modal: { title: 'Error saving configuration', msg }});
+        }
+        else if (!res) {
+            this.setState({ modal: { title: 'Error saving configuration',
+                                     msg: 'Unknown error' }});
+        }
+        else {
+            this.setState({ modal: 2 });
+        }
     }
 
     _name_change = (e) => {
@@ -98,25 +110,83 @@ export default class ZynqConfig extends React.Component {
     _addr_change = (e) => {
         this.setState({ addr: e.target.value });
     }
-    _show_modal = (e) => {
+    _show_delete_confirm = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        this.setState({ modal: true });
+        this.setState({ modal: 1 });
     }
     _do_delete = async () => {
         let res = await socket.call('meta', 'remove_source', { id: this.props.src_id });
-        // TODO error message
-        if (res === true) {
+        if (is_object(res)) {
+            let msg = res.error;
+            if (!msg)
+                msg = 'Unknown error';
+            this.setState({ modal: { title: 'Error deleting device', msg }});
+        }
+        else if (!res) {
+            this.setState({ modal: { title: 'Error deleting device',
+                                     msg: 'Unknown error' }});
+        }
+        else {
             Router.push('/');
         }
     }
     _close_modal = () => {
-        this.setState({ modal: false });
+        this.setState({ modal: null });
     }
 
     render() {
         let { name, addr, modal } = this.state;
         let { src_id } = this.props;
+
+        let modal_widget;
+        if (modal === 1) {
+            modal_widget = <Modal onHide={this._close_modal} show={true}>
+              <Modal.Header>Confirm deletion</Modal.Header>
+              <Modal.Body>Delete source: {name}</Modal.Body>
+              <Modal.Footer>
+                <button className="btn btn-danger"
+                  onClick={this._do_delete}>Delete</button>
+                <button className="btn btn-secondary"
+                  onClick={this._close_modal}>Cancel</button>
+              </Modal.Footer>
+            </Modal>;
+        }
+        else if (modal === 2) {
+            modal_widget = <Modal onHide={this._close_modal} show={true}>
+              <Modal.Header>Configure saved</Modal.Header>
+              <Modal.Body>Back to device page?</Modal.Body>
+              <Modal.Footer>
+                <Link href={`/s/zynq/${src_id}`}>
+                  <a className="btn btn-primary">Device Page</a>
+                </Link>
+                <button className="btn btn-secondary"
+                  onClick={this._close_modal}>Close</button>
+              </Modal.Footer>
+            </Modal>;
+        }
+        else if (modal) {
+            modal_widget = <Modal onHide={this._close_modal} show={true}>
+              <Modal.Header>{modal.title}</Modal.Header>
+              <Modal.Body>{modal.msg}</Modal.Body>
+              <Modal.Footer>
+                <button className="btn btn-secondary"
+                  onClick={this._close_modal}>Close</button>
+              </Modal.Footer>
+            </Modal>;
+        }
+        else {
+            modal_widget = <Modal onHide={this._close_modal} show={false}>
+              <Modal.Header></Modal.Header>
+              <Modal.Body></Modal.Body>
+              <Modal.Footer>
+                <button className="btn btn-secondary"
+                  onClick={this._close_modal}>Close</button>
+              </Modal.Footer>
+            </Modal>;
+        }
+
+
         return <div className="container">
           <div className="row">
             <legend className="text-center">Zynq Device Config</legend>
@@ -145,20 +215,11 @@ export default class ZynqConfig extends React.Component {
                 </Link>
                 <span className="mx-3 border h-100"></span>
                 <button className="btn btn-sm btn-danger"
-                  onClick={this._show_modal}>Remove</button>
+                  onClick={this._show_delete_confirm}>Remove</button>
               </div>
             </div>
           </form>
-          <Modal onHide={this._close_modal} show={modal}>
-            <Modal.Header>Confirm deletion</Modal.Header>
-            <Modal.Body>Delete source: {name}</Modal.Body>
-            <Modal.Footer>
-              <button className="btn btn-danger"
-                onClick={this._do_delete}>Delete</button>
-              <button className="btn btn-secondary"
-                onClick={this._close_modal}>Cancel</button>
-            </Modal.Footer>
-          </Modal>
+          {modal_widget}
         </div>;
     }
 }
