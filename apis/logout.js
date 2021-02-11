@@ -18,11 +18,12 @@
 
 "use strict";
 
+const config = require('../server/config');
+
 module.exports = async ({ req, res }) => {
     if (!req.nacs_user)
         return false;
-    // TODO secure
-    res.clearCookie('nacs_user', { httpOnly: true });
+    res.clearCookie('nacs_user', { httpOnly: true, secure: config.https });
     if (req.nacs_user_token)
         await req.nacs_user_token.invalidate();
     return true;

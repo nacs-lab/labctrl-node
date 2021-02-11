@@ -19,6 +19,7 @@
 "use strict";
 
 const User = require('../server/user');
+const config = require('../server/config');
 
 module.exports = async ({ req, res }, params) => {
     if (req.nacs_user)
@@ -31,7 +32,7 @@ module.exports = async ({ req, res }, params) => {
     let expires = new Date(Date.now() + maxage);
     let token = await user.new_token(token_type, expires);
     if (token)
-        // TODO secure
-        res.cookie('nacs_user', token, { expires, httpOnly: true, sameSite: true });
+        res.cookie('nacs_user', token, { expires, httpOnly: true,
+                                         sameSite: true, secure: config.https });
     return user.info();
 };

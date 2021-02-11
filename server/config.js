@@ -49,3 +49,4 @@ else {
 exports.trust_proxy = config.has('trust_proxy') ? !!config.get('trust_proxy') : false;
 exports.trust_ips = config.has('trust_ips') ? config.get('trust_ips') : [];
 exports.untrust_ips = config.has('untrust_ips') ? config.get('untrust_ips') : [];
+exports.https = config.has('https') && !!config.get('https');

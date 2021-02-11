@@ -19,6 +19,7 @@
 "use strict";
 
 const User = require('./user');
+const config = require('./config');
 
 async function try_set_user(req, res) {
     let user_cookie = req.cookies.nacs_user;
@@ -28,8 +29,7 @@ async function try_set_user(req, res) {
     if (!token || (token.type != User.Token.LoginSession &&
                    token.type != User.Token.LoginSessionLong)) {
         if (res && res.clearCookie) {
-            // TODO secure
-            res.clearCookie('nacs_user', { httpOnly: true });
+            res.clearCookie('nacs_user', { httpOnly: true, secure: config.https });
         }
         return;
     }
@@ -43,9 +43,9 @@ async function try_set_user(req, res) {
         // have the reply available or be able to extend the expiration time of
         // the socket.
         if (res && res.cookie) {
-            // TODO secure
             res.cookie('nacs_user', user_cookie,
-                       { expires: new_expire, httpOnly: true, sameSite: true });
+                       { expires: new_expire, httpOnly: true,
+                         sameSite: true, secure: config.https });
         }
     }
     req.nacs_user_token = token;

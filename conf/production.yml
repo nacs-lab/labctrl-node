@@ -2,6 +2,7 @@ db:
   dir: db/
 data:
   dir: data/
+# https: false
 # trust_proxy: false
 # trust_ips:
 #   - 127.0.0.1
