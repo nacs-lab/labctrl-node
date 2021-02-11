@@ -48,12 +48,7 @@ function trusted_ip(ip) {
     return !!ip_filter(ip, config.trust_ips);
 }
 
-function check_ip(req, res, next) {
-    req.nacs_trusted = trusted_ip(req.ip);
-    next();
-}
-
-function check_ip_socket(socket, next) {
+function get_socket_ip(socket) {
     let ip = socket.request.connection.remoteAddress;
     if (config.trust_proxy) {
         let proxy = socket.handshake.headers['x-forwarded-for'];
@@ -61,7 +56,16 @@ function check_ip_socket(socket, next) {
             proxy = proxy.trim().split(' ')[0]
         ip = proxy ? proxy : ip;
     }
-    socket.request.nacs_trusted = trusted_ip(ip);
+    return ip;
+}
+
+function check_ip(req, res, next) {
+    req.nacs_trusted = trusted_ip(req.ip);
+    next();
+}
+
+function check_ip_socket(socket, next) {
+    socket.request.nacs_trusted = trusted_ip(get_socket_ip(socket));
     next();
 }
 
@@ -69,6 +73,15 @@ function midware_express2io(mw) {
     return function (socket, next) {
         mw(socket.request, {}, next);
     };
+}
+
+function socket_logger(socket, name, params) {
+    let req = socket.request;
+    let ip = get_socket_ip(socket);
+    let trusted = req.nacs_trusted;
+    let user = req && req.nacs_user ? req.nacs_user.email : null
+    console.log(`socket(${ip}, user: ${user}, trusted: ${trusted}): ` +
+                `${name}, ${JSON.stringify(params)}`);
 }
 
 class Server {
@@ -81,6 +94,7 @@ class Server {
         this.handle = this.next.getRequestHandler();
         this.sock_mgr = new SocketManager();
         this.sock_mgr.set_auth_handler((sock) => this.request_approved(sock.request));
+        this.sock_mgr.set_log_handler(socket_logger);
         this.sock_mgr.add_source(new DemoSource('demo0'));
         this.sock_mgr.add_source(new MetaSource('meta'));
         this.prepare = Promise.all([this.next.prepare(),

@@ -335,8 +335,19 @@ class SocketManager {
         return true;
     }
 
+    #log_handler
+    set_log_handler(handler) {
+        this.#log_handler = handler;
+    }
+    #log_socket(sock, name, params) {
+        if (this.#log_handler !== undefined) {
+            this.#log_handler(sock, name, params);
+        }
+    }
+
     add_socket(sock) {
         let call_handler = (src_id, name, params, callback) => {
+            this.#log_socket(sock, 'call', { src_id, name, params });
             this.#handle(sock, 'call', () => this.call_method(src_id, name, params), callback);
         }
         let get_handler = (params, callback) => {
@@ -347,6 +358,7 @@ class SocketManager {
             this.#handle(sock, 'get', () => this.get_values(params), callback);
         }
         let set_handler = (params, callback) => {
+            this.#log_socket(sock, 'set', params);
             this.#handle(sock, 'set', () => this.set_values(params), callback);
         }
 
