@@ -1,5 +1,5 @@
 /*************************************************************************
- *   Copyright (c) 2019 - 2021 Yichao Yu <yyc1992@gmail.com>             *
+ *   Copyright (c) 2019 - 2019 Yichao Yu <yyc1992@gmail.com>             *
  *                                                                       *
  *   This library is free software; you can redistribute it and/or       *
  *   modify it under the terms of the GNU Lesser General Public          *
@@ -18,39 +18,35 @@
 
 "use strict";
 
-import Wrapper from '../../../../components/Wrapper';
-import CheckLogin from '../../../../components/CheckLogin';
-import RedirectIn from '../../../../components/RedirectIn';
-import { Config } from '../../../../components/SourceWidgets';
-
-import socket from '../../../../lib/socket';
+import Wrapper from '../components/Wrapper';
+import CheckLogin from '../components/CheckLogin';
+import { Config } from '../components/SourceWidgets';
 
 import Link from 'next/link';
 import React from 'react';
 
-export default class Page extends React.Component {
-    static async getInitialProps(ctx) {
-        let { type, id } = ctx.query;
-        return { src_type: type, src_id: id };
-    }
-    _error() {
-        return <RedirectIn href="/">
-          {(timeout, props) => (<div>
-            Unknown page.<br/>
-            Redirecting to <Link {...props}><a>home page</a></Link> in {timeout} seconds.
-          </div>)}
-        </RedirectIn>;
-    }
+export default class Add extends React.Component {
     _render_real() {
-        let { src_type, src_id } = this.props;
-        let conf = Config[src_type];
-        if (!conf)
-            return this._error();
-        let Widget = conf.edit;
-        if (!Widget)
-            return this._error();
-        return <Widget src_id={src_id}/>;
+        let add_btns = [];
+        for (let type in Config) {
+            add_btns.push(
+                <Link href={`/s/${type}/add`} key={type}>
+                  <a className="list-group-item list-group-item-action">
+                    {Config[type].name}
+                  </a>
+                </Link>);
+        }
+
+        return <div className="container">
+          <div className="row">
+            <legend className="text-center">Add Device</legend>
+          </div>
+          <div className="list-group">
+            {add_btns}
+          </div>
+        </div>;
     }
+
     render() {
         return <Wrapper>
           <CheckLogin approved={true}>

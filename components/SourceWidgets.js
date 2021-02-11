@@ -45,7 +45,9 @@ const Pages = {
 };
 
 const Config = {
-    zynq: dynamic(() => import('./zynq/Config'))
+    zynq: { name: 'Zynq Device',
+            edit: dynamic(() => import('./zynq/Config')),
+            add: dynamic(() => import('./zynq/Add')) }
 };
 
 const Widgets = {

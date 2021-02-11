@@ -18,20 +18,20 @@
 
 "use strict";
 
-import Wrapper from '../../../../components/Wrapper';
-import CheckLogin from '../../../../components/CheckLogin';
-import RedirectIn from '../../../../components/RedirectIn';
-import { Config } from '../../../../components/SourceWidgets';
+import Wrapper from '../../../components/Wrapper';
+import CheckLogin from '../../../components/CheckLogin';
+import RedirectIn from '../../../components/RedirectIn';
+import { Config } from '../../../components/SourceWidgets';
 
-import socket from '../../../../lib/socket';
+import socket from '../../../lib/socket';
 
 import Link from 'next/link';
 import React from 'react';
 
 export default class Page extends React.Component {
     static async getInitialProps(ctx) {
-        let { type, id } = ctx.query;
-        return { src_type: type, src_id: id };
+        let { type } = ctx.query;
+        return { src_type: type };
     }
     _error() {
         return <RedirectIn href="/">
@@ -42,14 +42,14 @@ export default class Page extends React.Component {
         </RedirectIn>;
     }
     _render_real() {
-        let { src_type, src_id } = this.props;
+        let { src_type } = this.props;
         let conf = Config[src_type];
         if (!conf)
             return this._error();
-        let Widget = conf.edit;
+        let Widget = conf.add;
         if (!Widget)
             return this._error();
-        return <Widget src_id={src_id}/>;
+        return <Widget/>;
     }
     render() {
         return <Wrapper>

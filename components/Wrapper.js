@@ -60,6 +60,11 @@ export default class Wrapper extends React.Component {
         let approved_widgets;
         if (approved)
             approved_widgets = <>
+              <Link href="/add">
+                <a className="dropdown-item">
+                  <i className="fas fa-plus mr-2"></i> Add Device
+                </a>
+              </Link>
               <Link href="/config">
                 <a className="dropdown-item">
                   <i className="fas fa-edit mr-2"></i> Device Config
