@@ -41,7 +41,7 @@ module.exports = async ({ req, res }, params) => {
         let token = await user.new_token(User.Token.LoginSession, expires);
         if (token) {
             // TODO secure
-            res.cookie('nacs_user', token, { expires, httpOnly: true });
+            res.cookie('nacs_user', token, { expires, httpOnly: true, sameSite: true });
         }
     }
     else {
