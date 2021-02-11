@@ -78,13 +78,15 @@ class MetaSource extends SocketManager.Source {
     async #config_source(id, name, src_params) {
         if (!id)
             return { error: "Missing required source parameter." };
-        if (!name && !src_params)
+        if (name === undefined && src_params === undefined)
             return false;
         let src = await SourceDB.findOne({ where: { id }});
         if (!src)
             return { error: `Source ${id} does not exist.` };
         if (src.name == name)
             name = undefined;
+        if (name !== undefined && !name)
+            return { error: `Name cannot be empty.` };
         if (name && await SourceDB.findOne({ where: { name }}))
             return { error: `Source name ${name} already exist.` };
         if (!(await src.reconfig(name, src_params, this.sock_mgr)))

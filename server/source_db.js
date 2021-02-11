@@ -48,7 +48,7 @@ class SourceDB extends DB.Model {
     async reconfig(name, params, sock_mgr) {
         let src_ent = await db.transaction(async () => {
             let update = {};
-            if (name)
+            if (name !== undefined)
                 update.name = name;
             if (params)
                 update.params = params;
