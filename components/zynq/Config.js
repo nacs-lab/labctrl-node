@@ -94,7 +94,7 @@ export default class ZynqConfig extends React.Component {
         this.setState({ name: e.target.value });
     }
     _addr_change = (e) => {
-        this.setState({ name: e.target.value });
+        this.setState({ addr: e.target.value });
     }
 
     render() {
