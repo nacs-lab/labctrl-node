@@ -92,6 +92,17 @@ class MetaSource extends SocketManager.Source {
         return true;
     }
 
+    async #remove_source(id) {
+        if (!id)
+            return { error: "Missing required source parameter." };
+        let src = await SourceDB.findOne({ where: { id }});
+        if (!src)
+            return { error: `Source ${id} does not exist.` };
+        if (!(await src.remove(this.sock_mgr)))
+            return { error: "Unknown error." };
+        return true;
+    }
+
     call_method(name, params) {
         if (name === 'add_source') {
             let { type, name, params: src_params } = params;
@@ -100,6 +111,10 @@ class MetaSource extends SocketManager.Source {
         else if (name === 'config_source') {
             let { id, name, params: src_params } = params;
             return this.#config_source(id, name, src_params);
+        }
+        else if (name === 'remove_source') {
+            let { id } = params;
+            return this.#remove_source(id);
         }
         return;
     }

@@ -64,6 +64,20 @@ class SourceDB extends DB.Model {
         }
         return true;
     }
+    async remove(sock_mgr) {
+        let src_id = this.source_id();
+        if (sock_mgr) {
+            let src = sock_mgr.find_source(this.source_id());
+            if (!src)
+                return false;
+            sock_mgr.remove_source(src);
+            src.destroy();
+        }
+        return await db.transaction(async () => {
+            await this.destroy();
+            return true;
+        }).catch(db.err_handler(false));
+    }
 
     // Hijack the init function ;-p
     // The importer should wait for `SourceDB.init()`

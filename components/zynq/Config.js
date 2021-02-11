@@ -18,11 +18,13 @@
 
 "use strict";
 
-import Link from 'next/link';
-import React from 'react';
-
 import socket from '../../lib/socket';
 import { getfield_recursive } from '../../lib/utils';
+
+import Link from 'next/link';
+import Router from 'next/router';
+import React from 'react';
+import Modal from "react-bootstrap/Modal";
 
 export default class ZynqConfig extends React.Component {
     #watch_id
@@ -32,7 +34,7 @@ export default class ZynqConfig extends React.Component {
         super(props);
         this.#watch_param = { meta: { sources: { [props.src_id]: 0 }}};
         this.#source_path = ['meta', 'sources', props.src_id];
-        this.state = this._get_state();
+        this.state = { modal: false, ...this._get_state() };
     }
     _get_state() {
         let params = getfield_recursive(socket.get_cached(this.#watch_param),
@@ -87,7 +89,7 @@ export default class ZynqConfig extends React.Component {
         let { name, addr } = this.state;
         let res = await socket.call('meta', 'config_source', { id: src_id, name: name,
                                                                params: { addr: addr } });
-        console.log(res);
+        console.log(res); // TODO error message
     }
 
     _name_change = (e) => {
@@ -96,13 +98,28 @@ export default class ZynqConfig extends React.Component {
     _addr_change = (e) => {
         this.setState({ addr: e.target.value });
     }
+    _show_modal = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.setState({ modal: true });
+    }
+    _do_delete = async () => {
+        let res = await socket.call('meta', 'remove_source', { id: this.props.src_id });
+        // TODO error message
+        if (res === true) {
+            Router.push('/');
+        }
+    }
+    _close_modal = () => {
+        this.setState({ modal: false });
+    }
 
     render() {
-        let { name, addr } = this.state;
+        let { name, addr, modal } = this.state;
         let { src_id } = this.props;
         return <div className="container">
           <div className="row">
-            <legend className="text-center">Zynq Backend Config</legend>
+            <legend className="text-center">Zynq Device Config</legend>
           </div>
           <form>
             <div className="form-group row">
@@ -126,9 +143,22 @@ export default class ZynqConfig extends React.Component {
                 <Link href={`/s/zynq/${src_id}`}>
                   <a className="btn btn-secondary">Back</a>
                 </Link>
+                <span className="mx-3 border h-100"></span>
+                <button className="btn btn-sm btn-danger"
+                  onClick={this._show_modal}>Remove</button>
               </div>
             </div>
           </form>
+          <Modal onHide={this._close_modal} show={modal}>
+            <Modal.Header>Confirm deletion</Modal.Header>
+            <Modal.Body>Delete source: {name}</Modal.Body>
+            <Modal.Footer>
+              <button className="btn btn-danger"
+                onClick={this._do_delete}>Delete</button>
+              <button className="btn btn-secondary"
+                onClick={this._close_modal}>Cancel</button>
+            </Modal.Footer>
+          </Modal>
         </div>;
     }
 }
