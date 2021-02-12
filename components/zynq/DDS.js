@@ -198,8 +198,7 @@ export default class DDSWidget extends DataWidget {
                         source_id={this.props.source_id} dds_id={i}/>
                       <div className={`w-100 d-flex d-${col_break}-none`}/>
                       <div className={`${col_name} d-flex d-${col_break}-none`}>
-                        <b className="nacs-d-xxs-none">Frequency</b>
-                        <b className="nacs-d-xxs-flex d-none">Freq</b>
+                        <b>Freq</b>
                       </div>
                       <DDSFreqField
                         className={`${col_value} col-${col_break}-${col_w_freq} px-1`}
@@ -213,8 +212,7 @@ export default class DDSWidget extends DataWidget {
                   <div className={`col-${col_break}-${subcol2_w}`}>
                     <div className="row">
                       <div className={`${col_name} d-flex d-${col_break}-none`}>
-                        <b className="nacs-d-xxs-none">Amplitude</b>
-                        <b className="nacs-d-xxs-flex d-none">Amp</b>
+                        <b>Amp</b>
                       </div>
                       <DDSAmpField
                         className={`${col_value} col-${col_break}-${col_w_amp} px-1`}
