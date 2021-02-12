@@ -29,6 +29,7 @@ import DDSAmpField from './DDSAmpField';
 import DDSPhaseField from './DDSPhaseField';
 
 import React from 'react';
+import Button from 'react-bootstrap/Button';
 
 export default class DDSWidget extends DataWidget {
     #source_id
@@ -174,7 +175,7 @@ export default class DDSWidget extends DataWidget {
                     onChange={this.refresh_changed_state}/>
                   <div className={`w-100 d-flex d-${col_break}-none`}/>
                   <div className={`col-12 col-${col_break}-${col_w_reset} px-1 text-center`}>
-                    <button className="btn btn-xs btn-warning" dds_id={i}
+                    <Button variant="warning" size="sm" dds_id={i}
                       onClick={this._reset_dds}>
                       <span>
                         <i className="fas fa-redo"></i>
@@ -182,7 +183,7 @@ export default class DDSWidget extends DataWidget {
                           Reset
                         </b>
                       </span>
-                    </button>
+                    </Button>
                   </div>
                 </React.Fragment>;
             }
