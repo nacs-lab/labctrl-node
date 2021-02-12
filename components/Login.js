@@ -146,10 +146,11 @@ export default class Login extends React.Component {
               <div className="form-group row">
                 <label className="col-sm-2"></label>
                 <div className="col-sm-10">
-                  <div className="form-check">
+                  <div className="form-check-inline">
+                    <input className="form-check-input" type="checkbox" defaultChecked
+                      onKeyDown={this.key_press} ref={this.remember}/>
                     <label className="form-check-label">
-                      <input className="form-check-input" type="checkbox" defaultChecked
-                        onKeyDown={this.key_press} ref={this.remember}/> Remember me
+                      Remember me
                     </label>
                   </div>
                 </div>
