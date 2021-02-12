@@ -123,6 +123,18 @@ function find_min_digit(lo, hi) {
 }
 
 export default class NumberField extends SingleField {
+    #input
+    #menu
+    #menu_show = false
+    #input_touched = false
+    #input_focused = false
+    constructor(props) {
+        super(props);
+        this.state.menu_show = false;
+        this.state.menu_x = 0;
+        this.state.menu_y = 0;
+    }
+
     _normalize_value(val) {
         let { minValue = -Infinity, maxValue = Infinity, step = 0 } = this.props;
         if (step > 0)
@@ -182,12 +194,18 @@ export default class NumberField extends SingleField {
         return 0;
     }
     set_value_input = (input) => {
+        this.#input = input;
+        this.set_menu_position();
         if (input) {
             // This is necessary to prevent the parent from getting the event
             // and start scrolling. The `SyntheticEvent` from React
             // when using the `onWheel` handler directly doesn't work.
             input.addEventListener("wheel", this.value_scrolled);
         }
+    }
+    set_input_menu = (menu) => {
+        this.#menu = menu;
+        this.set_menu_position();
     }
     increment_value(delta) {
         let { step = 0, minScroll = 0, minValue = -Infinity, maxValue = Infinity } = this.props;
@@ -248,6 +266,11 @@ export default class NumberField extends SingleField {
     componentDidMount() {
         super.componentDidMount();
         ScrollWatcher.enable();
+        window.addEventListener('resize', this.window_resize);
+    }
+    componentWillUnmount() {
+        super.componentWillUnmount();
+        window.removeEventListener('resize', this.window_resize);
     }
     key_press(e) {
         if (e.keyCode == 40) {
@@ -267,12 +290,58 @@ export default class NumberField extends SingleField {
         super.key_press(e);
     }
 
-    // TODO increment buttons
     input_focus = (e) => {
         this.set_value_focus(true);
+        this.#input_focused = true;
+        this.check_show_menu();
+    }
+    input_touch = (e) => {
+        // Show the menu only for touch input.
+        this.#input_touched = true;
+        this.check_show_menu();
     }
     input_blur = (e) => {
         this.set_value_focus(false);
+        this.#input_touched = false
+        this.#input_focused = false
+        this.#menu_show = false;
+        this.setState({ menu_show: false });
+    }
+    check_show_menu() {
+        if (!this.#input_focused || !this.#input_touched)
+            return;
+        this.#menu_show = true;
+        this.setState({ menu_show: true }, this.set_menu_position);
+    }
+    window_resize = (e) => {
+        this.set_menu_position();
+    }
+    set_menu_position = () => {
+        if (!this.#input || !this.#menu || !this.#menu_show)
+            return;
+        let input = this.#input;
+        let menu = this.#menu;
+        // Round the coordinate to integer to hopefully eliminate some unnecessary updates.
+        this.setState({
+            menu_x: (input.offsetLeft + (input.clientWidth - menu.clientWidth) / 2) | 0,
+            menu_y: (input.offsetTop + input.clientHeight + 5) | 0 });
+    }
+    inc_button_click = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        let cur_unit = scale_from_state(this.state);
+        let old_dispvalue = [value_from_state(this.state), cur_unit];
+        let new_dispvalue = [Number(e.currentTarget.getAttribute('set_value')), cur_unit];
+        let old_value = this.disp2raw(old_dispvalue);
+        let new_value = this.disp2raw(new_dispvalue);
+        if (new_value != old_value) {
+            this.set_display_value(this.raw2disp(new_value));
+        }
+    }
+    inc_button_mouse_down = (e) => {
+        // Do not cause focus change when clicking on the incremental button.
+        e.preventDefault();
+        e.stopPropagation();
     }
 
     render() {
@@ -311,7 +380,29 @@ export default class NumberField extends SingleField {
               </span>
             </div>;
         }
-        return <div className={`input-group input-group-sm mb-1 ${className}`}>
+
+        let menu_items;
+        if (this.props.get_inc_menu)
+            menu_items = this.props.get_inc_menu(cur_value, cur_scale, unit);
+        let menu_show = false;
+        let menu_widget;
+        if (menu_items && menu_items.length > 0) {
+            let nitems = menu_items.length;
+            menu_widget = [];
+            for (let i = 0; i < nitems; i++) {
+                let item = menu_items[i];
+                menu_widget.push(<button type="button" key={i}
+                                   className="btn btn-sm btn-light border px-2"
+                                   set_value={item.value} onClick={this.inc_button_click}
+                                   onMouseDown={this.inc_button_mouse_down}>
+                  {item.text}
+                </button>);
+            }
+            menu_show = this.state.menu_show;
+        }
+
+        return <div className={`input-group input-group-sm mb-1 ${className}`}
+                 style={{ position: 'relative' }}>
           <div className="input-group-prepend">
             {
                 this.has_ovr() ?
@@ -341,8 +432,18 @@ export default class NumberField extends SingleField {
           <input type="text" className="form-control text-right px-1"
             value={cur_value} ref={this.set_value_input} onChange={this.value_input_changed}
             onKeyDown={this.key_press} onWheel={this.value_scrolled}
-            onFocus={this.input_focus} onBlur={this.input_blur}/>
+            onFocus={this.input_focus} onTouchStart={this.input_touch}
+            onBlur={this.input_blur}/>
           {unit_dropdown}
+          <div style={{ position: 'absolute', zIndex: 2000,
+                        left: this.state.menu_x, top: this.state.menu_y,
+                        display: menu_show ? 'block' : 'none' }}
+            ref={this.set_input_menu}
+            className="btn-toolbar mb-2" role="toolbar">
+            <div className="btn-group btn-group-sm mr-2" role="group">
+              {menu_widget}
+            </div>
+          </div>
         </div>;
     }
 }

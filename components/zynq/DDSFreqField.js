@@ -44,12 +44,48 @@ export default class DDSFreqField extends React.Component {
             return;
         return this.#field.current.cancel();
     }
+    _get_inc_menu = (cur_value, cur_scale, unit) => {
+        cur_value = Number(cur_value);
+        if (cur_scale == 0) {
+            return [{ text: '-100', value: cur_value - 100 },
+                    { text: '-10', value: cur_value - 10 },
+                    { text: '-1', value: cur_value - 1 },
+                    { text: '+1', value: cur_value + 1 },
+                    { text: '+10', value: cur_value + 10 },
+                    { text: '+100', value: cur_value + 100 }];
+        }
+        else if (cur_scale == 1) {
+            return [{ text: '-100k', value: cur_value - 100 },
+                    { text: '-10k', value: cur_value - 10 },
+                    { text: '-1k', value: cur_value - 1 },
+                    { text: '+1k', value: cur_value + 1 },
+                    { text: '+10k', value: cur_value + 10 },
+                    { text: '+100k', value: cur_value + 100 }];
+        }
+        else if (cur_scale == 2) {
+            return [{ text: '-100M', value: cur_value - 100 },
+                    { text: '-10M', value: cur_value - 10 },
+                    { text: '-1M', value: cur_value - 1 },
+                    { text: '+1M', value: cur_value + 1 },
+                    { text: '+10M', value: cur_value + 10 },
+                    { text: '+100M', value: cur_value + 100 }];
+        }
+        else if (cur_scale == 3) {
+            return [{ text: '-1G', value: cur_value - 1 },
+                    { text: '-100M', value: cur_value - 0.1 },
+                    { text: '-10M', value: cur_value - 0.01 },
+                    { text: '+10M', value: cur_value + 0.01 },
+                    { text: '+100M', value: cur_value + 0.1 },
+                    { text: '+1G', value: cur_value + 1 }];
+        }
+    }
     render() {
         let { source_id, dds_id, ...props } = this.props;
         let path = this.#path.get([source_id, 'dds', `freq${dds_id}`])[0];
         let ovr_path = this.#ovr_path.get([source_id, 'dds', `ovr_freq${dds_id}`])[0];
         return <NumberField {...props} path={path} ovr_path={ovr_path}
                  minScale={0} maxScale={9} minValue={0} maxValue={2**31} unit="Hz"
-                 step={1} scale={3.5e9 / 2**32} minScroll={1} ref={this.#field}/>;
+                 step={1} scale={3.5e9 / 2**32} minScroll={1} ref={this.#field}
+                 get_inc_menu={this._get_inc_menu}/>;
     }
 };

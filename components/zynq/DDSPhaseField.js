@@ -44,12 +44,20 @@ export default class DDSPhaseField extends React.Component {
             return;
         return this.#field.current.cancel();
     }
+    _get_inc_menu = (cur_value, cur_scale, unit) => {
+        cur_value = Number(cur_value);
+        return [{ text: '-10' + unit, value: cur_value - 10 },
+                { text: '-1' + unit, value: cur_value - 1 },
+                { text: '+1' + unit, value: cur_value + 1 },
+                { text: '+10' + unit, value: cur_value + 10 }];
+    }
     render() {
         let { source_id, dds_id, ...props } = this.props;
         let path = this.#path.get([source_id, 'dds', `phase${dds_id}`])[0];
         let ovr_path = this.#ovr_path.get([source_id, 'dds', `ovr_phase${dds_id}`])[0];
         return <NumberField {...props} path={path} ovr_path={ovr_path} unit="&deg;"
                  minScale={0} maxScale={0} minValue={-(2**17)} maxValue={2**17}
-                 step={1} scale={90 / 2**14} minScroll={1} ref={this.#field}/>;
+                 step={1} scale={90 / 2**14} minScroll={1} ref={this.#field}
+                 get_inc_menu={this._get_inc_menu}/>;
     }
 };
