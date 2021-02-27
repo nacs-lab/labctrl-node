@@ -228,10 +228,15 @@ export default class Admin extends React.Component {
         }
         return <div style={{width: "100%"}}>
           <legend className="text-center">Manage Users</legend>
-          <label className="text-center checkbox-inline" style={{width: "100%"}}>
-            <input type="checkbox" checked={this.state.request_only}
-              onChange={this.request_only_change}/>Only show requested
-          </label>
+          <div className="row">
+            <div className="col text-center">
+              <div className="form-check-inline">
+                <input type="checkbox" className="form-check-input"
+                  checked={this.state.request_only} onChange={this.request_only_change}/>
+                <label className="form-check-label text-bold">Only show requested</label>
+              </div>
+            </div>
+          </div>
           <div style={{width: "100%", overflowX: "scroll"}}>
             <table className="table table-striped table-hover"
               style={{whiteSpace: "nowrap"}}>
