@@ -7,6 +7,7 @@ Wants=network-online.target
 
 [Service]
 ExecStart=node @SERVER_DIR@/index.js
+User=labctrl-node
 Restart=always
 RestartSec=1
 KillMode=process
