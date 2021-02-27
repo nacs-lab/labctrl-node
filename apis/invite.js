@@ -64,7 +64,13 @@ LabControl`,
           <p>LabControl</p>`});
 }
 
-async function invite_user(email) {
+async function invite_user(email, reinvite) {
+    if (reinvite) {
+        let user = await User.find_user(email);
+        if (!user)
+            return 'User do not exist.';
+        return user;
+    }
     if (!email || !validate_email(email))
         return 'Invalid email address.';
     let user = await User.invite(email);
@@ -82,7 +88,7 @@ module.exports = async ({ req }, params) => {
     let res = [];
     for (let i in params.emails) {
         let email = params.emails[i];
-        let r = await invite_user(email);
+        let r = await invite_user(email, params.reinvite);
         if (typeof(r) === 'string') {
             res.push(r);
         }

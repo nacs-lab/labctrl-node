@@ -113,6 +113,26 @@ export default class Admin extends React.Component {
         e.stopPropagation();
         this.set_flags(email, { admin: false }, i, notify, 'Revoke admin ');
     }
+    async reinvite(e, email, notify) {
+        e.preventDefault();
+        e.stopPropagation();
+        let res = (await api({ invite: { params: { emails: [email],
+                                                   reinvite: true } } })).invite;
+        if (!res) {
+            notify.add_notify('fas fa-info-circle text-red',
+                              'Invitation failed', '', 20);
+            return;
+        }
+        let success = 0;
+        if (res[0] === true) {
+            notify.add_notify('fas fa-check text-green',
+                              `${email} reinvited`, '', 20);
+        }
+        else {
+            notify.add_notify('fas fa-info-circle text-red',
+                              'Cannot reinvite ' + email, res[0], 20);
+        }
+    }
     invite_users = async (e, notify) => {
         e.preventDefault();
         e.stopPropagation();
@@ -203,13 +223,16 @@ export default class Admin extends React.Component {
             if (info.requested) {
                 req = <React.Fragment>
                   <span className="fas fa-info text-blue"/>
-                  {
-                      <React.Fragment>
-                        <span style={{paddingRight: "6px"}}/>
-                        <button className="btn btn-danger btn-sm"
-                          onClick={(e) => this.ignore_request(e, info.email, i, notify)}>Ignore</button>
-                      </React.Fragment>
-                  }
+                  <span style={{paddingRight: "6px"}}/>
+                  <button className="btn btn-danger btn-sm"
+                    onClick={(e) => this.ignore_request(e, info.email, i, notify)}>Ignore</button>
+                </React.Fragment>;
+            }
+            else if (info.approved && !info.verified) {
+                req = <React.Fragment>
+                  <span style={{paddingRight: "6px"}}/>
+                  <button className="btn btn-success btn-sm"
+                    onClick={(e) => this.reinvite(e, info.email, notify)}>Reinvite</button>
                 </React.Fragment>;
             }
             let ad;
