@@ -176,7 +176,7 @@ export default class Admin extends React.Component {
                   {
                       is_self ? '' : <React.Fragment>
                         <span style={{paddingRight: "6px"}}/>
-                        <button className="btn btn-danger btn-xs"
+                        <button className="btn btn-danger btn-sm"
                           onClick={(e) => this.revoke_approve(e, info.email, i, notify)}>Revoke</button>
                       </React.Fragment>
                   }
@@ -186,7 +186,7 @@ export default class Admin extends React.Component {
                 ap = <React.Fragment>
                   <span className="fas fa-times text-red"/>
                   <span style={{paddingRight: "6px"}}/>
-                  <button className="btn btn-success btn-xs"
+                  <button className="btn btn-success btn-sm"
                     onClick={(e) => this.approve(e, info.email, i, notify)}>Approve</button>
                 </React.Fragment>;
             }
@@ -197,7 +197,7 @@ export default class Admin extends React.Component {
                   {
                       <React.Fragment>
                         <span style={{paddingRight: "6px"}}/>
-                        <button className="btn btn-danger btn-xs"
+                        <button className="btn btn-danger btn-sm"
                           onClick={(e) => this.ignore_request(e, info.email, i, notify)}>Ignore</button>
                       </React.Fragment>
                   }
@@ -211,12 +211,12 @@ export default class Admin extends React.Component {
                 ad = <React.Fragment>
                   <span className="fas fa-check text-green"/>
                   <span style={{paddingRight: "6px"}}/>
-                  <button className="btn btn-danger btn-xs"
+                  <button className="btn btn-danger btn-sm"
                     onClick={(e) => this.revoke_admin(e, info.email, i, notify)}>Revoke admin</button>
                 </React.Fragment>;
             }
             else {
-                ad = <button className="btn btn-info btn-xs"
+                ad = <button className="btn btn-info btn-sm"
                        onClick={(e) => this.grant_admin(e, info.email, i, notify)}>Grant admin</button>;
             }
             rows.push(<tr key={i}>
