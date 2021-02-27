@@ -77,6 +77,8 @@ install(PROGRAMS create_admin.js
 if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   include(InstallRequiredSystemLibraries)
 
+  get_filename_component(SERVER_DIR_FULL "${SERVER_DIR}"
+    ABSOLUTE BASE_DIR "${CMAKE_INSTALL_PREFIX}")
   configure_file(deb/conffiles.in conffiles @ONLY)
 
   set(CPACK_SET_DESTDIR "on")
