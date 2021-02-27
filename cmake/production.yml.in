@@ -1,0 +1,4 @@
+db:
+  dir: @DEPLOY_BUILD_DIR@/db/
+data:
+  dir: @DEPLOY_BUILD_DIR@/data/

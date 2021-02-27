@@ -16,14 +16,17 @@ git_is_dirty() {
     fi
 }
 
-is_dirty=0
+if git_is_dirty &> /dev/null; then
+    is_dirty=1
+else
+    is_dirty=0
+fi
 generate_build_id() {
     if [[ -f VERSION ]]; then
         cat VERSION
     else
         hash=$(git rev-parse HEAD)
-        if git_is_dirty &> /dev/null; then
-            is_dirty=1
+        if ((is_dirty)); then
             echo "${hash}-dirty"
         else
             echo "${hash}"

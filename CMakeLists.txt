@@ -47,8 +47,10 @@ add_subdirectory(tests)
 add_subdirectory(data)
 
 file(RELATIVE_PATH BIN_DIR_REL "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
+set(DEPLOY_BUILD_DIR "${PROJECT_BINARY_DIR}/deploy")
+configure_file(cmake/production.yml.in deploy/conf/production.yml @ONLY)
 add_custom_target(deploy
-  COMMAND "NODE_CONFIG_DIR=${PROJECT_SOURCE_DIR}/conf"
+  COMMAND "NODE_CONFIG_DIR=${DEPLOY_BUILD_DIR}/conf"
   "NODE_COMPILING=1"
   "LABCTRL_LIB_DIR=${PROJECT_BINARY_DIR}/addon"
   "${PROJECT_SOURCE_DIR}/cmake/deploy_next.sh" "${BIN_DIR_REL}"
