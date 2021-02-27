@@ -71,6 +71,9 @@ install(DIRECTORY node_modules public conf "${PROJECT_BINARY_DIR}/exec"
 install(FILES index.js next.config.js
   DESTINATION "${SERVER_DIR}")
 
+install(PROGRAMS create_admin.js
+  DESTINATION "${SERVER_DIR}" RENAME create_admin)
+
 if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   include(InstallRequiredSystemLibraries)
 

@@ -24,6 +24,7 @@
     "nan": "^2.14.2",
     "next": "^10.0.7",
     "nodemailer": "^6.5.0",
+    "prompt": "^1.1.0",
     "react": "^17.0.1",
     "react-bootstrap": "^1.5.0",
     "react-dom": "^17.0.1",
