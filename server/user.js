@@ -23,6 +23,7 @@ const account = require('../lib/account');
 
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+const base64url = require('base64url');
 
 const db = new DB('user.db');
 
@@ -235,7 +236,7 @@ function hash_sha512(bytes, encoding) {
 
 class Token extends DB.Model {
     static async find_tag(tag) {
-        let bytes = Buffer.from(tag, 'base64');
+        let bytes = base64url.toBuffer(tag);
         let hash = hash_sha512(bytes, 'base64');
         return await this.findOne({ where: { tag: hash } });
     }
@@ -245,12 +246,12 @@ class Token extends DB.Model {
             let hash = hash_sha512(bytes, 'base64');
             if (await this.count({ where: { tag: hash } }))
                 continue;
-            return { tag: bytes.toString('base64'), hash };
+            return { tag: base64url(bytes), hash }
         }
     }
     static async new_value() {
         while (true) {
-            let value = (await get_rand_bytes(33)).toString('base64');
+            let value = base64url(await get_rand_bytes(33));
             let hash = await secure_hash(value);
             if (await this.count({ where: { value: hash } }))
                 continue;
