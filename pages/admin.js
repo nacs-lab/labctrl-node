@@ -26,6 +26,7 @@ import Wrapper from '../components/Wrapper';
 
 import Link from 'next/link';
 import React from 'react';
+import Modal from "react-bootstrap/Modal";
 
 export default class Admin extends React.Component {
     static contextType = GlobalContext;
@@ -37,7 +38,8 @@ export default class Admin extends React.Component {
         this.state = {
             all_users: props.all_users,
             invite_emails: '',
-            request_only: true
+            request_only: true,
+            remove_email: null
         };
         if (props.all_users) {
             let has_request = false;
@@ -177,6 +179,26 @@ export default class Admin extends React.Component {
         }
         this.refresh();
     }
+    async do_remove_email(email, notify) {
+        let res = (await api({ remove_user: { params: { email } } })).remove_user;
+        if (!res)
+            notify.add_notify('fas fa-info-circle text-red',
+                              `Removing ${email} failed`, '', 20);
+        this.refresh();
+    }
+
+    _close_modal = () => {
+        this.setState({ remove_email: null });
+    }
+    _remove_email = (notify) => {
+        this.do_remove_email(this.state.remove_email, notify);
+        this._close_modal();
+    }
+    _confirm_remove = (e, email) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.setState({ remove_email: email });
+    }
     invite_emails_change = (e) => {
         this.setState({ invite_emails: event.target.value });
     }
@@ -213,10 +235,13 @@ export default class Admin extends React.Component {
             }
             else {
                 ap = <React.Fragment>
-                  <span className="fas fa-times text-red"/>
-                  <span style={{paddingRight: "6px"}}/>
                   <button className="btn btn-success btn-sm"
                     onClick={(e) => this.approve(e, info.email, i, notify)}>Approve</button>
+                  <span style={{paddingRight: "6px"}}/>
+                  <button className="btn btn-danger btn-sm"
+                    onClick={(e) => this._confirm_remove(e, info.email)}>
+                    <span className="fas fa-trash"/>
+                  </button>
                 </React.Fragment>;
             }
             let req = '';
@@ -258,6 +283,21 @@ export default class Admin extends React.Component {
               <td>{ad}</td>
             </tr>);
         }
+
+        let modal_widget = <Modal onHide={this._close_modal} show={!!this.state.remove_email}>
+          <Modal.Header><b>Confirm removing user</b></Modal.Header>
+          <Modal.Body>
+            <p>Are you sure you want to remove {this.state.remove_email}</p>
+            <p>This cannot be undone.</p>
+          </Modal.Body>
+          <Modal.Footer>
+            <button className="btn btn-danger"
+              onClick={() => this._remove_email(notify)}>Remove</button>
+            <button className="btn btn-secondary"
+              onClick={this._close_modal}>Close</button>
+          </Modal.Footer>
+        </Modal>;
+
         return <div style={{width: "100%"}}>
           <legend className="text-center">Manage Users</legend>
           <div className="row">
@@ -295,6 +335,7 @@ export default class Admin extends React.Component {
               style={{minWidth: "50%"}}
               onClick={(e) => this.invite_users(e, notify)}>Invite</button>
           </div>
+          {modal_widget}
         </div>;
     }
 }

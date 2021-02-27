@@ -159,6 +159,12 @@ class User extends DB.Model {
             return this.approved;
         }).catch(db.err_handler(false));
     }
+    async remove() {
+        return await db.transaction(async () => {
+            await this.destroy();
+            return true;
+        }).catch(db.err_handler(false));
+    }
 
     // Token
     async new_token(type, expires) {
