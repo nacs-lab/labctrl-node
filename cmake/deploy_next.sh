@@ -22,7 +22,7 @@ generate_build_id() {
         cat VERSION
     else
         hash=$(git rev-parse HEAD)
-        if git_is_dirty; then
+        if git_is_dirty &> /dev/null; then
             is_dirty=1
             echo "${hash}-dirty"
         else
@@ -38,5 +38,6 @@ if [ -f "${NEXT_DIST_DIR}/BUILD_ID" ] && ((!is_dirty)) &&
     exit 0
 fi
 
+echo "Build ID: ${NEXT_BUILD_ID}"
 rm -rf "${NEXT_DIST_DIR}"
 node_modules/next/dist/bin/next build
