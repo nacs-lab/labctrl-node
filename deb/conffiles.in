@@ -1,1 +1,1 @@
-@SERVER_DIR@/conf/production.yml
+@SERVER_DIR_FULL@/conf/production.yml
