@@ -1,6 +1,6 @@
 {
   "name": "labctrl-node",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Lab Control Web Frontend",
   "main": "index.js",
   "scripts": {

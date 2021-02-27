@@ -30,4 +30,4 @@ process.chdir(__dirname);
 const Server = require('./server/server');
 
 const server = new Server();
-server.listen(8000);
+server.listen(8000, 'localhost');

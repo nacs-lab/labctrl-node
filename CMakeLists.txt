@@ -9,7 +9,13 @@ set(MAJOR_VERSION 1)
 set(MINOR_VERSION 0)
 set(PATCH_VERSION 0)
 
+include(GNUInstallDirs)
+
 set(SERVER_DIR /srv/labctrl/)
+set(SYSTEMD_SERVICE_DIR "${CMAKE_INSTALL_LIBDIR}/systemd/system"
+  CACHE PATH "Systemd service file install dir")
+set(SYSTEMD_SYSUSERS_DIR "${CMAKE_INSTALL_LIBDIR}/sysusers.d"
+  CACHE PATH "Systemd sysusers file install dir")
 
 find_package(Node 12.0 REQUIRED)
 
@@ -38,6 +44,7 @@ add_custom_target(compile-all ALL)
 
 add_subdirectory(addon)
 add_subdirectory(tests)
+add_subdirectory(data)
 
 file(RELATIVE_PATH BIN_DIR_REL "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
 add_custom_target(deploy

@@ -1,0 +1,16 @@
+#
+
+[Unit]
+Description=Start lab control web server
+After=network-online.target auditd.service
+Wants=network-online.target
+
+[Service]
+ExecStart=node @SERVER_DIR@/index.js
+Restart=always
+RestartSec=1
+KillMode=process
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target
