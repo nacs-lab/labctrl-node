@@ -1,0 +1,2 @@
+d @SERVER_DIR@/db 0755 labctrl-node labctrl-node
+d @SERVER_DIR@/data 0755 labctrl-node labctrl-node

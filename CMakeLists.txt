@@ -16,6 +16,8 @@ set(SYSTEMD_SERVICE_DIR "${CMAKE_INSTALL_LIBDIR}/systemd/system"
   CACHE PATH "Systemd service file install dir")
 set(SYSTEMD_SYSUSERS_DIR "${CMAKE_INSTALL_LIBDIR}/sysusers.d"
   CACHE PATH "Systemd sysusers file install dir")
+set(SYSTEMD_TMPFILES_DIR "${CMAKE_INSTALL_LIBDIR}/tmpfiles.d"
+  CACHE PATH "Systemd tmpfiles file install dir")
 
 find_package(Node 12.0 REQUIRED)
 
