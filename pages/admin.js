@@ -34,9 +34,9 @@ export default class Admin extends React.Component {
     }
     constructor(props) {
         super(props);
-        this.invite_area = React.createRef();
         this.state = {
             all_users: props.all_users,
+            invite_emails: '',
             request_only: true
         };
         if (props.all_users) {
@@ -52,6 +52,10 @@ export default class Admin extends React.Component {
                 this.state.request_only = false;
             }
         }
+    }
+    async refresh() {
+        let { all_users } = await api({ all_users: 'all_users' });
+        this.setState({ all_users });
     }
     request_only_change = (e) => {
         this.setState({ request_only: e.target.checked });
@@ -113,7 +117,7 @@ export default class Admin extends React.Component {
         e.preventDefault();
         e.stopPropagation();
         let emails = [];
-        let lines = this.invite_area.current.value.split('\n');
+        let lines = this.state.invite_emails.split('\n');
         for (let i in lines) {
             let l = lines[i];
             l = l.trim();
@@ -130,6 +134,7 @@ export default class Admin extends React.Component {
                               'No email entered for invitation', '', 20);
             return;
         }
+        this.setState({ invite_emails: '' });
         let res = (await api({ invite: { params: { emails } } })).invite;
         if (!res) {
             notify.add_notify('fas fa-info-circle text-red',
@@ -150,6 +155,10 @@ export default class Admin extends React.Component {
             notify.add_notify('fas fa-check text-green',
                               `Successfully invited ${success} users`, '', 20);
         }
+        this.refresh();
+    }
+    invite_emails_change = (e) => {
+        this.setState({ invite_emails: event.target.value });
     }
     render() {
         return <Wrapper>
@@ -238,7 +247,7 @@ export default class Admin extends React.Component {
             </div>
           </div>
           <div style={{width: "100%", overflowX: "scroll"}}>
-            <table className="table table-striped table-hover"
+            <table className="table table-striped table-hover mb-0"
               style={{whiteSpace: "nowrap"}}>
               <thead>
                 <tr>
@@ -256,8 +265,8 @@ export default class Admin extends React.Component {
           <legend className="text-center">Invitations</legend>
           <div style={{margin: "8px"}} className="text-center">
             <textarea style={{width: "100%", resize: "vertical"}}
-              placeholder="One email per line"
-              ref={this.invite_area}/>
+              placeholder="One email per line" onChange={this.invite_emails_change}
+              value={this.state.invite_emails}/>
             <span style={{padding: "6px"}}/>
             <button className="btn btn-sm btn-primary"
               style={{minWidth: "50%"}}
