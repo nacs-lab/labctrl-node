@@ -5,6 +5,10 @@ cmake_minimum_required(VERSION 3.0)
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}"
   "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+set(MAJOR_VERSION 1)
+set(MINOR_VERSION 0)
+set(PATCH_VERSION 0)
+
 set(SERVER_DIR /srv/labctrl/)
 
 find_package(Node 12.0 REQUIRED)
@@ -55,3 +59,30 @@ install(DIRECTORY node_modules public conf "${PROJECT_BINARY_DIR}/exec"
 
 install(FILES index.js next.config.js
   DESTINATION "${SERVER_DIR}")
+
+if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
+  include(InstallRequiredSystemLibraries)
+
+  set(CPACK_SET_DESTDIR "on")
+  set(CPACK_PACKAGING_INSTALL_PREFIX "/tmp")
+  set(CPACK_GENERATOR "DEB")
+
+  set(CPACK_PACKAGE_DESCRIPTION "NaCs Lab Control Web Frontend")
+  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Web frontend for lab control")
+  set(CPACK_PACKAGE_VENDOR "Harvard")
+  set(CPACK_PACKAGE_CONTACT "Yichao Yu")
+  set(CPACK_PACKAGE_VERSION_MAJOR "${MAJOR_VERSION}")
+  set(CPACK_PACKAGE_VERSION_MINOR "${MINOR_VERSION}")
+  set(CPACK_PACKAGE_VERSION_PATCH "${PATCH_VERSION}")
+  set(CPACK_PACKAGE_FILE_NAME
+    "${CMAKE_PROJECT_NAME}_${MAJOR_VERSION}.${MINOR_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}")
+  set(CPACK_SOURCE_PACKAGE_FILE_NAME
+    "${CMAKE_PROJECT_NAME}_${MAJOR_VERSION}.${MINOR_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}")
+
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6 (>= 4.2.1), libnacs (>= 10.0), libzmq5 (>= 4.0), nodejs (>=12.0)")
+
+  set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+  set(CPACK_DEBIAN_PACKAGE_SECTION "")
+  set(CPACK_DEBIAN_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
+  include(CPack)
+endif()
