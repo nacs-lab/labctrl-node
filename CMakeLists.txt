@@ -63,6 +63,8 @@ install(FILES index.js next.config.js
 if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   include(InstallRequiredSystemLibraries)
 
+  configure_file(deb/conffiles.in conffiles @ONLY)
+
   set(CPACK_SET_DESTDIR "on")
   set(CPACK_PACKAGING_INSTALL_PREFIX "/tmp")
   set(CPACK_GENERATOR "DEB")
@@ -80,6 +82,7 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     "${CMAKE_PROJECT_NAME}_${MAJOR_VERSION}.${MINOR_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}")
 
   set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6 (>= 4.2.1), libnacs (>= 10.0), libzmq5 (>= 4.0), nodejs (>=12.0)")
+  set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA ${CMAKE_BINARY_DIR}/conffiles)
 
   set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
   set(CPACK_DEBIAN_PACKAGE_SECTION "")
