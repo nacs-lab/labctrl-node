@@ -19,7 +19,7 @@ set(SYSTEMD_SYSUSERS_DIR "${CMAKE_INSTALL_LIBDIR}/sysusers.d"
 set(SYSTEMD_TMPFILES_DIR "${CMAKE_INSTALL_LIBDIR}/tmpfiles.d"
   CACHE PATH "Systemd tmpfiles file install dir")
 
-find_package(Node 12.0 REQUIRED)
+find_package(Node 14.0 REQUIRED)
 
 find_package(PkgConfig REQUIRED)
 set(DEP_PKGS nacs-utils>=10.0 nacs-seq libzmq>=4.0)
@@ -95,7 +95,7 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   set(CPACK_SOURCE_PACKAGE_FILE_NAME
     "${CMAKE_PROJECT_NAME}_${MAJOR_VERSION}.${MINOR_VERSION}.${CPACK_PACKAGE_VERSION_PATCH}")
 
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6 (>= 4.2.1), libnacs (>= 10.0), libzmq5 (>= 4.0), nodejs (>=12.0)")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6 (>= 4.2.1), libnacs (>= 10.0), libzmq5 (>= 4.0), nodejs (>=14.0)")
   set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA ${CMAKE_BINARY_DIR}/conffiles)
 
   set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
