@@ -35,6 +35,7 @@ module.exports = async ({ req, res }, params) => {
     }
     else if (type == User.Token.Invitation ||
              type == User.Token.ResetPassword) {
+        await user.verify();
         // These allows the user to update password so we need to keep the token valid until
         // the user set the new password.
         let maxage = User.min_login_time;
