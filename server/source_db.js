@@ -54,12 +54,17 @@ class SourceDB extends DB.Model {
                 update.params = params;
             return await this.update(update);
         }).catch(db.err_handler(false));
-        if (!src_ent)
+        if (!src_ent) {
+            console.log("Update source configuration failed.");
             return false;
+        }
         if (src_ent && sock_mgr) {
-            let src = sock_mgr.find_source(src_ent.id);
+            let src = sock_mgr.find_source(src_ent.source_id());
             if (src) {
                 src.reconfig(src_ent.params);
+            }
+            else {
+                console.log(`Unable to find source ${src_ent.source_id()}`);
             }
         }
         return true;
