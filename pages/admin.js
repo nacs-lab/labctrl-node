@@ -19,6 +19,7 @@
 "use strict";
 
 import api from '../lib/api';
+import { object_empty } from '../lib/utils';
 import CheckLogin from '../components/CheckLogin';
 import GlobalContext from '../components/Global';
 import { NotifyContext } from '../components/NotifyMenu';
@@ -54,6 +55,15 @@ export default class Admin extends React.Component {
                 this.state.request_only = false;
             }
         }
+    }
+    componentDidUpdate() {
+        if (!this.context.user || !this.context.user.admin)
+            return;
+        // If the user accessed this page before logging in as admin
+        // we should reload the user info when the user does become an admin.
+        if (this.state.all_users && !object_empty(this.state.all_users))
+            return;
+        this.refresh();
     }
     async refresh() {
         let { all_users } = await api({ all_users: 'all_users' });
