@@ -29,6 +29,16 @@ import Link from 'next/link';
 import React from 'react';
 import Modal from "react-bootstrap/Modal";
 
+function has_request(all_users) {
+    let has_request = false;
+    for (let i in all_users) {
+        if (all_users[i].requested) {
+            return true;
+        }
+    }
+    return false;
+}
+
 export default class Admin extends React.Component {
     static contextType = GlobalContext;
     static async getInitialProps(ctx) {
@@ -43,17 +53,7 @@ export default class Admin extends React.Component {
             remove_email: null
         };
         if (props.all_users) {
-            let has_request = false;
-            for (let i in props.all_users) {
-                let user = props.all_users[i];
-                if (user.requested) {
-                    has_request = true;
-                    break;
-                }
-            }
-            if (!has_request) {
-                this.state.request_only = false;
-            }
+            this.state.request_only = has_request(props.all_users);
         }
     }
     componentDidUpdate() {
@@ -67,7 +67,13 @@ export default class Admin extends React.Component {
     }
     async refresh() {
         let { all_users } = await api({ all_users: 'all_users' });
-        this.setState({ all_users });
+        this.setState((state) => {
+            let new_state = { all_users };
+            // If the previous user info was empty, recompute `request_only`.
+            if (!state.all_users || object_empty(state.all_users))
+                new_state.request_only = has_request(all_users);
+            return new_state;
+        });
     }
     request_only_change = (e) => {
         this.setState({ request_only: e.target.checked });
