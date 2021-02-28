@@ -243,21 +243,22 @@ export default class Admin extends React.Component {
                   {
                       is_self ? '' : <React.Fragment>
                         <span style={{paddingRight: "6px"}}/>
-                        <button className="btn btn-danger btn-sm"
-                          onClick={(e) => this.revoke_approve(e, info.email, i, notify)}>Revoke</button>
+                        <span role="button" className="badge badge-danger"
+                          onClick={(e) => this.revoke_approve(e, info.email, i, notify)}>
+                          Revoke</span>
                       </React.Fragment>
                   }
                 </React.Fragment>;
             }
             else {
                 ap = <React.Fragment>
-                  <button className="btn btn-success btn-sm"
-                    onClick={(e) => this.approve(e, info.email, i, notify)}>Approve</button>
+                  <span role="button" className="badge badge-success"
+                    onClick={(e) => this.approve(e, info.email, i, notify)}>Approve</span>
                   <span style={{paddingRight: "6px"}}/>
-                  <button className="btn btn-danger btn-sm"
+                  <span role="button" className="badge badge-danger"
                     onClick={(e) => this._confirm_remove(e, info.email)}>
                     <span className="fas fa-trash"/>
-                  </button>
+                  </span>
                 </React.Fragment>;
             }
             let req = '';
@@ -265,15 +266,15 @@ export default class Admin extends React.Component {
                 req = <React.Fragment>
                   <span className="fas fa-info text-blue"/>
                   <span style={{paddingRight: "6px"}}/>
-                  <button className="btn btn-danger btn-sm"
-                    onClick={(e) => this.ignore_request(e, info.email, i, notify)}>Ignore</button>
+                  <span role="button" className="badge badge-danger"
+                    onClick={(e) => this.ignore_request(e, info.email, i, notify)}>Ignore</span>
                 </React.Fragment>;
             }
             else if (info.approved && !info.verified) {
                 req = <React.Fragment>
                   <span style={{paddingRight: "6px"}}/>
-                  <button className="btn btn-success btn-sm"
-                    onClick={(e) => this.reinvite(e, info.email, notify)}>Reinvite</button>
+                  <span role="button" className="badge badge-success"
+                    onClick={(e) => this.reinvite(e, info.email, notify)}>Reinvite</span>
                 </React.Fragment>;
             }
             let ad;
@@ -284,13 +285,15 @@ export default class Admin extends React.Component {
                 ad = <React.Fragment>
                   <span className="fas fa-check text-green"/>
                   <span style={{paddingRight: "6px"}}/>
-                  <button className="btn btn-danger btn-sm"
-                    onClick={(e) => this.revoke_admin(e, info.email, i, notify)}>Revoke admin</button>
+                  <span role="button" className="badge badge-danger"
+                    onClick={(e) => this.revoke_admin(e, info.email, i, notify)}>
+                    Revoke admin</span>
                 </React.Fragment>;
             }
             else {
-                ad = <button className="btn btn-info btn-sm"
-                       onClick={(e) => this.grant_admin(e, info.email, i, notify)}>Grant admin</button>;
+                ad = <span role="button" className="badge badge-info"
+                       onClick={(e) => this.grant_admin(e, info.email, i, notify)}>
+                  Grant admin</span>;
             }
             rows.push(<tr key={i}>
               <th scope="row">{info.email}</th>
