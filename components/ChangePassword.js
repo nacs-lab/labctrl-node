@@ -20,12 +20,14 @@
 
 const { validate_password } = require('../lib/account');
 import api from '../lib/api';
+import GlobalContext from '../components/Global';
 import RedirectIn from './RedirectIn';
 
 import Link from 'next/link';
 import React from 'react';
 
 export default class ChangePassword extends React.Component {
+    static contextType = GlobalContext;
     static defaultProps = {
         title: 'Changing Password',
         submit: 'Update Password'
@@ -117,6 +119,14 @@ export default class ChangePassword extends React.Component {
           <legend className="text-center">{this.props.title}</legend>
           <div className="container">
             <form>
+              <div className="form-group d-none">
+                <label htmlFor="email"
+                  className="col-sm-3 col-form-label">Email</label>
+                <div className="col-sm-9">
+                  <input type="email" className="form-control" readOnly
+                    id="email" value={this.context.user ? this.context.user.email : ''}/>
+                </div>
+              </div>
               {
                   this.props.token ? '' : <React.Fragment>
                     <div className="form-group row">
