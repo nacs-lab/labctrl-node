@@ -42,7 +42,7 @@ export default class BoolField extends SingleField {
                 this.has_ovr() ?
                 <div className={"input-group-text px-1 border-left-0"
                               + (this.state.display_ovr ? " bg-info" : "")}
-                  onClick={this.ovr_toggle} style={{cursor: "pointer"}}
+                  onClick={this.ovr_toggle} role="button"
                   title={this.state.display_ovr ? "Disable override" : "Enable override"}>
                   <span
                     className={'fas fa-fw ' + (this.state.display_ovr ?
@@ -53,11 +53,11 @@ export default class BoolField extends SingleField {
                 this.state.value_changed || this.state.ovr_changed ?
                 <React.Fragment>
                   <div className="input-group-text px-1 border-right-0"
-                    onClick={this.submit} style={{cursor: "pointer"}} title="Submit">
+                    onClick={this.submit} role="button" title="Submit">
                     <span className='fas fa-check text-success'/>
                   </div>
                   <div className="input-group-text px-1 border-left-0"
-                    onClick={this.cancel} style={{cursor: "pointer"}} title="Cancel">
+                    onClick={this.cancel} role="button" title="Cancel">
                     <span className='fas fa-fw fa-times text-danger'/>
                   </div>
                 </React.Fragment> : <React.Fragment/>

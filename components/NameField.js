@@ -56,15 +56,13 @@ export default class NameField extends SingleField {
         let btns = [];
         if (this.state.editing) {
             btns.push(<div className="input-group-append" key="submit-name"
-                        onClick={this.submit} style={{cursor: "pointer"}}
-                        title="Change Name">
+                        onClick={this.submit} role="button" title="Change Name">
               <span className="input-group-text bg-white px-1" style={{ fontSize: "0.75rem" }}>
                 <i className="fas fa-check text-success"/>
               </span>
             </div>);
             btns.push(<div className="input-group-append border-left-0" key="cancel-name"
-                        onClick={this.cancel} style={{cursor: "pointer"}}
-                        title="Restore Name">
+                        onClick={this.cancel} role="button" title="Restore Name">
               <span className="input-group-text bg-white border-left-0 px-1"
                 style={{ fontSize: "0.75rem" }}>
                 <i className="fas fa-fw fa-times text-danger"/>
@@ -73,8 +71,7 @@ export default class NameField extends SingleField {
         }
         else {
             btns.push(<div className="input-group-append" key="edit-name"
-                        onClick={this.edit} style={{cursor: "pointer"}}
-                        title="Edit Name">
+                        onClick={this.edit} role="button" title="Edit Name">
               <span className="input-group-text bg-white px-1" style={{ fontSize: "0.75rem" }}>
                 <i className="fas fa-edit"/>
               </span>
