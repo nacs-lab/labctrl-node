@@ -45,7 +45,7 @@ async function try_set_user(req, res) {
         if (res && res.cookie) {
             res.cookie('nacs_user', user_cookie,
                        { expires: new_expire, httpOnly: true,
-                         sameSite: true, secure: config.https });
+                         sameSite: 'lax', secure: config.https });
         }
     }
     req.nacs_user_token = token;

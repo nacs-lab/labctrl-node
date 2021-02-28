@@ -33,6 +33,6 @@ module.exports = async ({ req, res }, params) => {
     let token = await user.new_token(token_type, expires);
     if (token)
         res.cookie('nacs_user', token, { expires, httpOnly: true,
-                                         sameSite: true, secure: config.https });
+                                         sameSite: 'lax', secure: config.https });
     return user.info();
 };

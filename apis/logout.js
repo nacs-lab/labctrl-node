@@ -23,7 +23,7 @@ const config = require('../server/config');
 module.exports = async ({ req, res }) => {
     if (!req.nacs_user)
         return false;
-    res.clearCookie('nacs_user', { httpOnly: true, secure: config.https });
+    res.clearCookie('nacs_user', { httpOnly: true, sameSite: 'lax', secure: config.https });
     if (req.nacs_user_token)
         await req.nacs_user_token.invalidate();
     return true;
