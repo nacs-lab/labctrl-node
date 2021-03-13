@@ -135,7 +135,7 @@ class MainSidebar extends React.Component {
             }
 
             let active = is_active(type, id);
-            items.push(<li className="nav-item menu-open" key={`${type}-${id}`}>
+            let item = <li className="nav-item menu-open" key={`${type}-${id}`}>
               <span className={`nav-link ${active ? 'active' : ''}`}>
                 <Link href={`/s/${type}/${id}`}>
                   <a><i className={`fas fa-th nav-icon ${active ? 'text-light' : ''}`}/></a>
@@ -150,7 +150,14 @@ class MainSidebar extends React.Component {
               <ul className="nav nav-treeview">
                 {page_links}
               </ul>
-            </li>);
+            </li>;
+            if (active) {
+                // Put active device in front.
+                items.unshift(item);
+            }
+            else {
+                items.push(item);
+            }
         }
         return items;
     }
