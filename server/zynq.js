@@ -665,7 +665,11 @@ class Zynq extends SocketManager.Source {
                 let state_id = this.#sock.state_id();
                 let name_id = this.#sock.name_id();
                 [this.#state_id, this.#name_id] = await Promise.all([state_id, name_id]);
-                this.update_values({ running: this.#state_id[0] < 0 });
+                // Hold "running: true" state for one round
+                // to avoid having the running state changing back and forth
+                // when running a scan.
+                this.update_values({ running: this.#state_id[0] < 0 ||
+                                              this.#prev_state_id[0] < 0 });
                 clearTimeout(timeout);
                 timeout = undefined;
                 if (this.#state_id[1] != this.#prev_state_id[1] &&
