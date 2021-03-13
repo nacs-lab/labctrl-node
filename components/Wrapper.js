@@ -24,12 +24,13 @@ import MainSidebar from './MainSidebar';
 import { NotifyMenu, NotifyProvider } from './NotifyMenu';
 import { hash_md5 } from '../lib/crypto';
 
+import { withRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import React from 'react';
 
 // This relies on the css and js files loaded by the `_document.js`
-export default class Wrapper extends React.Component {
+class Wrapper extends React.Component {
     static contextType = GlobalContext;
     logout = async (e) => {
         e.preventDefault();
@@ -37,8 +38,14 @@ export default class Wrapper extends React.Component {
         await api({ logout: 'logout' });
         this.context.set_user(null);
     }
+    _set_default = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        api({ set_default_page: { params: { default_path: this.props.router.asPath }}});
+    }
     render() {
         let user;
+        let default_button;
         if (!this.context.user) {
             user = {
                 name: 'Anonymous',
@@ -54,6 +61,10 @@ export default class Wrapper extends React.Component {
                 anonymous: false,
                 admin: this.context.user.admin
             };
+            default_button = <span className="text-sm text-secondary float-right"
+                               role="button" onClick={this._set_default}>
+              Set As Default Page
+            </span>;
         }
 
         let approved = this.context.trusted || (this.context.user && this.context.user.approved);
@@ -219,6 +230,7 @@ export default class Wrapper extends React.Component {
               <span> </span>and<span> </span>
               <a href="https://adminlte.io" target="_blank">AdminLTE</a>.
             </strong>
+            <span>{default_button}</span>
           </footer>
           {/* Manually add the sidebar overlay to make React aware of this.
             * This makes sure that the overlay can stay up when we switch page
@@ -231,3 +243,5 @@ export default class Wrapper extends React.Component {
         return <NotifyProvider>{dom}</NotifyProvider>;
     }
 };
+
+export default withRouter(Wrapper);

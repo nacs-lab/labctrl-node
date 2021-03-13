@@ -165,6 +165,16 @@ class User extends DB.Model {
             return true;
         }).catch(db.err_handler(false));
     }
+    async set_default_path(path) {
+        if (!path)
+            return null;
+        return await db.transaction(async () => {
+            await this.reload();
+            let pref = { ...this.preferences };
+            pref.default_path = path;
+            return await this.update({ preferences: pref });
+        }).catch(db.err_handler(null));
+    }
 
     // Token
     async new_token(type, expires) {
