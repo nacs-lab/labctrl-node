@@ -104,7 +104,7 @@ export default class StatusField extends React.Component {
           <i className={this.state.connected ? "far fa-fw fa-check-circle text-success" :
                         "fas fa-fw fa-unlink text-danger"}
             title={this.state.connected ? "Device Connected" : "Device Disconnected"}/>
-          <i className={this.state.running ? "fas fa-fw fa-sync text-success" :
+          <i className={this.state.running ? "fas fa-fw fa-sync text-primary" :
                         "fas fa-fw fa-minus text-muted"}
             title={this.state.running ? "Sequence Running" : "Idling"}/>
         </span>;
