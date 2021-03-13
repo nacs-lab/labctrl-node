@@ -18,85 +18,51 @@
 
 "use strict";
 
-import Wrapper from '../components/Wrapper';
 import CheckLogin from '../components/CheckLogin';
+import GlobalContext from '../components/Global';
+import RedirectIn from '../components/RedirectIn';
+import Wrapper from '../components/Wrapper';
 
-import socket from '../lib/socket';
-import { getfield_recursive } from '../lib/utils';
+import api from '../lib/api';
 
-import Link from 'next/link';
 import React from 'react';
 
-const meta_params = { meta: 0 };
-const source_path = ['meta', 'sources'];
+function get_default_path(user, trusted) {
+    if (!user && !trusted)
+        return null;
+    if (user && user.preferences && user.preferences.default_path)
+        return user.preferences.default_path;
+    return '/devices';
+}
+
+export async function getServerSideProps(ctx) {
+    let { user, trusted } = (await api({ user: 'user',
+                                         trusted: 'trusted' }, ctx));
+    let default_path = get_default_path(user, trusted);
+    if (default_path)
+        return {
+            redirect: {
+                destination: default_path,
+                permanent: false,
+            },
+        };
+    return { props: {} };
+}
 
 export default class Main extends React.Component {
-    #watch_id
-    constructor(props) {
-        super(props);
-        this.state = this._source_state();
-    }
-
-    _source_state() {
-        let sources = getfield_recursive(socket.get_cached(meta_params), source_path);
-        let ary = [];
-        if (sources) {
-            for (let id of Object.getOwnPropertyNames(sources)) {
-                ary.push({ id, ...sources[id] });
-            }
-        }
-        return { sources: ary };
-    }
-    _update = () => {
-        this.setState(this._source_state());
-    }
-
-    _refresh = () => {
-        if (!socket.connected) {
-            this.#watch_id = undefined;
-            return;
-        }
-        if (this.#watch_id !== undefined)
-            return;
-        this.#watch_id = socket.watch(meta_params, this._update);
-        this._update();
-    }
-    componentDidMount() {
-        socket.on('connect', this._refresh);
-        socket.on('disconnect', this._refresh);
-        this._refresh();
-    }
-    componentWillUnmount() {
-        if (this.#watch_id !== undefined) {
-            socket.unwatch(this.#watch_id);
-        }
-    }
-
-    _render_real() {
-        let { sources } = this.state;
-        let src_btns = [];
-        for (let { type, id, name } of sources)
-            src_btns.push(
-                <Link href={`/s/${type}/${id}/`} key={id}>
-                  <a className="list-group-item list-group-item-action">
-                    {name}
-                  </a>
-                </Link>);
-
-        return <div className="container">
-          <div className="row">
-            <legend className="text-center">Devices</legend>
-          </div>
-          <div className="list-group">
-            {src_btns}
-          </div>
-        </div>;
-    }
-
+    static contextType = GlobalContext;
     render() {
+        let { user, trusted } = this.context;
+        let default_path = get_default_path(user, trusted);
+        if (!default_path)
+            default_path = '/devices';
         return <Wrapper>
           <CheckLogin approved={true}>
-            {this._render_real()}
+            <RedirectIn href={default_path} timeout={1}>
+              {(timeout, props) => (<div>
+                <b>Redirecting to default page in {timeout} seconds.</b>
+              </div>)}
+            </RedirectIn>
           </CheckLogin>
         </Wrapper>;
     }

@@ -159,6 +159,20 @@ class MainSidebar extends React.Component {
                 items.push(item);
             }
         }
+        // Makes sure this comes before the active device
+        let active = router.pathname == '/devices' || router.pathname == '/config';
+        items.unshift(<li className="nav-item menu-open" key="devices">
+          <span className={`nav-link ${active ? 'active' : ''}`}>
+            <Link href="/devices">
+              <a><i className={`fas fa-list nav-icon ${active ? 'text-light' : ''}`}/>
+                <p>All Devices</p>
+              </a>
+            </Link>
+            <Link href="/config">
+              <a><i className={`fas fa-edit ml-2 ${active ? 'text-light' : ''}`}/></a>
+            </Link>
+          </span>
+        </li>);
         return items;
     }
 
