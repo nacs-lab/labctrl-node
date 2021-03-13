@@ -20,6 +20,7 @@
 
 import Wrapper from '../components/Wrapper';
 import CheckLogin from '../components/CheckLogin';
+import { Pages, Widgets } from '../components/SourceWidgets';
 
 import socket from '../lib/socket';
 import { getfield_recursive } from '../lib/utils';
@@ -38,6 +39,8 @@ export default class Main extends React.Component {
     }
 
     _source_state() {
+        // Too lazy to prefetch the data for the status widget
+        // Just let the widget grab it's own state instead...
         let sources = getfield_recursive(socket.get_cached(meta_params), source_path);
         let ary = [];
         if (sources) {
@@ -75,13 +78,22 @@ export default class Main extends React.Component {
     _render_real() {
         let { sources } = this.state;
         let src_btns = [];
-        for (let { type, id, name } of sources)
+        for (let { type, id, name } of sources) {
+            let widgets = Widgets[type];
+            let status_widget;
+            if (widgets && widgets.status) {
+                let Widget = widgets.status.widget;
+                status_widget = <span className="float-right">
+                  <Widget source_id={`${type}-${id}`}/>
+                </span>;
+            }
             src_btns.push(
                 <Link href={`/s/${type}/${id}/`} key={id}>
                   <a className="list-group-item list-group-item-action">
-                    {name}
+                    {name}{status_widget}
                   </a>
                 </Link>);
+        }
 
         return <div className="container">
           <div className="row">

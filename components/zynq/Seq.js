@@ -22,6 +22,7 @@ import socket from '../../lib/socket';
 import { is_object } from '../../lib/utils';
 
 import SeqTextArea from './SeqTextArea';
+import StatusField from './StatusField';
 
 import React from 'react';
 import Modal from "react-bootstrap/Modal";
@@ -524,6 +525,9 @@ export default class Seq extends React.Component {
           <div className="row d-sm-none">
             <legend className="text-center">
               {name}
+              <span className="float-right">
+                <StatusField source_id={this.props.source_id}/>
+              </span>
             </legend>
           </div>
           <div className="row">
@@ -561,6 +565,9 @@ export default class Seq extends React.Component {
             <div className="col d-none d-sm-block">
               <legend className="text-center">
                 {name}
+                <span className="float-right">
+                  <StatusField source_id={this.props.source_id}/>
+                </span>
               </legend>
             </div>
           </div>

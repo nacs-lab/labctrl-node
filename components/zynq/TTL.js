@@ -23,6 +23,7 @@ import { getfield_recursive, ArrayCache } from '../../lib/utils';
 
 import DataWidget from '../DataWidget';
 
+import StatusField from './StatusField';
 import TTLField from './TTLField';
 
 import React from 'react';
@@ -71,7 +72,11 @@ export default class TTLWidget extends DataWidget {
         }
         return <div className="container-lg" onWheel={this.on_wheel_cb}>
           <div className="row">
-            <legend className="text-center">TTL</legend>
+            <legend className="text-center">TTL
+              <span className="float-right">
+                <StatusField source_id={this.props.source_id}/>
+              </span>
+            </legend>
           </div>
           {rows}
           <div className="row">

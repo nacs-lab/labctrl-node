@@ -27,6 +27,7 @@ import DDSNameField from './DDSNameField';
 import DDSFreqField from './DDSFreqField';
 import DDSAmpField from './DDSAmpField';
 import DDSPhaseField from './DDSPhaseField';
+import StatusField from './StatusField';
 
 import React from 'react';
 
@@ -226,7 +227,11 @@ export default class DDSWidget extends DataWidget {
         }
         return <div className={`${container}`} onWheel={this.on_wheel_cb}>
           <div className="row">
-            <legend className="text-center">DDS</legend>
+            <legend className="text-center">DDS
+              <span className="float-right">
+                <StatusField source_id={this.props.source_id}/>
+              </span>
+            </legend>
           </div>
           {rows}
           <div className="row">

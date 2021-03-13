@@ -24,6 +24,7 @@ import { getfield_recursive, ArrayCache } from '../../lib/utils';
 import DataWidget from '../DataWidget';
 
 import ClockField from './ClockField';
+import StatusField from './StatusField';
 
 import React from 'react';
 
@@ -31,7 +32,11 @@ export default class ClockWidget extends DataWidget {
     render() {
         return <div className="container" onWheel={this.on_wheel_cb}>
           <div className="row">
-            <legend className="text-center">Clock</legend>
+            <legend className="text-center">Clock
+              <span className="float-right">
+                <StatusField source_id={this.props.source_id}/>
+              </span>
+            </legend>
           </div>
           <div className="row">
             <div className="col-sm-4 text-sm-right"><b>Clock Cycle</b></div>

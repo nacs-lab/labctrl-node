@@ -21,7 +21,7 @@
 import Wrapper from '../../../components/Wrapper';
 import CheckLogin from '../../../components/CheckLogin';
 import RedirectIn from '../../../components/RedirectIn';
-import { Pages } from '../../../components/SourceWidgets';
+import { Pages, Widgets } from '../../../components/SourceWidgets';
 
 import socket from '../../../lib/socket';
 import { getfield_recursive } from '../../../lib/utils';
@@ -44,9 +44,16 @@ export default class Page extends React.Component {
     #watch_id
     #watch_param
     #name_path
+    #status
     constructor(props) {
         super(props);
         this.#watch_param = { meta: { sources: { [props.src_id]: { name: 0 }}}};
+        let widgets = Widgets[props.src_type];
+        if (widgets && widgets.status) {
+            if (widgets.status.data)
+                this.#watch_param[`${props.src_type}-${props.src_id}`] = widgets.status.data();
+            this.#status = widgets.status;
+        }
         this.#name_path = ['meta', 'sources', props.src_id, 'name'];
         this.state = { name: this._get_name() };
     }
@@ -89,9 +96,17 @@ export default class Page extends React.Component {
                   </a>
                 </Link>);
 
+        let status_widget;
+        if (this.#status) {
+            let Widget = this.#status.widget;
+            status_widget = <span className="float-right">
+              <Widget source_id={`${src_type}-${src_id}`}/>
+            </span>;
+        }
+
         return <div className="container">
           <div className="row">
-            <legend className="text-center">{name}</legend>
+            <legend className="text-center">{name}{status_widget}</legend>
           </div>
           <div className="list-group">
             {page_btns}

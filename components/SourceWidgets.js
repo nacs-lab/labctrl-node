@@ -24,21 +24,22 @@ const Pages = {
     zynq: {
         dds: {
             name: "DDS",
-            data: { dds: 0 },
+            data: { dds: 0, running: 0, connected: 0 },
             widget: dynamic(() => import('./zynq/DDS'))
         },
         ttl: {
             name: "TTL",
-            data: { ttl: 0 },
+            data: { ttl: 0, running: 0, connected: 0 },
             widget: dynamic(() => import('./zynq/TTL'))
         },
         clock: {
             name: "Clock",
-            data: { clock: 0 },
+            data: { clock: 0, running: 0, connected: 0 },
             widget: dynamic(() => import('./zynq/Clock'))
         },
         seq: {
             name: "Sequence",
+            data: { running: 0, connected: 0 },
             widget: dynamic(() => import('./zynq/Seq'))
         }
     }
@@ -52,6 +53,11 @@ const Config = {
 
 const Widgets = {
     zynq: {
+        status: {
+            name: "Status",
+            data: () => { return { running: 0, connected: 0 }; },
+            widget: dynamic(() => import('./zynq/StatusField'))
+        },
         dds_name: {
             name: "DDS Name",
             data: (id) => { return { dds: { [`name$id`]: 0 }}; },
