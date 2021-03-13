@@ -678,7 +678,7 @@ class Zynq extends SocketManager.Source {
                 // so that we can start the next cycle to check the connection again.
                 this.#update_state();
                 if (this.#state_id[0] < 0) {
-                    await sleep(100);
+                    await sleep(200);
                 }
                 else {
                     await sleep(500);
