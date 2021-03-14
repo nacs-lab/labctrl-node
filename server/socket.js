@@ -80,6 +80,8 @@ class socket {
     // on the server and the client (and so that the server rendered page is usable).
     // We can bypass the authentication here
     // since the cache is isolated from the actual values.
+    // This works very well in development mode but doesn't work in production mode.
+    // https://github.com/vercel/next.js/discussions/23042
     static put(values, ages) {
         if (!values)
             return;
