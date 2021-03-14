@@ -36,7 +36,8 @@ export default class Page extends React.Component {
         let pages = Pages[type];
         if (pages) {
             for (let pg in pages) {
-                props.pages.push({ id: pg, name: pages[pg].name });
+                props.pages.push({ id: pg, name: pages[pg].name,
+                                   icon: pages[pg].icon });
             }
         }
         return props;
@@ -88,13 +89,17 @@ export default class Page extends React.Component {
         let { name = '' } = this.state;
         let { pages, src_type, src_id } = this.props;
         let page_btns = [];
-        for (let pg of pages)
+        for (let pg of pages) {
+            let icon_class = 'far fa-circle fa-fw';
+            if (pg.icon)
+                icon_class = pg.icon;
             page_btns.push(
                 <Link href={`/s/${src_type}/${src_id}/${pg.id}`} key={pg.id}>
                   <a className="list-group-item list-group-item-action">
-                    {pg.name}
+                    <i className={`${icon_class} mr-2`}/>{pg.name}
                   </a>
                 </Link>);
+        }
 
         let status_widget;
         if (this.#status) {

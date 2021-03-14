@@ -24,21 +24,25 @@ const Pages = {
     zynq: {
         dds: {
             name: "DDS",
+            icon: "fas fa-broadcast-tower fa-fw",
             data: { dds: 0, running: 0, connected: 0 },
             widget: dynamic(() => import('./zynq/DDS'))
         },
         ttl: {
             name: "TTL",
+            icon: "fas fa-toggle-off fa-fw",
             data: { ttl: 0, running: 0, connected: 0 },
             widget: dynamic(() => import('./zynq/TTL'))
         },
         clock: {
             name: "Clock",
+            icon: "far fa-clock fa-fw",
             data: { clock: 0, running: 0, connected: 0 },
             widget: dynamic(() => import('./zynq/Clock'))
         },
         seq: {
             name: "Sequence",
+            icon: "fas fa-terminal fa-fw",
             data: { running: 0, connected: 0 },
             widget: dynamic(() => import('./zynq/Seq'))
         }

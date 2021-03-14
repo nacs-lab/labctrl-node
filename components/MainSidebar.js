@@ -124,10 +124,13 @@ class MainSidebar extends React.Component {
             for (let pg in pages) {
                 let page = pages[pg];
                 let active = is_active(type, id, pg);
+                let icon_class = 'far fa-circle fa-fw';
+                if (page.icon)
+                    icon_class = page.icon;
                 page_links.push(<li className="nav-item" key={pg}>
                   <Link href={`/s/${type}/${id}/${pg}`}>
                     <a href="#" className={`nav-link ${active ? 'active' : ''}`}>
-                      <i className="far fa-circle nav-icon"></i>
+                      <i className={`${icon_class} nav-icon`}/>
                       <p>{page.name}</p>
                     </a>
                   </Link>
