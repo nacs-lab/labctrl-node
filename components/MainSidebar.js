@@ -161,16 +161,24 @@ class MainSidebar extends React.Component {
         }
         // Makes sure this comes before the active device
         let active = router.pathname == '/devices' || router.pathname == '/config';
-        items.unshift(<li className="nav-item menu-open" key="devices">
+        items.unshift(<li className="nav-item" key="devices">
           <span className={`nav-link ${active ? 'active' : ''}`}>
             <Link href="/devices">
-              <a><i className={`fas fa-list nav-icon ${active ? 'text-light' : ''}`}/>
-                <p>All Devices</p>
-              </a>
+              <a><i className={`fas fa-list nav-icon ${active ? 'text-light' : ''}`}/></a>
             </Link>
-            <Link href="/config">
-              <a><i className={`fas fa-edit ml-2 ${active ? 'text-light' : ''}`}/></a>
-            </Link>
+            <p>
+              {/* Separate into a second link in the <p/> to the same target as the icon
+                * so that the text is properly hidden the the menu item is iconized */}
+              <Link href="/devices">
+                {/* Text color change on "active" doesn't work for link text */}
+                <a><span className={active ? 'text-light' : ''}>All Devices</span></a>
+              </Link>
+              <Link href="/config">
+                {/* The right class here prevents adminlte from automatically
+                  * move this icon to the left in large window when hiding the the sidebar */}
+                <a><i className={`right fas fa-edit ml-2 ${active ? 'text-light' : ''}`}/></a>
+              </Link>
+            </p>
           </span>
         </li>);
         return items;
