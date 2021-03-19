@@ -520,8 +520,18 @@ export default class Seq extends React.Component {
             msg_box_style.backgroundColor = '#ffcbc0';
         }
 
+        let src_name;
+        if (this.props.source_param && this.props.source_param.name) {
+            src_name = <div className="row">
+              <legend className="text-center">
+                <b>{this.props.source_param.name}</b>
+              </legend>
+            </div>
+        }
+
         return <div className="container"
                  style={{ height: '80vh', minHeight: '30em' }}>
+          {src_name}
           <div className="row d-sm-none">
             <legend className="text-center">
               {name}

@@ -30,9 +30,13 @@ import React from 'react';
 
 export default class ClockWidget extends DataWidget {
     render() {
+        let title = 'Clock';
+        if (this.props.source_param && this.props.source_param.name)
+            title = <span><b>{this.props.source_param.name}</b>:
+                    <span className="mx-2"/>{title}</span>;
         return <div className="container" onWheel={this.on_wheel_cb}>
           <div className="row">
-            <legend className="text-center">Clock
+            <legend className="text-center">{title}
               <span className="float-right">
                 <StatusField source_id={this.props.source_id}/>
               </span>

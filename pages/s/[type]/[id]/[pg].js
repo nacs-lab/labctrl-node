@@ -33,7 +33,7 @@ export default class Page extends React.Component {
     static async getInitialProps(ctx) {
         let { type, id, pg } = ctx.query;
         let source_id = `${type}-${id}`;
-        let props = { src_type: type, source_id: source_id, pg_type: pg };
+        let props = { src_type: type, source_id: source_id, src_id: id, pg_type: pg };
         let pages = Pages[type];
         if (!pages)
             return props;
@@ -49,18 +49,24 @@ export default class Page extends React.Component {
     }
     #watch_id
     #watch_param
+    #param_path
     #color_path
     constructor(props) {
         super(props);
         if (props.initvalues)
             socket.put(...props.initvalues);
-        this.#watch_param = { meta: { sources: { [props.src_id]: { params: 0 }}}};
+        this.#watch_param = { meta: { sources: { [props.src_id]: 0 }}};
+        this.#param_path = ['meta', 'sources', props.src_id];
         this.#color_path = ['meta', 'sources', props.src_id, 'params', 'backgroundColor'];
-        this.state = { color: getfield_recursive(props.init_params, this.#color_path) };
+        this.state = {
+            color: getfield_recursive(props.init_params, this.#color_path),
+            source_param: getfield_recursive(props.init_params, this.#param_path),
+        };
     }
     _update = () => {
         let params = socket.get_cached(this.#watch_param);
-        this.setState({ color: getfield_recursive(params, this.#color_path) });
+        this.setState({ color: getfield_recursive(params, this.#color_path),
+                        source_param: getfield_recursive(params, this.#param_path) });
     }
     _refresh = () => {
         if (!socket.connected) {
@@ -102,7 +108,7 @@ export default class Page extends React.Component {
         let Widget = page.widget;
         if (!Widget)
             return this._error();
-        return <Widget source_id={source_id}/>;
+        return <Widget source_id={source_id} source_param={this.state.source_param}/>;
     }
     render() {
         return <Wrapper backgroundColor={this.state.color}>
