@@ -429,7 +429,8 @@ export default class NumberField extends SingleField {
                 </React.Fragment> : <React.Fragment/>
             }
           </div>
-          <input type="text" className="form-control text-right px-1"
+          <input type="text"
+            className={`form-control text-right px-1 ${this.state.ovr ? "bg-warning" : ""}`}
             value={cur_value} ref={this.set_value_input} onChange={this.value_input_changed}
             onKeyDown={this.key_press} onWheel={this.value_scrolled}
             onFocus={this.input_focus} onTouchStart={this.input_touch}
