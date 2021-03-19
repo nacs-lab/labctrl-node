@@ -43,4 +43,6 @@ fi
 
 echo "Build ID: ${NEXT_BUILD_ID}"
 rm -rf "${NEXT_DIST_DIR}"
-node_modules/next/dist/bin/next build
+if ! node_modules/next/dist/bin/next build; then
+    rm -rf "${NEXT_DIST_DIR}"
+fi
