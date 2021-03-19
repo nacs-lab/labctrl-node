@@ -44,6 +44,8 @@ export default class Page extends React.Component {
             await socket.get({'meta': { sources: { [id]: 0 }}}, false, ctx);
         return props;
     }
+    #src_id
+    #src_type
     #watch_id
     #watch_param
     #name_path
@@ -51,17 +53,25 @@ export default class Page extends React.Component {
     #status
     constructor(props) {
         super(props);
-        this.#watch_param = { meta: { sources: { [props.src_id]: 0 }}};
-        let widgets = Widgets[props.src_type];
-        if (widgets && widgets.status) {
-            if (widgets.status.data)
-                this.#watch_param[`${props.src_type}-${props.src_id}`] = widgets.status.data();
-            this.#status = widgets.status;
-        }
-        this.#name_path = ['meta', 'sources', props.src_id, 'name'];
-        this.#color_path = ['meta', 'sources', props.src_id, 'params', 'backgroundColor'];
+        this._set_paths();
         this.state = { name: getfield_recursive(props.init_params, this.#name_path),
                        color: getfield_recursive(props.init_params, this.#color_path) };
+    }
+    _set_paths() {
+        if (this.#src_id == this.props.src_id && this.#src_type == this.props.src_type)
+            return false;
+        this.#src_id = this.props.src_id;
+        this.#src_type = this.props.src_type;
+        this.#watch_param = { meta: { sources: { [this.#src_id]: 0 }}};
+        let widgets = Widgets[this.#src_type];
+        if (widgets && widgets.status) {
+            if (widgets.status.data)
+                this.#watch_param[`${this.#src_type}-${this.#src_id}`] = widgets.status.data();
+            this.#status = widgets.status;
+        }
+        this.#name_path = ['meta', 'sources', this.#src_id, 'name'];
+        this.#color_path = ['meta', 'sources', this.#src_id, 'params', 'backgroundColor'];
+        return true;
     }
     _update = () => {
         let params = socket.get_cached(this.#watch_param);
@@ -73,14 +83,19 @@ export default class Page extends React.Component {
             this.#watch_id = undefined;
             return;
         }
-        if (this.#watch_id !== undefined)
+        if (this.#watch_id !== undefined && !this._set_paths())
             return;
+        if (this.#watch_id !== undefined)
+            socket.unwatch(this.#watch_id);
         this.#watch_id = socket.watch(this.#watch_param, this._update);
         this._update();
     }
     componentDidMount() {
         socket.on('connect', this._refresh);
         socket.on('disconnect', this._refresh);
+        this._refresh();
+    }
+    componentDidUpdate() {
         this._refresh();
     }
     componentWillUnmount() {

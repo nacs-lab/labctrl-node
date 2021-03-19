@@ -28,14 +28,22 @@ import Modal from "react-bootstrap/Modal";
 import { SketchPicker } from 'react-color';
 
 export default class ZynqConfig extends React.Component {
+    #src_id
     #watch_id
     #watch_param
     #source_path
     constructor(props) {
         super(props);
-        this.#watch_param = { meta: { sources: { [props.src_id]: 0 }}};
-        this.#source_path = ['meta', 'sources', props.src_id];
+        this._set_paths();
         this.state = { modal: null, ...this._get_state() };
+    }
+    _set_paths() {
+        if (this.#src_id == this.props.src_id)
+            return false;
+        this.#src_id = this.props.src_id;
+        this.#watch_param = { meta: { sources: { [this.#src_id]: 0 }}};
+        this.#source_path = ['meta', 'sources', this.#src_id];
+        return true;
     }
     _get_state() {
         let params = getfield_recursive(socket.get_cached(this.#watch_param),
@@ -77,14 +85,19 @@ export default class ZynqConfig extends React.Component {
             this.#watch_id = undefined;
             return;
         }
-        if (this.#watch_id !== undefined)
+        if (this.#watch_id !== undefined && !this._set_paths())
             return;
+        if (this.#watch_id !== undefined)
+            socket.unwatch(this.#watch_id);
         this.#watch_id = socket.watch(this.#watch_param, this._update);
         this._update();
     }
     componentDidMount() {
         socket.on('connect', this._refresh);
         socket.on('disconnect', this._refresh);
+        this._refresh();
+    }
+    componentDidUpdate() {
         this._refresh();
     }
     componentWillUnmount() {
