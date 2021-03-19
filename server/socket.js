@@ -18,12 +18,16 @@
 
 "use strict";
 
-const Server = require('./server');
+const compiling = process.env.NODE_COMPILING == '1';
+
+const Server = compiling ? null : require('./server');
 
 const { is_object, object_empty, update_object, copy_object } = require('../lib/utils');
 
 class socket {
     static async #get_sock_mgr(ctx) {
+        if (compiling)
+            return;
         let server = Server.current();
         if (!server || !ctx || !(await server.request_approved(ctx.req)))
             return;
@@ -83,6 +87,8 @@ class socket {
     // This works very well in development mode but doesn't work in production mode.
     // https://github.com/vercel/next.js/discussions/23042
     static put(values, ages) {
+        if (compiling)
+            return;
         if (!values)
             return;
         let cache = Server.namespace.get('value_cache');
@@ -108,6 +114,8 @@ class socket {
         }
     }
     static get_cached(params) {
+        if (compiling)
+            return;
         // Get value from cache
         let cache = Server.namespace.get('value_cache');
         if (!cache)
