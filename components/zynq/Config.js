@@ -25,6 +25,7 @@ import Link from 'next/link';
 import Router from 'next/router';
 import React from 'react';
 import Modal from "react-bootstrap/Modal";
+import { SketchPicker } from 'react-color';
 
 export default class ZynqConfig extends React.Component {
     #watch_id
@@ -39,13 +40,22 @@ export default class ZynqConfig extends React.Component {
     _get_state() {
         let params = getfield_recursive(socket.get_cached(this.#watch_param),
                                         this.#source_path);
-        let state = { name_changed: false, addr_changed: false };
+        let state = {
+            name_changed: false, addr_changed: false,
+            name: '', addr: '', backgroundColor: '', backgroundColor_temp: ''
+        };
         if (!params)
             return state;
         if (params.name)
             state.name = params.name;
-        if (params.params && params.params.addr)
-            state.addr = params.params.addr;
+        if (params.params) {
+            if (params.params.addr) {
+                state.addr = params.params.addr;
+            }
+            if (params.params.backgroundColor) {
+                state.backgroundColor = params.params.backgroundColor;
+            }
+        }
         return state;
     }
     _update = () => {
@@ -58,6 +68,7 @@ export default class ZynqConfig extends React.Component {
                 new_state.name = update_state.name;
             if (!state.addr_changed && !state.addr)
                 new_state.addr = update_state.addr;
+            new_state.backgroundColor = update_state.backgroundColor;
             return new_state;
         });
     }
@@ -86,9 +97,11 @@ export default class ZynqConfig extends React.Component {
         e.preventDefault();
         e.stopPropagation();
         let { src_id } = this.props;
-        let { name, addr } = this.state;
-        let res = await socket.call('meta', 'config_source', { id: src_id, name: name,
-                                                               params: { addr: addr } });
+        let { name, addr, backgroundColor } = this.state;
+        let res = await socket.call('meta', 'config_source',
+                                    { id: src_id, name: name,
+                                      params: { addr: addr,
+                                                backgroundColor: backgroundColor }});
         if (is_object(res)) {
             let msg = res.error;
             if (!msg)
@@ -110,10 +123,36 @@ export default class ZynqConfig extends React.Component {
     _addr_change = (e) => {
         this.setState({ addr: e.target.value });
     }
+    _backgroundColor_change = (color) => {
+        this.setState({ backgroundColor_temp: color.hex });
+    }
     _show_delete_confirm = (e) => {
         e.preventDefault();
         e.stopPropagation();
         this.setState({ modal: 1 });
+    }
+    _show_change_color = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.setState(state => {
+            return { backgroundColor_temp: state.backgroundColor, modal: 3 };
+        });
+    }
+    _confirm_color = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.setState(state => {
+            return { backgroundColor: state.backgroundColor_temp,
+                     backgroundColor_temp: '', modal: null };
+        });
+        this._close_modal();
+    }
+    _discard_color = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.setState(state => {
+            return { backgroundColor_temp: '', modal: null };
+        });
     }
     _do_delete = async () => {
         let res = await socket.call('meta', 'remove_source', { id: this.props.src_id });
@@ -136,7 +175,7 @@ export default class ZynqConfig extends React.Component {
     }
 
     render() {
-        let { name, addr, modal } = this.state;
+        let { name, addr, backgroundColor, backgroundColor_temp, modal } = this.state;
         let { src_id } = this.props;
 
         let modal_widget;
@@ -162,6 +201,21 @@ export default class ZynqConfig extends React.Component {
                 </Link>
                 <button className="btn btn-secondary"
                   onClick={this._close_modal}>Close</button>
+              </Modal.Footer>
+            </Modal>;
+        }
+        else if (modal === 3) {
+            modal_widget = <Modal onHide={this._close_modal} show={true}>
+              <Modal.Header>Change Background Color</Modal.Header>
+              <Modal.Body>
+                <SketchPicker className="mx-auto" color={backgroundColor_temp || '#f4f6f9'}
+                  onChange={this._backgroundColor_change}/>
+              </Modal.Body>
+              <Modal.Footer>
+                <button className="btn btn-secondary"
+                  onClick={this._confirm_color}>Select</button>
+                <button className="btn btn-secondary"
+                  onClick={this._discard_color}>Close</button>
               </Modal.Footer>
             </Modal>;
         }
@@ -202,6 +256,16 @@ export default class ZynqConfig extends React.Component {
               <label className="col-sm-3 col-form-label">Address</label>
               <div className="col-sm-9">
                 <input className="form-control" value={addr} onChange={this._addr_change}/>
+              </div>
+            </div>
+            <div className="form-group row">
+              <label className="col-sm-3 col-form-label">Background Color</label>
+              <div className="col-sm-9">
+                <button className="btn btn-light btn-block border border-dark"
+                  style={{ backgroundColor: backgroundColor || '#f4f6f9' }}
+                  onClick={this._show_change_color}>
+                  Change Color
+                </button>
               </div>
             </div>
             <hr className={`row my-3`}/>
