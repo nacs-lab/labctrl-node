@@ -200,7 +200,9 @@ class Wrapper extends React.Component {
           </aside>
 
           {/* Content Wrapper. Contains page content */}
-          <div className="content-wrapper" style={{ overflow: 'auto' }}>
+          <div className="content-wrapper"
+            style={{ overflow: 'auto',
+                     backgroundColor: this.props.backgroundColor || '#f4f6f9' }}>
             {/* Main content */}
             <div className="content h-100">
               <div className="container-fluid">
