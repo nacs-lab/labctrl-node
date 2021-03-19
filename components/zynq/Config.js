@@ -145,7 +145,13 @@ export default class ZynqConfig extends React.Component {
             return { backgroundColor: state.backgroundColor_temp,
                      backgroundColor_temp: '', modal: null };
         });
-        this._close_modal();
+    }
+    _reset_default_color = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.setState(state => {
+            return { backgroundColor_temp: '' };
+        });
     }
     _discard_color = (e) => {
         e.preventDefault();
@@ -212,8 +218,11 @@ export default class ZynqConfig extends React.Component {
                   onChange={this._backgroundColor_change}/>
               </Modal.Body>
               <Modal.Footer>
-                <button className="btn btn-secondary"
+                <button className="btn btn-primary"
                   onClick={this._confirm_color}>Select</button>
+                <button className="btn btn-light border border-dark"
+                  style={{ backgroundColor: '#f4f6f9' }}
+                  onClick={this._reset_default_color}>Default</button>
                 <button className="btn btn-secondary"
                   onClick={this._discard_color}>Close</button>
               </Modal.Footer>
