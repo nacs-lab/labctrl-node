@@ -40,15 +40,18 @@ export default class Page extends React.Component {
                                    icon: pages[pg].icon });
             }
         }
+        props.init_params =
+            await socket.get({'meta': { sources: { [id]: 0 }}}, false, ctx);
         return props;
     }
     #watch_id
     #watch_param
     #name_path
+    #color_path
     #status
     constructor(props) {
         super(props);
-        this.#watch_param = { meta: { sources: { [props.src_id]: { name: 0 }}}};
+        this.#watch_param = { meta: { sources: { [props.src_id]: 0 }}};
         let widgets = Widgets[props.src_type];
         if (widgets && widgets.status) {
             if (widgets.status.data)
@@ -56,13 +59,14 @@ export default class Page extends React.Component {
             this.#status = widgets.status;
         }
         this.#name_path = ['meta', 'sources', props.src_id, 'name'];
-        this.state = { name: this._get_name() };
-    }
-    _get_name() {
-        return getfield_recursive(socket.get_cached(this.#watch_param), this.#name_path);
+        this.#color_path = ['meta', 'sources', props.src_id, 'params', 'backgroundColor'];
+        this.state = { name: getfield_recursive(props.init_params, this.#name_path),
+                       color: getfield_recursive(props.init_params, this.#color_path) };
     }
     _update = () => {
-        this.setState({ name: this._get_name() });
+        let params = socket.get_cached(this.#watch_param);
+        this.setState({ name: getfield_recursive(params, this.#name_path),
+                        color: getfield_recursive(params, this.#color_path) });
     }
     _refresh = () => {
         if (!socket.connected) {
@@ -129,7 +133,7 @@ export default class Page extends React.Component {
         </div>;
     }
     render() {
-        return <Wrapper>
+        return <Wrapper backgroundColor={this.state.color}>
           <CheckLogin approved={true}>
             {this._render_real()}
           </CheckLogin>

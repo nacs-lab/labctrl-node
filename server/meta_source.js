@@ -80,6 +80,15 @@ class MetaSource extends SocketManager.Source {
             return { error: "Missing required source parameter." };
         if (name === undefined && src_params === undefined)
             return false;
+        if (src_params.backgroundColor) {
+            src_params.backgroundColor = String(src_params.backgroundColor);
+            if (!src_params.backgroundColor.match(/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/)) {
+                return { error: `Invalid color ${src_params.backgroundColor}.` };
+            }
+        }
+        else {
+            src_params.backgroundColor = '';
+        }
         let src = await SourceDB.findOne({ where: { id }});
         if (!src)
             return { error: `Source ${id} does not exist.` };

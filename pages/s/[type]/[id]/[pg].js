@@ -24,6 +24,7 @@ import RedirectIn from '../../../../components/RedirectIn';
 import { Pages } from '../../../../components/SourceWidgets';
 
 import socket from '../../../../lib/socket';
+import { getfield_recursive } from '../../../../lib/utils';
 
 import Link from 'next/link';
 import React from 'react';
@@ -42,14 +43,46 @@ export default class Page extends React.Component {
         let data = page.data;
         if (data)
             props.initvalues = await socket.get({ [source_id]: data }, true, ctx);
+        props.init_params =
+            await socket.get({'meta': { sources: { [id]: 0 }}}, false, ctx);
         return props;
     }
+    #watch_id
+    #watch_param
+    #color_path
     constructor(props) {
         super(props);
-        if (props.initvalues) {
+        if (props.initvalues)
             socket.put(...props.initvalues);
+        this.#watch_param = { meta: { sources: { [props.src_id]: { params: 0 }}}};
+        this.#color_path = ['meta', 'sources', props.src_id, 'params', 'backgroundColor'];
+        this.state = { color: getfield_recursive(props.init_params, this.#color_path) };
+    }
+    _update = () => {
+        let params = socket.get_cached(this.#watch_param);
+        this.setState({ color: getfield_recursive(params, this.#color_path) });
+    }
+    _refresh = () => {
+        if (!socket.connected) {
+            this.#watch_id = undefined;
+            return;
+        }
+        if (this.#watch_id !== undefined)
+            return;
+        this.#watch_id = socket.watch(this.#watch_param, this._update);
+        this._update();
+    }
+    componentDidMount() {
+        socket.on('connect', this._refresh);
+        socket.on('disconnect', this._refresh);
+        this._refresh();
+    }
+    componentWillUnmount() {
+        if (this.#watch_id !== undefined) {
+            socket.unwatch(this.#watch_id);
         }
     }
+
     _error() {
         return <RedirectIn href="/">
           {(timeout, props) => (<div>
@@ -72,7 +105,7 @@ export default class Page extends React.Component {
         return <Widget source_id={source_id}/>;
     }
     render() {
-        return <Wrapper>
+        return <Wrapper backgroundColor={this.state.color}>
           <CheckLogin approved={true}>
             {this._render_real()}
           </CheckLogin>
