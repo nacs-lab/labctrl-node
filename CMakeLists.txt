@@ -22,7 +22,7 @@ set(SYSTEMD_TMPFILES_DIR "${CMAKE_INSTALL_LIBDIR}/tmpfiles.d"
 find_package(Node 14.0 REQUIRED)
 
 find_package(PkgConfig REQUIRED)
-set(DEP_PKGS nacs-utils>=10.0 nacs-seq libzmq>=4.0)
+set(DEP_PKGS nacs-utils>=11.0 nacs-seq libzmq>=4.0)
 pkg_check_modules(DEP REQUIRED ${DEP_PKGS})
 
 add_definitions(-Wall -Wextra -g -pthread -fvisibility=hidden

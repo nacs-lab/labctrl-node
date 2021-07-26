@@ -18,7 +18,7 @@
 
 #include "parse.h"
 
-#include <nacs-seq/cmdlist.h>
+#include <nacs-seq/zynq/cmdlist.h>
 
 #include <nacs-utils/errors.h>
 #include <nacs-utils/streams.h>
@@ -35,8 +35,10 @@ using namespace NaCs;
 class ParserWorker : public Nan::AsyncWorker {
 public:
     ParserWorker(Nan::Callback *callback, std::string source,
-                 v8::Local<v8::Function> parse_error)
-        : AsyncWorker(callback, "labctrl:ParserWorker"), m_code(std::move(source))
+                 v8::Local<v8::Function> parse_error, uint32_t version)
+        : AsyncWorker(callback, "labctrl:ParserWorker"),
+          m_code(std::move(source)),
+          m_version(version)
     {
         // This is the `ParseError` class from js.
         // We'll convert the C++ `SyntaxError` to this below.
@@ -57,7 +59,7 @@ public:
         string_ostream sstm;
         uint32_t ttl_mask;
         try {
-            ttl_mask = Seq::CmdList::parse(sstm, istm);
+            ttl_mask = Seq::Zynq::CmdList::parse(sstm, istm, m_version);
         }
         catch (const SyntaxError &err) {
             m_error.reset(new SyntaxError(err));
@@ -75,7 +77,8 @@ public:
         }
         m_code = sstm.get_buf();
         // Hard code 10ns per step.
-        uint64_t len_ns = Seq::CmdList::total_time((uint8_t*)m_code.data(), m_code.size()) * 10;
+        uint64_t len_ns = Seq::Zynq::CmdList::total_time((uint8_t*)m_code.data(),
+                                                         m_code.size(), m_version) * 10;
         char buff[12];
         // This is the prefix expected by the server.
         memcpy(buff, &len_ns, 8);
@@ -132,12 +135,13 @@ public:
 
 private:
     std::string m_code;
+    const uint32_t m_version;
     std::unique_ptr<SyntaxError> m_error;
 };
 
 }
 
-// Asynchronous access to the `Seq::CmdList::parse` function
+// Asynchronous access to the `Seq::Zynq::CmdList::parse` function
 NAN_METHOD(ParseCmdList)
 {
     Nan::HandleScope scope;
@@ -148,6 +152,17 @@ NAN_METHOD(ParseCmdList)
     Nan::Utf8String source(Nan::To<v8::String>(info[0]).ToLocalChecked());
     auto parse_error = v8::Local<v8::Function>::Cast(info[1]);
     auto callback = v8::Local<v8::Function>::Cast(info[2]);
+    uint32_t version = 1;
+    if (info.Length() >= 4) {
+        auto maybe_version = Nan::To<int32_t>(info[4]);
+        if (maybe_version.IsJust()) {
+            version = (uint32_t)maybe_version.FromJust();
+            if (version != 1 && version != 2) {
+                Nan::ThrowRangeError("CmdList version must be 1 or 2.");
+                return;
+            }
+        }
+    }
     Nan::AsyncQueueWorker(new ParserWorker(new Nan::Callback(callback), std::string(*source),
-                                           parse_error));
+                                           parse_error, version));
 }
