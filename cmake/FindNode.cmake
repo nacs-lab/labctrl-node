@@ -28,32 +28,32 @@ if(NOT NODE_EXECUTABLE)
     HINTS $ENV{NODE_DIR}
     PATH_SUFFIXES bin
     DOC "Node.js interpreter")
-  if(NODE_EXECUTABLE)
-    execute_process(COMMAND "${NODE_EXECUTABLE}" --version
-      OUTPUT_VARIABLE _VERSION
-      RESULT_VARIABLE _NODE_VERSION_RESULT)
-    execute_process(COMMAND "${NODE_EXECUTABLE}" -e "console.log(process.versions.v8)"
-      OUTPUT_VARIABLE _V8_VERSION
-      RESULT_VARIABLE _V8_RESULT)
-    if(NOT _NODE_VERSION_RESULT AND NOT _V8_RESULT)
-      string(REPLACE "v" "" NODE_VERSION_STRING "${_VERSION}")
-      string(REPLACE "." ";" _VERSION_LIST "${NODE_VERSION_STRING}")
-      list(GET _VERSION_LIST 0 NODE_VERSION_MAJOR)
-      list(GET _VERSION_LIST 1 NODE_VERSION_MINOR)
-      list(GET _VERSION_LIST 2 NODE_VERSION_PATCH)
-      set(V8_VERSION_STRING ${_V8_VERSION})
-      string(REPLACE "." ";" _V8_VERSION_LIST "${_V8_VERSION}")
-      string(REPLACE "." "" V8_DEFINE_STRING "${_V8_VERSION}")
-      string(STRIP ${V8_DEFINE_STRING} V8_DEFINE_STRING)
-      list(GET _V8_VERSION_LIST 0 V8_VERSION_MAJOR)
-      list(GET _V8_VERSION_LIST 1 V8_VERSION_MINOR)
-      list(GET _V8_VERSION_LIST 2 V8_VERSION_PATCH)
-      # we end up with a nasty newline so strip everything that isn't a number
-      string(REGEX MATCH "^[0-9]*" V8_VERSION_PATCH ${V8_VERSION_PATCH})
-      string(REGEX REPLACE "\n" "" NODE_VERSION_STRING ${NODE_VERSION_STRING})
-      string(REGEX REPLACE "\n" "" V8_VERSION_STRING ${V8_VERSION_STRING})
-      message(STATUS "Found v8: version \"${V8_VERSION_STRING}\"")
-    endif()
+endif()
+if(NODE_EXECUTABLE)
+  execute_process(COMMAND "${NODE_EXECUTABLE}" --version
+    OUTPUT_VARIABLE _VERSION
+    RESULT_VARIABLE _NODE_VERSION_RESULT)
+  execute_process(COMMAND "${NODE_EXECUTABLE}" -e "console.log(process.versions.v8)"
+    OUTPUT_VARIABLE _V8_VERSION
+    RESULT_VARIABLE _V8_RESULT)
+  if(NOT _NODE_VERSION_RESULT AND NOT _V8_RESULT)
+    string(REPLACE "v" "" NODE_VERSION_STRING "${_VERSION}")
+    string(REPLACE "." ";" _VERSION_LIST "${NODE_VERSION_STRING}")
+    list(GET _VERSION_LIST 0 NODE_VERSION_MAJOR)
+    list(GET _VERSION_LIST 1 NODE_VERSION_MINOR)
+    list(GET _VERSION_LIST 2 NODE_VERSION_PATCH)
+    set(V8_VERSION_STRING ${_V8_VERSION})
+    string(REPLACE "." ";" _V8_VERSION_LIST "${_V8_VERSION}")
+    string(REPLACE "." "" V8_DEFINE_STRING "${_V8_VERSION}")
+    string(STRIP ${V8_DEFINE_STRING} V8_DEFINE_STRING)
+    list(GET _V8_VERSION_LIST 0 V8_VERSION_MAJOR)
+    list(GET _V8_VERSION_LIST 1 V8_VERSION_MINOR)
+    list(GET _V8_VERSION_LIST 2 V8_VERSION_PATCH)
+    # we end up with a nasty newline so strip everything that isn't a number
+    string(REGEX MATCH "^[0-9]*" V8_VERSION_PATCH ${V8_VERSION_PATCH})
+    string(REGEX REPLACE "\n" "" NODE_VERSION_STRING ${NODE_VERSION_STRING})
+    string(REGEX REPLACE "\n" "" V8_VERSION_STRING ${V8_VERSION_STRING})
+    message(STATUS "Found v8: version \"${V8_VERSION_STRING}\"")
   endif()
 endif()
 
