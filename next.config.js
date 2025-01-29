@@ -36,6 +36,9 @@ module.exports = {
             return process.env.NEXT_BUILD_ID
         return null
     },
+    future: {
+        webpack5: true,
+    },
     webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
         // Note: we provide webpack above so you should not `require` it
         // Perform customizations to webpack config
@@ -46,7 +49,7 @@ module.exports = {
         if (!Array.isArray(config.externals))
             config.externals = [config.externals];
         // Blacklist modules that we don't want to be packaged
-        config.externals.push(function (context, request, callback) {
+        config.externals.push(function ({context, request}, callback) {
             if (request[0] == '.') {
                 let p = path.join(context, request);
                 for (let i in blacklist_prefix) {
