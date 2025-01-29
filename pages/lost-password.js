@@ -99,7 +99,7 @@ export default class LostPassword extends React.Component {
                                        query: { email: this.state.registered } }} as="/login">
               {(timeout, props) => (<div>
                 Please use the link in the email you've just recieved to reset your password.<br/>
-                Redirect to <Link { ...props }><a>login</a></Link> in {timeout} seconds.
+                Redirect to <Link { ...props }>login</Link> in {timeout} seconds.
               </div>)}
             </RedirectIn>;
         }
@@ -127,9 +127,9 @@ export default class LostPassword extends React.Component {
                   <button type="submit" onClick={this.reset_password}
                     className="btn btn-primary">Send password reset link</button>
                   <span style={{margin: "0.5em"}}/>
-                  <Link href="/login">
-                    <a onClick={this.cancel}
-                      className="btn btn-secondary" role="button">Cancel</a>
+                  <Link href="/login" onClick={this.cancel}
+                    className="btn btn-secondary" role="button">
+                    Cancel
                   </Link>
                 </div>
               </div>

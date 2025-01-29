@@ -111,7 +111,7 @@ export default class ChangePassword extends React.Component {
             return <RedirectIn href="/profile">
               {(timeout, props) => (<div>
                 Password changed esuccessfully.<br/>
-                Redirect to <Link { ...props }><a>profile page</a></Link> in {timeout} seconds.
+                Redirect to <Link { ...props }>profile page</Link> in {timeout} seconds.
               </div>)}
             </RedirectIn>;
         }
@@ -129,21 +129,21 @@ export default class ChangePassword extends React.Component {
               </div>
               {
                   this.props.token ? '' : <React.Fragment>
-                    <div className="form-group row">
-                      <label htmlFor="change-password-old-password"
-                        className="col-sm-3 col-form-label">Old password</label>
-                      <div className="col-sm-9">
-                        <input type="password" className="form-control"
-                          id="change-password-old-password" placeholder="Old Password"
-                          onKeyDown={this.key_press} ref={this.old_password}/>
-                      </div>
+                  <div className="form-group row">
+                    <label htmlFor="change-password-old-password"
+                      className="col-sm-3 col-form-label">Old password</label>
+                    <div className="col-sm-9">
+                      <input type="password" className="form-control"
+                        id="change-password-old-password" placeholder="Old Password"
+                        onKeyDown={this.key_press} ref={this.old_password}/>
                     </div>
-                    <div className="row nacs-form-msg">
-                      <div className="col-sm-3"></div>
-                      <div className="col-sm-9 text-red">
-                        <small><b>{this.state.old_password_msg}</b></small>
-                      </div>
+                  </div>
+                  <div className="row nacs-form-msg">
+                    <div className="col-sm-3"></div>
+                    <div className="col-sm-9 text-red">
+                      <small><b>{this.state.old_password_msg}</b></small>
                     </div>
+                  </div>
                   </React.Fragment>
               }
               <div className="form-group row">
@@ -185,10 +185,10 @@ export default class ChangePassword extends React.Component {
                       // Do not allow cancellation if the user is
                       // updating the password based on a token.
                       this.props.token ? '' : <React.Fragment>
-                        <span style={{margin: "0.5em"}}/>
-                        <Link href="/profile">
-                          <a className="btn btn-secondary" role="button">Cancel</a>
-                        </Link>
+                      <span style={{margin: "0.5em"}}/>
+                      <Link href="/profile" className="btn btn-secondary" role="button">
+                        Cancel
+                      </Link>
                       </React.Fragment>
                   }
                 </div>

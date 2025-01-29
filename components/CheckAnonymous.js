@@ -37,7 +37,7 @@ export default class CheckAnonymous extends React.Component {
         return <RedirectIn href="/" timeout={5}>
           {(timeout, props) => (<div>
             Already logged in as {this.context.user.email}.<br/>
-            Redirect to <Link {...props}><a>home page</a></Link> in {timeout} seconds.
+            Redirect to <Link {...props}>home page</Link> in {timeout} seconds.
           </div>)}
         </RedirectIn>;
     }

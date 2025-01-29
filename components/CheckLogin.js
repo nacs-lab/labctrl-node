@@ -44,7 +44,7 @@ export default class CheckLogin extends React.Component {
             return <RedirectIn href="/profile">
               {(timeout, props) => (<div>
                 Account not approved.<br/>
-                You can request approval from <Link {...props}><a>profile page</a></Link>.<br/>
+                You can request approval from <Link {...props}>profile page</Link>.<br/>
                 Redirecting in {timeout} seconds.
               </div>)}
             </RedirectIn>;
@@ -52,7 +52,7 @@ export default class CheckLogin extends React.Component {
             return <RedirectIn href="/">
               {(timeout, props) => (<div>
                 You are not an admin.<br/>
-                Redirecting to <Link {...props}><a>home page</a></Link> in {timeout} seconds.
+                Redirecting to <Link {...props}>home page</Link> in {timeout} seconds.
               </div>)}
             </RedirectIn>;
         return <React.Fragment>

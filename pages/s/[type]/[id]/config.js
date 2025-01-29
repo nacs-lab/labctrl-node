@@ -86,7 +86,7 @@ export default class Page extends React.Component {
         return <RedirectIn href="/">
           {(timeout, props) => (<div>
             Unknown page.<br/>
-            Redirecting to <Link {...props}><a>home page</a></Link> in {timeout} seconds.
+            Redirecting to <Link {...props}>home page</Link> in {timeout} seconds.
           </div>)}
         </RedirectIn>;
     }

@@ -60,8 +60,9 @@ export default class Profile extends React.Component {
               <div className="form-group row">
                 <label className="col-sm-3 col-form-label">Password</label>
                 <div className="col-sm-9">
-                  <Link href="/change-password">
-                    <a className="btn btn-secondary" style={{color: "#fff"}}>Change password</a>
+                  <Link href="/change-password" className="btn btn-secondary"
+                    style={{color: "#fff"}}>
+                    Change password
                   </Link>
                 </div>
               </div>

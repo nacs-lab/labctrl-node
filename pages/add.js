@@ -30,10 +30,9 @@ export default class Add extends React.Component {
         let add_btns = [];
         for (let type in Config) {
             add_btns.push(
-                <Link href={`/s/${type}/add`} key={type}>
-                  <a className="list-group-item list-group-item-action">
-                    {Config[type].name}
-                  </a>
+                <Link href={`/s/${type}/add`} key={type}
+                  className="list-group-item list-group-item-action">
+                  {Config[type].name}
                 </Link>);
         }
 

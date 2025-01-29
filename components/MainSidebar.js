@@ -79,9 +79,7 @@ class MainSidebar extends React.Component {
             if (!this.context.user) {
                 return <li className="nav-item">
                   <span className="nav-link">
-                    <Link href="/login">
-                      <a> Login </a>
-                    </Link> to see more options
+                    <Link href="/login">Login</Link> to see more options
                   </span>
                 </li>;
             }
@@ -128,11 +126,10 @@ class MainSidebar extends React.Component {
                 if (page.icon)
                     icon_class = page.icon;
                 page_links.push(<li className="nav-item" key={pg}>
-                  <Link href={`/s/${type}/${id}/${pg}`}>
-                    <a href="#" className={`nav-link ${active ? 'active' : ''}`}>
-                      <i className={`${icon_class} nav-icon`}/>
-                      <p>{page.name}</p>
-                    </a>
+                  <Link href={`/s/${type}/${id}/${pg}`}
+                    className={`nav-link ${active ? 'active' : ''}`}>
+                    <i className={`${icon_class} nav-icon`}/>
+                    <p>{page.name}</p>
                   </Link>
                 </li>);
             }
@@ -141,11 +138,11 @@ class MainSidebar extends React.Component {
             let item = <li className="nav-item menu-open" key={`${type}-${id}`}>
               <span className={`nav-link ${active ? 'active' : ''}`}>
                 <Link href={`/s/${type}/${id}`}>
-                  <a><i className={`fas fa-th nav-icon ${active ? 'text-light' : ''}`}/></a>
+                  <i className={`fas fa-th nav-icon ${active ? 'text-light' : ''}`}/>
                 </Link>
                 <p>{name}
                   <Link href={`/s/${type}/${id}/config`}>
-                    <a><i className={`fas fa-edit ml-2 ${active ? 'text-light' : ''}`}/></a>
+                    <i className={`fas fa-edit ml-2 ${active ? 'text-light' : ''}`}/>
                   </Link>
                   <i className="right fas fa-angle-left"/>
                 </p>
@@ -167,19 +164,19 @@ class MainSidebar extends React.Component {
         items.unshift(<li className="nav-item" key="devices">
           <span className={`nav-link ${active ? 'active' : ''}`}>
             <Link href="/devices">
-              <a><i className={`fas fa-list nav-icon ${active ? 'text-light' : ''}`}/></a>
+              <i className={`fas fa-list nav-icon ${active ? 'text-light' : ''}`}/>
             </Link>
             <p>
               {/* Separate into a second link in the <p/> to the same target as the icon
                 * so that the text is properly hidden the the menu item is iconized */}
               <Link href="/devices">
                 {/* Text color change on "active" doesn't work for link text */}
-                <a><span className={active ? 'text-light' : ''}>All Devices</span></a>
+                <span className={active ? 'text-light' : ''}>All Devices</span>
               </Link>
               <Link href="/config">
                 {/* The right class here prevents adminlte from automatically
                   * move this icon to the left in large window when hiding the the sidebar */}
-                <a><i className={`right fas fa-edit ml-2 ${active ? 'text-light' : ''}`}/></a>
+                <i className={`right fas fa-edit ml-2 ${active ? 'text-light' : ''}`}/>
               </Link>
             </p>
           </span>

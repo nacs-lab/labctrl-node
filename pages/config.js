@@ -77,10 +77,9 @@ export default class Main extends React.Component {
         let src_btns = [];
         for (let { type, id, name } of sources)
             src_btns.push(
-                <Link href={`/s/${type}/${id}/config`} key={id}>
-                  <a className="list-group-item list-group-item-action">
-                    {name}
-                  </a>
+                <Link href={`/s/${type}/${id}/config`} key={id}
+                  className="list-group-item list-group-item-action">
+                  {name}
                 </Link>);
 
         return <div className="container">

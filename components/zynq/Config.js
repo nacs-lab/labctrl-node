@@ -215,8 +215,8 @@ export default class ZynqConfig extends React.Component {
               <Modal.Header>Configure saved</Modal.Header>
               <Modal.Body>Back to device page?</Modal.Body>
               <Modal.Footer>
-                <Link href={`/s/zynq/${src_id}`}>
-                  <a className="btn btn-primary">Device Page</a>
+                <Link href={`/s/zynq/${src_id}`} className="btn btn-primary">
+                  Device Page
                 </Link>
                 <button className="btn btn-secondary"
                   onClick={this._close_modal}>Close</button>
@@ -296,8 +296,8 @@ export default class ZynqConfig extends React.Component {
                 <button className="btn btn-primary"
                   onClick={this._save_click}>Apply</button>
                 <span className="mx-2"></span>
-                <Link href={`/s/zynq/${src_id}`}>
-                  <a className="btn btn-secondary">Back</a>
+                <Link href={`/s/zynq/${src_id}`} className="btn btn-secondary">
+                  Back
                 </Link>
                 <span className="mx-3 border h-100"></span>
                 <button className="btn btn-sm btn-danger"

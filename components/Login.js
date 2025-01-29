@@ -162,13 +162,15 @@ export default class Login extends React.Component {
                       className="btn btn-primary">Sign in</button>
                   </p>
                   <p className="text-sm">
-                    <Link href="/lost-password">
-                      <a className="btn btn-link" onClick={this.lost_password}>Lost password</a>
+                    <Link href="/lost-password"
+                      className="btn btn-link" onClick={this.lost_password}>
+                      Lost password
                     </Link>
                     {/* A direct `|` somehow makes emacs indent unhappy... */}
                     <span>|</span>
-                    <Link href="/register">
-                      <a className="btn btn-link" onClick={this.register}>Register</a>
+                    <Link href="/register"
+                      className="btn btn-link" onClick={this.register}>
+                      Register
                     </Link>
                   </p>
                 </div>

@@ -112,9 +112,7 @@ export default class ZynqAdd extends React.Component {
                 <button className="btn btn-primary"
                   onClick={this._add_click}>Add</button>
                 <span className="mx-2"></span>
-                <Link href="/">
-                  <a className="btn btn-secondary">Cancel</a>
-                </Link>
+                <Link href="/" className="btn btn-secondary">Cancel</Link>
               </div>
             </div>
           </form>

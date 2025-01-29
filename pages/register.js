@@ -143,7 +143,7 @@ export default class Register extends React.Component {
               {(timeout, props) => (<div>
                 You will be able to login after confirming your email address using the
                 email we've just sent you.<br/>
-                Redirect to <Link { ...props }><a>login</a></Link> in {timeout} seconds.
+                Redirect to <Link { ...props }>login</Link> in {timeout} seconds.
               </div>)}
             </RedirectIn>;
         }
@@ -200,9 +200,9 @@ export default class Register extends React.Component {
                   <button type="submit" onClick={this.register}
                     className="btn btn-primary">Register</button>
                   <span style={{margin: "0.5em"}}/>
-                  <Link href="/login">
-                    <a onClick={this.cancel}
-                      className="btn btn-secondary" role="button">Cancel</a>
+                  <Link href="/login" onClick={this.cancel}
+                    className="btn btn-secondary" role="button">
+                    Cancel
                   </Link>
                 </div>
               </div>

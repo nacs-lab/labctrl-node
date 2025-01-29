@@ -71,20 +71,14 @@ class Wrapper extends React.Component {
         let approved_widgets;
         if (approved)
             approved_widgets = <>
-              <Link href="/add">
-                <a className="dropdown-item">
-                  <i className="fas fa-fw fa-plus mr-2"></i> Add Device
-                </a>
+              <Link href="/add" className="dropdown-item">
+                <i className="fas fa-fw fa-plus mr-2"></i> Add Device
               </Link>
-              <Link href="/config">
-                <a className="dropdown-item">
-                  <i className="fas fa-fw fa-edit mr-2"></i> Device Config
-                </a>
+              <Link href="/config" className="dropdown-item">
+                <i className="fas fa-fw fa-edit mr-2"></i> Device Config
               </Link>
-              <Link href="/demo">
-                <a className="dropdown-item">
-                  <i className="fas fa-fw fa-code mr-2"></i> Demo
-                </a>
+              <Link href="/demo" className="dropdown-item">
+                <i className="fas fa-fw fa-code mr-2"></i> Demo
               </Link>
               <div className="dropdown-divider"></div>
             </>;
@@ -105,16 +99,12 @@ class Wrapper extends React.Component {
             // so I don't think it'll be worth the effort....
             user_dropdown = <div className="dropdown-menu dropdown-menu-right">
               {approved_widgets}
-              <Link href="/login">
-                <a className="dropdown-item">
-                  <i className="fas fa-fw fa-sign-in-alt mr-2"></i> Login
-                </a>
+              <Link href="/login" className="dropdown-item">
+                <i className="fas fa-fw fa-sign-in-alt mr-2"></i> Login
               </Link>
               <div className="dropdown-divider"></div>
-              <Link href="/register">
-                <a className="dropdown-item">
-                  <i className="fas fa-fw fa-user-plus mr-2"></i> Register
-                </a>
+              <Link href="/register" className="dropdown-item">
+                <i className="fas fa-fw fa-user-plus mr-2"></i> Register
               </Link>
             </div>;
         }
@@ -130,19 +120,15 @@ class Wrapper extends React.Component {
               </span>
               <div className="dropdown-divider"></div>
               {approved_widgets}
-              <Link href="/profile">
-                <a className="dropdown-item">
-                  <i className="fas fa-fw fa-id-card mr-2"></i> Profile
-                </a>
+              <Link href="/profile" className="dropdown-item">
+                <i className="fas fa-fw fa-id-card mr-2"></i> Profile
               </Link>
               {
                   user.admin ? <React.Fragment>
-                    <div className="dropdown-divider"></div>
-                    <Link href="/admin">
-                      <a className="dropdown-item">
-                        <i className="fas fa-fw fa-users-cog mr-2"></i> Admin
-                      </a>
-                    </Link>
+                  <div className="dropdown-divider"></div>
+                  <Link href="/admin" className="dropdown-item">
+                    <i className="fas fa-fw fa-users-cog mr-2"></i> Admin
+                  </Link>
                   </React.Fragment> : <React.Fragment/>
               }
               <div className="dropdown-divider"></div>
@@ -182,12 +168,10 @@ class Wrapper extends React.Component {
           {/* Main Sidebar Container */}
           <aside className="main-sidebar sidebar-light-cyan elevation-4">
             {/* Brand Logo */}
-            <Link href="/">
-              <a className="brand-link">
-                <img src="/favicon.ico" alt="Lab Control Logo"
-                  className="brand-image img-circle elevation-3" style={{opacity: .8}}/>
-                <span className="brand-text font-weight-light">Lab Control</span>
-              </a>
+            <Link href="/" className="brand-link">
+              <img src="/favicon.ico" alt="Lab Control Logo"
+                className="brand-image img-circle elevation-3" style={{opacity: .8}}/>
+              <span className="brand-text font-weight-light">Lab Control</span>
             </Link>
 
             {/* Sidebar */}

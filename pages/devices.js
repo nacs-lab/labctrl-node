@@ -88,10 +88,9 @@ export default class Main extends React.Component {
                 </span>;
             }
             src_btns.push(
-                <Link href={`/s/${type}/${id}/`} key={id}>
-                  <a className="list-group-item list-group-item-action">
-                    {name}{status_widget}
-                  </a>
+                <Link href={`/s/${type}/${id}/`} key={id}
+                  className="list-group-item list-group-item-action">
+                  {name}{status_widget}
                 </Link>);
         }
 

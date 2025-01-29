@@ -70,7 +70,7 @@ export default class Verify extends React.Component {
                                   query: { email: user.email } }} as="/login">
                 {(timeout, props) => (<div>
                   Account {this.props.check_token.user.email} verified.<br/>
-                  Redirect to <Link { ...props }><a>login</a></Link> in {timeout} seconds.
+                  Redirect to <Link { ...props }>login</Link> in {timeout} seconds.
                 </div>)}
               </RedirectIn>
             </CheckAnonymous>;
@@ -92,7 +92,7 @@ export default class Verify extends React.Component {
           <RedirectIn>
             {(timeout, props) => (<div>
               Token invalid.<br/>
-              Redirect to <Link { ...props }><a>home page</a></Link> in {timeout} seconds.
+              Redirect to <Link { ...props }>home page</Link> in {timeout} seconds.
             </div>)}
           </RedirectIn>
         </CheckAnonymous>;

@@ -113,10 +113,9 @@ export default class Page extends React.Component {
             if (pg.icon)
                 icon_class = pg.icon;
             page_btns.push(
-                <Link href={`/s/${src_type}/${src_id}/${pg.id}`} key={pg.id}>
-                  <a className="list-group-item list-group-item-action">
-                    <i className={`${icon_class} mr-2`}/>{pg.name}
-                  </a>
+                <Link href={`/s/${src_type}/${src_id}/${pg.id}`} key={pg.id}
+                  className="list-group-item list-group-item-action">
+                  <i className={`${icon_class} mr-2`}/>{pg.name}
                 </Link>);
         }
 
@@ -138,10 +137,8 @@ export default class Page extends React.Component {
           <hr/>
           <div className="row">
             <div className="col text-center">
-              <Link href={`/s/${src_type}/${src_id}/config`}>
-                <a className="btn btn-info">
-                  <i className="fas fa-edit mr-2"/>Configure
-                </a>
+              <Link href={`/s/${src_type}/${src_id}/config`} className="btn btn-info">
+                <i className="fas fa-edit mr-2"/>Configure
               </Link>
             </div>
           </div>
