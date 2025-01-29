@@ -19,7 +19,7 @@
 "use strict";
 
 const dev = process.env.NODE_ENV == 'development';
-exports.dev = dev;
+module.exports.dev = dev;
 
 const config = require('config');
 const fs = require('fs');
@@ -28,25 +28,25 @@ const db = {
     dir: config.get('db.dir')
 };
 fs.mkdirSync(db.dir, {recursive: true, mode: 0o755});
-exports.db = db;
+module.exports.db = db;
 
 const data = {
     dir: config.get('data.dir')
 };
 fs.mkdirSync(data.dir, {recursive: true, mode: 0o755});
-exports.data = data;
+module.exports.data = data;
 
 if (dev && !config.has('email.account')) {
-    exports.email = { test: true };
+    module.exports.email = { test: true };
 }
 else {
-    exports.email = {
+    module.exports.email = {
         test: false,
         account: config.get('email.account')
     };
 }
 
-exports.trust_proxy = config.has('trust_proxy') ? !!config.get('trust_proxy') : false;
-exports.trust_ips = config.has('trust_ips') ? config.get('trust_ips') : [];
-exports.untrust_ips = config.has('untrust_ips') ? config.get('untrust_ips') : [];
-exports.https = config.has('https') && !!config.get('https');
+module.exports.trust_proxy = config.has('trust_proxy') ? !!config.get('trust_proxy') : false;
+module.exports.trust_ips = config.has('trust_ips') ? config.get('trust_ips') : [];
+module.exports.untrust_ips = config.has('untrust_ips') ? config.get('untrust_ips') : [];
+module.exports.https = config.has('https') && !!config.get('https');
