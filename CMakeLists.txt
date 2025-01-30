@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.10)
 
 set(MAJOR_VERSION 1)
 set(MINOR_VERSION 0)
@@ -12,7 +12,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}"
 
 include(GNUInstallDirs)
 
-set(SERVER_DIR /srv/labctrl/)
+set(SERVER_DIR /srv/labctrl)
 set(SYSTEMD_SERVICE_DIR "${CMAKE_INSTALL_LIBDIR}/systemd/system"
   CACHE PATH "Systemd service file install dir")
 set(SYSTEMD_SYSUSERS_DIR "${CMAKE_INSTALL_LIBDIR}/sysusers.d"
