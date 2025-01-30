@@ -6,7 +6,7 @@ After=network-online.target auditd.service
 Wants=network-online.target
 
 [Service]
-ExecStart=node @SERVER_DIR@/index.js
+ExecStart=node @SERVER_DIR@/index.mjs
 User=labctrl-node
 Restart=always
 RestartSec=1

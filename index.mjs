@@ -18,11 +18,19 @@
 
 "use strict";
 
-// Override the environment variable
-// since other packages might get the debugging state from this.
-process.env.NODE_ENV = 'development';
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const Server = require('../server/server');
+process.env.NODE_ENV = 'production';
+process.env.NEXT_DIST_DIR = 'exec';
+process.env.NODE_CONFIG_DIR = 'conf';
+process.env.LABCTRL_LIB_DIR = path.resolve(__dirname, 'addon');
+
+process.chdir(__dirname);
+
+const { default: Server } = await import('./server/server.js');
 
 const server = new Server();
-server.listen(8000);
+server.listen(8000, 'localhost');

@@ -69,7 +69,7 @@ install(DIRECTORY node_modules public conf "${PROJECT_BINARY_DIR}/exec"
   DESTINATION "${SERVER_DIR}"
   USE_SOURCE_PERMISSIONS)
 
-install(FILES index.js next.config.js
+install(FILES index.mjs next.config.js
   DESTINATION "${SERVER_DIR}")
 
 install(PROGRAMS create_admin.js
