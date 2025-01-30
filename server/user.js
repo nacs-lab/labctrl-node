@@ -86,8 +86,8 @@ class User extends DB.Model {
             return null;
         let match = await user.match_password(password);
         if (!match || user.last_failed) {
-            await db.transaction(async () => {
-                user.update({ last_failed: match ? null : new Date(Date.now()) });
+            await db.transaction(() => {
+                return user.update({ last_failed: match ? null : new Date(Date.now()) });
             }).catch(db.err_handler(null));
             if (!match) {
                 return null;
@@ -195,7 +195,7 @@ class User extends DB.Model {
             if (!t || !(await t.match_value(s[1])))
                 return null;
             if (t.expires <= Date.now()) {
-                t.destroy();
+                await t.destroy();
                 return null;
             }
             return t;

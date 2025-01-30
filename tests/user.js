@@ -130,8 +130,8 @@ module.exports = async function test() {
     let token = await User.find_token(token_str);
     assert(token);
     assert((await token.getUser()).email == user2.email);
+    await token.update_expire(new Date(Date.now() + 1100));
     let retry_token = (async (token, token_str) => {
-        token.update_expire(new Date(Date.now() + 1100));
         console.log("Sleeping for 0.7 seconds.");
         await sleep(700);
         assert(await token.isvalid());
