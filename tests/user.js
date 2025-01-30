@@ -59,7 +59,7 @@ module.exports = async function test() {
     assert(u === null);
     assert((await User.find_user('a@b.c')).last_failed);
     let infos = await User.all_infos();
-    assert(JSON.stringify(infos) == '[{"email":"a@b.c","verified":false,"approved":false,"admin":false,"requested":false}]');
+    assert(JSON.stringify(infos) == '[{"email":"a@b.c","verified":false,"approved":false,"admin":false,"preferences":{},"requested":false}]');
 
     let retry_login = (async () => {
         console.log("Sleeping for 6.5 seconds.");
