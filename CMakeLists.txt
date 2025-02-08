@@ -53,6 +53,8 @@ file(RELATIVE_PATH BIN_DIR_REL "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
 set(DEPLOY_BUILD_DIR "${PROJECT_BINARY_DIR}/deploy")
 configure_file(cmake/production.yml.in deploy/conf/production.yml @ONLY)
 add_custom_target(deploy
+  COMMAND "${CMAKE_COMMAND}" -E create_symlink "${PROJECT_SOURCE_DIR}/server" "${PROJECT_BINARY_DIR}/server"
+  COMMAND "${CMAKE_COMMAND}" -E create_symlink "${PROJECT_SOURCE_DIR}/apis" "${PROJECT_BINARY_DIR}/apis"
   COMMAND "NODE_CONFIG_DIR=${DEPLOY_BUILD_DIR}/conf"
   "NODE_COMPILING=1"
   "LABCTRL_LIB_DIR=${PROJECT_BINARY_DIR}/addon"

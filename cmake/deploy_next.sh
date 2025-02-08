@@ -46,3 +46,9 @@ rm -rf "${NEXT_DIST_DIR}"
 if ! node_modules/next/dist/bin/next build; then
     rm -rf "${NEXT_DIST_DIR}"
 fi
+
+shopt -s globstar
+for f in "${NEXT_DIST_DIR}"/**/*.js; do
+    d=$(realpath --relative-to="$(dirname "$f")" "$BIN_DIR_REL")
+    sed -i -e "s:$PWD:${d}/:" "$f"
+done
